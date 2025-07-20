@@ -44,7 +44,7 @@ export default function CTA() {
   return (
     <section ref={sectionRef} className="relative py-24 overflow-hidden">
       <div className="cta-bg absolute inset-0 z-0">
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom right, #ff385c, #e31c5f, #ff385c)' }} />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #111111 100%)' }} />
         <div className="absolute inset-0 opacity-10">
           <div className="h-full w-full" style={{
             backgroundImage: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23c9a961" fill-opacity="0.4"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
@@ -56,7 +56,7 @@ export default function CTA() {
       <div className="relative z-10 section-container">
         <div ref={contentRef} className="text-center max-w-3xl mx-auto">
           <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
-            ¿Listo para Encontrar tu Hogar Ideal?
+            ¿Listo para Encontrar tu <span className="gradient-text">Hogar Ideal</span>?
           </h2>
           <p className="text-lg text-white/90 mb-10">
             Deja que nuestros expertos te guíen hacia la propiedad perfecta adaptada a tu estilo de vida

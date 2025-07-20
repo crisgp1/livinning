@@ -8,13 +8,13 @@ export default function AuthenticatedContent() {
   return (
     <>
       <SignedIn>
-        <section className="py-16" style={{ backgroundColor: '#f7f7f7' }}>
+        <section className="py-16" style={{ background: 'linear-gradient(135deg, #111111 0%, #1a1a1a 100%)' }}>
           <div className="section-container">
             <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: '#222222' }}>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 gradient-text">
                 Tu Panel Personal
               </h2>
-              <p className="text-lg" style={{ color: '#717171' }}>
+              <p className="text-lg" style={{ color: '#e5e5e5' }}>
                 Gestiona tus propiedades favoritas y búsquedas guardadas
               </p>
             </div>
@@ -25,14 +25,14 @@ export default function AuthenticatedContent() {
                 whileHover={{ y: -4 }}
                 transition={{ duration: 0.2 }}
               >
-                <div className="inline-flex p-4 rounded-full mb-4" style={{ backgroundColor: '#ff385c15' }}>
-                  <Heart size={32} style={{ color: '#ff385c' }} />
+                <div className="inline-flex p-4 rounded-full mb-4" style={{ background: 'rgba(255, 255, 255, 0.1)' }}>
+                  <div className="w-3 h-3 rounded-full bg-white opacity-60"></div>
                 </div>
-                <h3 className="text-lg font-semibold mb-2" style={{ color: '#222222' }}>
+                <h3 className="text-lg font-semibold mb-2" style={{ color: '#ffffff' }}>
                   Favoritos
                 </h3>
-                <p className="text-2xl font-bold" style={{ color: '#ff385c' }}>12</p>
-                <p className="text-sm" style={{ color: '#717171' }}>Propiedades guardadas</p>
+                <p className="text-2xl font-bold" style={{ color: '#ffffff' }}>12</p>
+                <p className="text-sm" style={{ color: '#a3a3a3' }}>Propiedades guardadas</p>
               </motion.div>
 
               <motion.div
@@ -40,14 +40,14 @@ export default function AuthenticatedContent() {
                 whileHover={{ y: -4 }}
                 transition={{ duration: 0.2 }}
               >
-                <div className="inline-flex p-4 rounded-full mb-4" style={{ backgroundColor: '#00a69915' }}>
-                  <Search size={32} style={{ color: '#00a699' }} />
+                <div className="inline-flex p-4 rounded-full mb-4" style={{ background: 'rgba(255, 255, 255, 0.1)' }}>
+                  <div className="w-3 h-3 rounded-full bg-white opacity-60"></div>
                 </div>
-                <h3 className="text-lg font-semibold mb-2" style={{ color: '#222222' }}>
+                <h3 className="text-lg font-semibold mb-2" style={{ color: '#ffffff' }}>
                   Búsquedas
                 </h3>
-                <p className="text-2xl font-bold" style={{ color: '#00a699' }}>5</p>
-                <p className="text-sm" style={{ color: '#717171' }}>Búsquedas guardadas</p>
+                <p className="text-2xl font-bold" style={{ color: '#ffffff' }}>5</p>
+                <p className="text-sm" style={{ color: '#a3a3a3' }}>Búsquedas guardadas</p>
               </motion.div>
 
               <motion.div
@@ -55,14 +55,14 @@ export default function AuthenticatedContent() {
                 whileHover={{ y: -4 }}
                 transition={{ duration: 0.2 }}
               >
-                <div className="inline-flex p-4 rounded-full mb-4" style={{ backgroundColor: '#ff5a5f15' }}>
-                  <Home size={32} style={{ color: '#ff5a5f' }} />
+                <div className="inline-flex p-4 rounded-full mb-4" style={{ background: 'rgba(255, 255, 255, 0.1)' }}>
+                  <div className="w-3 h-3 rounded-full bg-white opacity-60"></div>
                 </div>
-                <h3 className="text-lg font-semibold mb-2" style={{ color: '#222222' }}>
+                <h3 className="text-lg font-semibold mb-2" style={{ color: '#ffffff' }}>
                   Mis Propiedades
                 </h3>
-                <p className="text-2xl font-bold" style={{ color: '#ff5a5f' }}>2</p>
-                <p className="text-sm" style={{ color: '#717171' }}>Propiedades publicadas</p>
+                <p className="text-2xl font-bold" style={{ color: '#ffffff' }}>2</p>
+                <p className="text-sm" style={{ color: '#a3a3a3' }}>Propiedades publicadas</p>
               </motion.div>
 
               <motion.div
@@ -70,14 +70,14 @@ export default function AuthenticatedContent() {
                 whileHover={{ y: -4 }}
                 transition={{ duration: 0.2 }}
               >
-                <div className="inline-flex p-4 rounded-full mb-4" style={{ backgroundColor: '#48484815' }}>
-                  <Bell size={32} style={{ color: '#484848' }} />
+                <div className="inline-flex p-4 rounded-full mb-4" style={{ background: 'rgba(255, 255, 255, 0.1)' }}>
+                  <div className="w-3 h-3 rounded-full bg-white opacity-60"></div>
                 </div>
-                <h3 className="text-lg font-semibold mb-2" style={{ color: '#222222' }}>
+                <h3 className="text-lg font-semibold mb-2" style={{ color: '#ffffff' }}>
                   Alertas
                 </h3>
-                <p className="text-2xl font-bold" style={{ color: '#484848' }}>8</p>
-                <p className="text-sm" style={{ color: '#717171' }}>Notificaciones nuevas</p>
+                <p className="text-2xl font-bold" style={{ color: '#ffffff' }}>8</p>
+                <p className="text-sm" style={{ color: '#a3a3a3' }}>Notificaciones nuevas</p>
               </motion.div>
             </div>
 
@@ -96,12 +96,12 @@ export default function AuthenticatedContent() {
       </SignedIn>
 
       <SignedOut>
-        <section className="py-16" style={{ backgroundColor: '#f7f7f7' }}>
+        <section className="py-16" style={{ background: 'linear-gradient(135deg, #111111 0%, #1a1a1a 100%)' }}>
           <div className="section-container text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: '#222222' }}>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 gradient-text">
               Únete a Livinning
             </h2>
-            <p className="text-lg mb-8" style={{ color: '#717171' }}>
+            <p className="text-lg mb-8" style={{ color: '#e5e5e5' }}>
               Crea tu cuenta gratuita y accede a funciones exclusivas para encontrar tu hogar ideal
             </p>
             

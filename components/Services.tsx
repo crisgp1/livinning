@@ -10,28 +10,20 @@ gsap.registerPlugin(ScrollTrigger)
 
 const services = [
   {
-    icon: Building,
     title: 'Gestión de Propiedades',
-    description: 'Servicios completos de gestión para tu propiedad',
-    color: '#ff385c'
+    description: 'Servicios completos de gestión para tu propiedad'
   },
   {
-    icon: Search,
     title: 'Búsqueda Personalizada',
-    description: 'Asistencia personalizada para encontrar tu hogar ideal',
-    color: '#00a699'
+    description: 'Asistencia personalizada para encontrar tu hogar ideal'
   },
   {
-    icon: TrendingUp,
     title: 'Asesoría de Inversión',
-    description: 'Orientación experta en inversiones inmobiliarias',
-    color: '#ff5a5f'
+    description: 'Orientación experta en inversiones inmobiliarias'
   },
   {
-    icon: Headphones,
     title: 'Servicio de Concierge',
-    description: 'Soporte 24/7 para todas tus necesidades inmobiliarias',
-    color: '#484848'
+    description: 'Soporte 24/7 para todas tus necesidades inmobiliarias'
   }
 ]
 
@@ -69,37 +61,37 @@ export default function Services() {
   }, [])
 
   return (
-    <section ref={sectionRef} className="py-20 bg-white">
+    <section ref={sectionRef} className="py-20" style={{ background: 'var(--color-background-secondary)' }}>
       <div className="section-container">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: '#222222' }}>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 gradient-text">
             Servicio Excepcional
           </h2>
-          <p className="text-lg max-w-2xl mx-auto" style={{ color: '#717171' }}>
+          <p className="text-lg max-w-2xl mx-auto" style={{ color: 'var(--color-text-secondary)' }}>
             Experimenta el mejor servicio inmobiliario con nuestra completa gama de servicios premium
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {services.map((service, index) => {
-            const Icon = service.icon
             return (
               <motion.div
                 key={service.title}
                 ref={(el) => {
                   if (el) cardsRef.current[index] = el
                 }}
-                className="rounded-2xl p-8 text-center hover:shadow-xl transition-all duration-300 cursor-pointer group" style={{ backgroundColor: '#f7f7f7' }} onMouseEnter={(e) => e.target.style.backgroundColor = 'white'} onMouseLeave={(e) => e.target.style.backgroundColor = '#f7f7f7'}
-                whileHover={{ scale: 1.05 }}
+                className="glass-card p-8 text-center cursor-pointer group"
+                whileHover={{ scale: 1.05, y: -8 }}
                 whileTap={{ scale: 0.95 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
               >
-                <div className="inline-flex p-4 rounded-full mb-6 group-hover:scale-110 transition-transform duration-300" style={{ backgroundColor: `${service.color}15` }}>
-                  <Icon size={32} style={{ color: service.color }} />
+                <div className="inline-flex p-4 rounded-full mb-6 group-hover:scale-110 transition-transform duration-300" style={{ background: 'rgba(255, 255, 255, 0.1)' }}>
+                  <div className="w-3 h-3 rounded-full bg-white opacity-60"></div>
                 </div>
-                <h3 className="text-lg font-semibold mb-3" style={{ color: '#222222' }}>
+                <h3 className="text-lg font-semibold mb-3" style={{ color: '#ffffff' }}>
                   {service.title}
                 </h3>
-                <p style={{ color: '#717171' }}>
+                <p style={{ color: '#a3a3a3' }}>
                   {service.description}
                 </p>
               </motion.div>

@@ -113,49 +113,70 @@ export default function PropertyCard({
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           
           {badge && (
-            <div className="absolute top-4 left-4 text-white px-3 py-1 rounded-full text-sm font-semibold" style={{ backgroundColor: '#ff385c' }}>
+            <div className="absolute top-4 left-4 text-white px-3 py-1 rounded-full text-xs font-medium" style={{ 
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(8px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)'
+            }}>
               {badge}
             </div>
           )}
           
-          <button className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white hover:scale-110">
-            <Heart size={18} style={{ color: '#717171' }} />
+          <button className="absolute top-4 right-4 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110" style={{ background: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(8px)' }}>
+            <div className="w-2 h-2 rounded-full bg-white opacity-60"></div>
           </button>
         </div>
 
         <div className="p-6">
           <div className="flex items-start justify-between mb-2">
-            <h3 className="text-lg font-semibold" style={{ color: '#222222' }}>
+            <h3 className="text-lg font-semibold" style={{ color: '#ffffff' }}>
               {title}
             </h3>
           </div>
           
-          <div className="flex items-center gap-2 mb-4" style={{ color: '#717171' }}>
-            <MapPin size={16} />
+          <div className="flex items-center gap-2 mb-4" style={{ color: '#a3a3a3' }}>
+            <div className="w-1 h-1 rounded-full bg-current opacity-60"></div>
             <p className="text-sm">{location}</p>
           </div>
 
-          <div className="flex items-center gap-4 text-sm mb-4" style={{ color: '#717171' }}>
+          <div className="flex items-center gap-4 text-sm mb-4" style={{ color: '#a3a3a3' }}>
             <div className="flex items-center gap-1">
-              <Bed size={16} />
+              <div className="w-1 h-1 rounded-full bg-current opacity-60"></div>
               <span>{beds} Hab</span>
             </div>
             <div className="flex items-center gap-1">
-              <Bath size={16} />
+              <div className="w-1 h-1 rounded-full bg-current opacity-60"></div>
               <span>{baths} Bañ</span>
             </div>
             <div className="flex items-center gap-1">
-              <Square size={16} />
+              <div className="w-1 h-1 rounded-full bg-current opacity-60"></div>
               <span>{sqft.toLocaleString()} m²</span>
             </div>
           </div>
 
-          <div className="flex items-center justify-between pt-4 border-t" style={{ borderColor: '#f0f0f0' }}>
-            <div className="text-xl font-bold" style={{ color: '#222222' }}>
+          <div className="flex items-center justify-between pt-4 border-t" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+            <div className="text-xl font-bold" style={{ color: '#ffffff' }}>
               €{price}
             </div>
             <motion.button
-              className="btn-outline"
+              className="px-4 py-2 rounded-lg font-medium transition-all duration-300 text-sm"
+              style={{ 
+                background: 'transparent',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                color: '#a3a3a3'
+              }}
+              onMouseEnter={(e) => {
+                const target = e.target as HTMLElement
+                target.style.background = 'rgba(255, 255, 255, 0.1)'
+                target.style.color = '#ffffff'
+                target.style.borderColor = 'rgba(255, 255, 255, 0.3)'
+              }}
+              onMouseLeave={(e) => {
+                const target = e.target as HTMLElement
+                target.style.background = 'transparent'
+                target.style.color = '#a3a3a3'
+                target.style.borderColor = 'rgba(255, 255, 255, 0.2)'
+              }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >

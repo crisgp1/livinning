@@ -255,17 +255,17 @@ export default function PropertyDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ff385c]"></div>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0a0a' }}>
+        <div className="loading-spinner"></div>
       </div>
     )
   }
 
   if (!property) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0a0a' }}>
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4" style={{ color: '#222222' }}>Propiedad No Encontrada</h1>
+          <h1 className="text-2xl font-bold mb-4" style={{ color: '#ffffff' }}>Propiedad No Encontrada</h1>
           <Link href="/" className="btn-primary">
             Volver al Inicio
           </Link>
@@ -275,19 +275,19 @@ export default function PropertyDetail() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen" style={{ background: '#0a0a0a' }}>
       <Navigation />
       
       <main className="pt-20">
         <div className="section-container py-8">
-          <Link href="/" className="inline-flex items-center gap-2 transition-colors mb-6" style={{ color: '#717171' }} 
+          <Link href="/" className="inline-flex items-center gap-2 transition-colors mb-6" style={{ color: '#666666' }} 
             onMouseEnter={(e) => {
               const target = e.target as HTMLElement;
-              target.style.setProperty('color', '#ff385c');
+              target.style.setProperty('color', '#ffffff');
             }} 
             onMouseLeave={(e) => {
               const target = e.target as HTMLElement;
-              target.style.setProperty('color', '#717171');
+              target.style.setProperty('color', '#666666');
             }}>
             <ArrowLeft size={20} />
             Volver a Propiedades
@@ -309,80 +309,99 @@ export default function PropertyDetail() {
               <div ref={detailsRef} className="property-info">
                 <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
                   <div>
-                    <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ color: '#222222' }}>
+                    <h1 className="text-3xl md:text-4xl font-light mb-2" style={{ color: '#ffffff' }}>
                       {property.title}
                     </h1>
-                    <div className="flex items-center gap-2" style={{ color: '#717171' }}>
-                      <MapPin size={20} />
+                    <div className="flex items-center gap-2" style={{ color: '#a3a3a3' }}>
+                      <div className="w-1 h-1 rounded-full bg-white opacity-60"></div>
                       <span className="text-lg">{property.address?.getFullAddress?.() || property.location}</span>
                     </div>
                   </div>
                   
                   <div className="flex gap-3">
-                    <button className="p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                    <button className="p-3 rounded-lg transition-colors" style={{ 
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      color: '#a3a3a3'
+                    }} onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
+                      e.currentTarget.style.color = '#ffffff'
+                    }} onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'
+                      e.currentTarget.style.color = '#a3a3a3'
+                    }}>
                       <Heart size={20} />
                     </button>
-                    <button className="p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                    <button className="p-3 rounded-lg transition-colors" style={{ 
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      color: '#a3a3a3'
+                    }} onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
+                      e.currentTarget.style.color = '#ffffff'
+                    }} onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'
+                      e.currentTarget.style.color = '#a3a3a3'
+                    }}>
                       <Share2 size={20} />
                     </button>
                   </div>
                 </div>
 
-                <div className="text-3xl font-bold mb-8" style={{ color: '#ff385c' }}>
+                <div className="text-3xl font-light mb-8" style={{ color: '#ffffff' }}>
                   €{property.price?.amount || 0}
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8 p-6 rounded-xl" style={{ backgroundColor: '#f7f7f7' }}>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8 p-6 rounded-xl glass-card">
                   <div className="text-center">
                     <div className="flex items-center justify-center gap-2 mb-2">
-                      <Bed size={20} style={{ color: '#717171' }} />
-                      <span className="text-2xl font-semibold">{property.features?.bedrooms || property.beds}</span>
+                      <div className="w-1 h-1 rounded-full bg-white opacity-60"></div>
+                      <span className="text-2xl font-light" style={{ color: '#ffffff' }}>{property.features?.bedrooms || property.beds}</span>
                     </div>
-                    <p className="text-sm" style={{ color: '#717171' }}>Habitaciones</p>
+                    <p className="text-sm" style={{ color: '#a3a3a3' }}>Habitaciones</p>
                   </div>
                   <div className="text-center">
                     <div className="flex items-center justify-center gap-2 mb-2">
-                      <Bath size={20} style={{ color: '#717171' }} />
-                      <span className="text-2xl font-semibold">{property.features?.bathrooms || property.baths}</span>
+                      <div className="w-1 h-1 rounded-full bg-white opacity-60"></div>
+                      <span className="text-2xl font-light" style={{ color: '#ffffff' }}>{property.features?.bathrooms || property.baths}</span>
                     </div>
-                    <p className="text-sm" style={{ color: '#717171' }}>Baños</p>
+                    <p className="text-sm" style={{ color: '#a3a3a3' }}>Baños</p>
                   </div>
                   <div className="text-center">
                     <div className="flex items-center justify-center gap-2 mb-2">
-                      <Square size={20} style={{ color: '#717171' }} />
-                      <span className="text-2xl font-semibold">{(property.features?.squareMeters || property.sqft)?.toLocaleString() || 'N/A'}</span>
+                      <div className="w-1 h-1 rounded-full bg-white opacity-60"></div>
+                      <span className="text-2xl font-light" style={{ color: '#ffffff' }}>{(property.features?.squareMeters || property.sqft)?.toLocaleString() || 'N/A'}</span>
                     </div>
-                    <p className="text-sm" style={{ color: '#717171' }}>m²</p>
+                    <p className="text-sm" style={{ color: '#a3a3a3' }}>m²</p>
                   </div>
                   <div className="text-center">
                     <div className="flex items-center justify-center gap-2 mb-2">
-                      <Calendar size={20} style={{ color: '#717171' }} />
-                      <span className="text-2xl font-semibold">{property.features?.yearBuilt || property.yearBuilt}</span>
+                      <div className="w-1 h-1 rounded-full bg-white opacity-60"></div>
+                      <span className="text-2xl font-light" style={{ color: '#ffffff' }}>{property.features?.yearBuilt || property.yearBuilt}</span>
                     </div>
-                    <p className="text-sm" style={{ color: '#717171' }}>Año Construcción</p>
+                    <p className="text-sm" style={{ color: '#a3a3a3' }}>Año Construcción</p>
                   </div>
                 </div>
 
                 <div className="mb-8">
-                  <h2 className="text-2xl font-bold mb-4" style={{ color: '#222222' }}>Descripción</h2>
-                  <p className="leading-relaxed text-lg" style={{ color: '#717171' }}>
+                  <h2 className="text-2xl font-light mb-4" style={{ color: '#ffffff' }}>Descripción</h2>
+                  <p className="leading-relaxed text-lg" style={{ color: '#a3a3a3' }}>
                     {property.description}
                   </p>
                 </div>
 
                 <div className="mb-8">
-                  <h2 className="text-2xl font-bold mb-4" style={{ color: '#222222' }}>Características</h2>
+                  <h2 className="text-2xl font-light mb-4" style={{ color: '#ffffff' }}>Características</h2>
                   <div className="features-list grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {(property.features?.amenities || []).map((feature: string, index: number) => (
+                    {(property.features?.amenities || property.features || []).map((feature: string, index: number) => (
                       <motion.div
                         key={index}
-                        className="feature-item flex items-center gap-3 p-3 bg-white rounded-lg border"
-                        style={{ borderColor: '#f0f0f0' }}
+                        className="feature-item flex items-center gap-3 p-3 rounded-lg glass-card"
                         whileHover={{ x: 5 }}
                         transition={{ duration: 0.2 }}
                       >
-                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#ff385c' }} />
-                        <span>{feature}</span>
+                        <div className="w-1 h-1 rounded-full bg-white opacity-60" />
+                        <span style={{ color: '#ffffff' }}>{feature}</span>
                       </motion.div>
                     ))}
                   </div>
@@ -393,61 +412,89 @@ export default function PropertyDetail() {
 
             <div className="lg:col-span-1">
               <div className="sticky top-24">
-                <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-lg">
-                  <h3 className="text-xl font-bold mb-4" style={{ color: '#222222' }}>
+                <div className="glass-card p-6">
+                  <h3 className="text-xl font-light mb-4" style={{ color: '#ffffff' }}>
                     Programar Visita
                   </h3>
                   <form className="space-y-4">
                     <input
                       type="text"
                       placeholder="Tu Nombre"
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none transition-colors"
+                      className="w-full px-4 py-3 rounded-lg focus:outline-none transition-colors"
+                      style={{ 
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: '#ffffff'
+                      }}
                       onFocus={(e) => {
                         const target = e.target as HTMLElement;
-                        target.style.setProperty('border-color', '#ff385c');
+                        target.style.setProperty('border-color', '#ffffff');
+                        target.style.setProperty('background', 'rgba(255, 255, 255, 0.1)');
                       }}
                       onBlur={(e) => {
                         const target = e.target as HTMLElement;
-                        target.style.setProperty('border-color', '#e5e7eb');
+                        target.style.setProperty('border-color', 'rgba(255, 255, 255, 0.1)');
+                        target.style.setProperty('background', 'rgba(255, 255, 255, 0.05)');
                       }}
                     />
                     <input
                       type="email"
                       placeholder="Correo Electrónico"
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none transition-colors"
+                      className="w-full px-4 py-3 rounded-lg focus:outline-none transition-colors"
+                      style={{ 
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: '#ffffff'
+                      }}
                       onFocus={(e) => {
                         const target = e.target as HTMLElement;
-                        target.style.setProperty('border-color', '#ff385c');
+                        target.style.setProperty('border-color', '#ffffff');
+                        target.style.setProperty('background', 'rgba(255, 255, 255, 0.1)');
                       }}
                       onBlur={(e) => {
                         const target = e.target as HTMLElement;
-                        target.style.setProperty('border-color', '#e5e7eb');
+                        target.style.setProperty('border-color', 'rgba(255, 255, 255, 0.1)');
+                        target.style.setProperty('background', 'rgba(255, 255, 255, 0.05)');
                       }}
                     />
                     <input
                       type="tel"
                       placeholder="Número de Teléfono"
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none transition-colors"
+                      className="w-full px-4 py-3 rounded-lg focus:outline-none transition-colors"
+                      style={{ 
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: '#ffffff'
+                      }}
                       onFocus={(e) => {
                         const target = e.target as HTMLElement;
-                        target.style.setProperty('border-color', '#ff385c');
+                        target.style.setProperty('border-color', '#ffffff');
+                        target.style.setProperty('background', 'rgba(255, 255, 255, 0.1)');
                       }}
                       onBlur={(e) => {
                         const target = e.target as HTMLElement;
-                        target.style.setProperty('border-color', '#e5e7eb');
+                        target.style.setProperty('border-color', 'rgba(255, 255, 255, 0.1)');
+                        target.style.setProperty('background', 'rgba(255, 255, 255, 0.05)');
                       }}
                     />
                     <textarea
                       placeholder="Mensaje (Opcional)"
                       rows={4}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none resize-none transition-colors"
+                      className="w-full px-4 py-3 rounded-lg focus:outline-none resize-none transition-colors"
+                      style={{ 
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: '#ffffff'
+                      }}
                       onFocus={(e) => {
                         const target = e.target as HTMLElement;
-                        target.style.setProperty('border-color', '#ff385c');
+                        target.style.setProperty('border-color', '#ffffff');
+                        target.style.setProperty('background', 'rgba(255, 255, 255, 0.1)');
                       }}
                       onBlur={(e) => {
                         const target = e.target as HTMLElement;
-                        target.style.setProperty('border-color', '#e5e7eb');
+                        target.style.setProperty('border-color', 'rgba(255, 255, 255, 0.1)');
+                        target.style.setProperty('background', 'rgba(255, 255, 255, 0.05)');
                       }}
                     />
                     <button className="btn-primary w-full">
@@ -456,26 +503,26 @@ export default function PropertyDetail() {
                   </form>
                 </div>
 
-                <div className="mt-6 rounded-xl p-6" style={{ backgroundColor: '#f7f7f7' }}>
-                  <h3 className="text-lg font-semibold mb-4" style={{ color: '#222222' }}>
+                <div className="mt-6 rounded-xl p-6 glass-card">
+                  <h3 className="text-lg font-light mb-4" style={{ color: '#ffffff' }}>
                     Detalles de la Propiedad
                   </h3>
                   <div className="space-y-3 text-sm">
                     <div className="flex justify-between">
-                      <span style={{ color: '#717171' }}>Tipo de Propiedad:</span>
-                      <span className="font-medium">{property.propertyType?.getDisplayName?.() || property.propertyType?.value || property.propertyType}</span>
+                      <span style={{ color: '#a3a3a3' }}>Tipo de Propiedad:</span>
+                      <span className="font-medium" style={{ color: '#ffffff' }}>{property.propertyType?.getDisplayName?.() || property.propertyType?.value || property.propertyType}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span style={{ color: '#717171' }}>Tamaño del Lote:</span>
-                      <span className="font-medium">{property.features?.lotSize || property.lotSize}</span>
+                      <span style={{ color: '#a3a3a3' }}>Tamaño del Lote:</span>
+                      <span className="font-medium" style={{ color: '#ffffff' }}>{property.features?.lotSize || property.lotSize}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span style={{ color: '#717171' }}>Año de Construcción:</span>
-                      <span className="font-medium">{property.features?.yearBuilt || property.yearBuilt}</span>
+                      <span style={{ color: '#a3a3a3' }}>Año de Construcción:</span>
+                      <span className="font-medium" style={{ color: '#ffffff' }}>{property.features?.yearBuilt || property.yearBuilt}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span style={{ color: '#717171' }}>ID de Propiedad:</span>
-                      <span className="font-medium">LV{id.padStart(4, '0')}</span>
+                      <span style={{ color: '#a3a3a3' }}>ID de Propiedad:</span>
+                      <span className="font-medium" style={{ color: '#ffffff' }}>LV{id.padStart(4, '0')}</span>
                     </div>
                   </div>
                 </div>

@@ -94,7 +94,9 @@ export class OrganizationService {
     }
 
     // Create a default organization for the user
-    const defaultSlug = `user-${userId.substring(0, 8)}`
+    // Generate a valid slug: lowercase, alphanumeric + hyphens only
+    const userIdSafe = userId.substring(0, 8).toLowerCase().replace(/[^a-z0-9]/g, '')
+    const defaultSlug = `user-${userIdSafe}`
     const defaultName = `Mi Organización`
     const defaultDescription = `Organización personal de ${userEmail}`
 

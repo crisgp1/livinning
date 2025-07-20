@@ -3,7 +3,7 @@ import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from 'luc
 
 export default function Footer() {
   return (
-    <footer className="text-white py-16" style={{ backgroundColor: '#222222' }}>
+    <footer className="text-white py-16" style={{ background: 'linear-gradient(135deg, #0a0a0a 0%, #111111 100%)' }}>
       <div className="section-container">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           <div>
@@ -15,7 +15,7 @@ export default function Footer() {
               <Link href="#" className="transition-colors" style={{ color: '#999999' }} 
                 onMouseEnter={(e) => {
                   const target = e.target as HTMLElement;
-                  target.style.setProperty('color', '#ff385c');
+                  target.style.setProperty('color', '#ffffff');
                 }} 
                 onMouseLeave={(e) => {
                   const target = e.target as HTMLElement;
@@ -26,7 +26,7 @@ export default function Footer() {
               <Link href="#" className="transition-colors" style={{ color: '#999999' }} 
                 onMouseEnter={(e) => {
                   const target = e.target as HTMLElement;
-                  target.style.setProperty('color', '#ff385c');
+                  target.style.setProperty('color', '#ffffff');
                 }} 
                 onMouseLeave={(e) => {
                   const target = e.target as HTMLElement;
@@ -37,7 +37,7 @@ export default function Footer() {
               <Link href="#" className="transition-colors" style={{ color: '#999999' }} 
                 onMouseEnter={(e) => {
                   const target = e.target as HTMLElement;
-                  target.style.setProperty('color', '#ff385c');
+                  target.style.setProperty('color', '#ffffff');
                 }} 
                 onMouseLeave={(e) => {
                   const target = e.target as HTMLElement;
@@ -48,7 +48,7 @@ export default function Footer() {
               <Link href="#" className="transition-colors" style={{ color: '#999999' }} 
                 onMouseEnter={(e) => {
                   const target = e.target as HTMLElement;
-                  target.style.setProperty('color', '#ff385c');
+                  target.style.setProperty('color', '#ffffff');
                 }} 
                 onMouseLeave={(e) => {
                   const target = e.target as HTMLElement;
@@ -66,7 +66,7 @@ export default function Footer() {
                 <Link href="/about" className="transition-colors" style={{ color: '#b3b3b3' }} 
                   onMouseEnter={(e) => {
                     const target = e.target as HTMLElement;
-                    target.style.setProperty('color', '#ff385c');
+                    target.style.setProperty('color', '#ffffff');
                   }} 
                   onMouseLeave={(e) => {
                     const target = e.target as HTMLElement;
@@ -79,7 +79,7 @@ export default function Footer() {
                 <Link href="/team" className="transition-colors" style={{ color: '#b3b3b3' }} 
                   onMouseEnter={(e) => {
                     const target = e.target as HTMLElement;
-                    target.style.setProperty('color', '#ff385c');
+                    target.style.setProperty('color', '#ffffff');
                   }} 
                   onMouseLeave={(e) => {
                     const target = e.target as HTMLElement;
@@ -92,7 +92,7 @@ export default function Footer() {
                 <Link href="/careers" className="transition-colors" style={{ color: '#b3b3b3' }} 
                   onMouseEnter={(e) => {
                     const target = e.target as HTMLElement;
-                    target.style.setProperty('color', '#ff385c');
+                    target.style.setProperty('color', '#ffffff');
                   }} 
                   onMouseLeave={(e) => {
                     const target = e.target as HTMLElement;
@@ -105,7 +105,7 @@ export default function Footer() {
                 <Link href="/press" className="transition-colors" style={{ color: '#b3b3b3' }} 
                   onMouseEnter={(e) => {
                     const target = e.target as HTMLElement;
-                    target.style.setProperty('color', '#ff385c');
+                    target.style.setProperty('color', '#ffffff');
                   }} 
                   onMouseLeave={(e) => {
                     const target = e.target as HTMLElement;
@@ -124,7 +124,7 @@ export default function Footer() {
                 <Link href="/comprar" className="transition-colors" style={{ color: '#b3b3b3' }} 
                   onMouseEnter={(e) => {
                     const target = e.target as HTMLElement;
-                    target.style.setProperty('color', '#ff385c');
+                    target.style.setProperty('color', '#ffffff');
                   }} 
                   onMouseLeave={(e) => {
                     const target = e.target as HTMLElement;
@@ -137,7 +137,7 @@ export default function Footer() {
                 <Link href="/vender" className="transition-colors" style={{ color: '#b3b3b3' }} 
                   onMouseEnter={(e) => {
                     const target = e.target as HTMLElement;
-                    target.style.setProperty('color', '#ff385c');
+                    target.style.setProperty('color', '#ffffff');
                   }} 
                   onMouseLeave={(e) => {
                     const target = e.target as HTMLElement;
@@ -150,7 +150,7 @@ export default function Footer() {
                 <Link href="/alquilar" className="transition-colors" style={{ color: '#b3b3b3' }} 
                   onMouseEnter={(e) => {
                     const target = e.target as HTMLElement;
-                    target.style.setProperty('color', '#ff385c');
+                    target.style.setProperty('color', '#ffffff');
                   }} 
                   onMouseLeave={(e) => {
                     const target = e.target as HTMLElement;
@@ -163,7 +163,7 @@ export default function Footer() {
                 <Link href="/inversion" className="transition-colors" style={{ color: '#b3b3b3' }} 
                   onMouseEnter={(e) => {
                     const target = e.target as HTMLElement;
-                    target.style.setProperty('color', '#ff385c');
+                    target.style.setProperty('color', '#ffffff');
                   }} 
                   onMouseLeave={(e) => {
                     const target = e.target as HTMLElement;
@@ -183,7 +183,7 @@ export default function Footer() {
                 <a href="mailto:hola@livinning.com" className="transition-colors" 
                   onMouseEnter={(e) => {
                     const target = e.target as HTMLElement;
-                    target.style.setProperty('color', '#ff385c');
+                    target.style.setProperty('color', '#ffffff');
                   }} 
                   onMouseLeave={(e) => {
                     const target = e.target as HTMLElement;
@@ -197,7 +197,7 @@ export default function Footer() {
                 <a href="tel:+34912345678" className="transition-colors" 
                   onMouseEnter={(e) => {
                     const target = e.target as HTMLElement;
-                    target.style.setProperty('color', '#ff385c');
+                    target.style.setProperty('color', '#ffffff');
                   }} 
                   onMouseLeave={(e) => {
                     const target = e.target as HTMLElement;
@@ -226,7 +226,7 @@ export default function Footer() {
               <Link href="/privacidad" className="transition-colors" style={{ color: '#999999' }} 
                 onMouseEnter={(e) => {
                   const target = e.target as HTMLElement;
-                  target.style.setProperty('color', '#ff385c');
+                  target.style.setProperty('color', '#ffffff');
                 }} 
                 onMouseLeave={(e) => {
                   const target = e.target as HTMLElement;
@@ -237,7 +237,7 @@ export default function Footer() {
               <Link href="/terminos" className="transition-colors" style={{ color: '#999999' }} 
                 onMouseEnter={(e) => {
                   const target = e.target as HTMLElement;
-                  target.style.setProperty('color', '#ff385c');
+                  target.style.setProperty('color', '#ffffff');
                 }} 
                 onMouseLeave={(e) => {
                   const target = e.target as HTMLElement;
@@ -248,7 +248,7 @@ export default function Footer() {
               <Link href="/cookies" className="transition-colors" style={{ color: '#999999' }} 
                 onMouseEnter={(e) => {
                   const target = e.target as HTMLElement;
-                  target.style.setProperty('color', '#ff385c');
+                  target.style.setProperty('color', '#ffffff');
                 }} 
                 onMouseLeave={(e) => {
                   const target = e.target as HTMLElement;

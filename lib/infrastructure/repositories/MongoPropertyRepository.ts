@@ -74,7 +74,8 @@ export class MongoPropertyRepository implements PropertyRepository {
         coordinates: property.address.coordinates ? {
           latitude: property.address.coordinates.latitude,
           longitude: property.address.coordinates.longitude
-        } : undefined
+        } : undefined,
+        displayPrivacy: property.address.displayPrivacy || false
       },
       features: {
         bedrooms: property.features.bedrooms,

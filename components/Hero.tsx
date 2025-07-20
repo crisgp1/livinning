@@ -44,16 +44,16 @@ export default function Hero() {
   }, [])
 
   return (
-    <section ref={heroRef} className="relative h-screen overflow-hidden">
-      <div ref={imageRef} className="absolute inset-0 z-0">
-        <Image
-          src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=2000"
-          alt="Luxury Estate"
-          fill
-          className="object-cover"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/40" />
+    <section ref={heroRef} className="relative h-screen overflow-hidden" style={{ background: '#0a0a0a' }}>
+      {/* Mysterious geometric background */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0" style={{ 
+          background: 'radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.02) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.03) 0%, transparent 50%), linear-gradient(135deg, #0a0a0a 0%, #111111 100%)'
+        }} />
+        {/* Floating geometric shapes */}
+        <div className="absolute top-20 left-10 w-32 h-32 border border-white/10 rounded-full animate-pulse" />
+        <div className="absolute top-1/3 right-20 w-24 h-24 border border-white/5 rotate-45" style={{ animationDelay: '1s' }} />
+        <div className="absolute bottom-1/4 left-1/4 w-16 h-16 bg-gradient-to-r from-white/5 to-white/10 rounded-lg rotate-12" />
       </div>
 
       <div className="relative z-10 h-full flex items-center">
@@ -61,32 +61,58 @@ export default function Hero() {
           <div className="max-w-3xl">
             <h1 className="hero-text text-4xl md:text-6xl font-bold text-white mb-6">
               Encuentra tu
-              <span className="block" style={{ color: '#ff385c' }}>Hogar Perfecto</span>
+              <span className="block gradient-text">Hogar Perfecto</span>
             </h1>
             <p className="hero-text text-lg md:text-xl text-white/90 mb-12">
               Descubre propiedades excepcionales en las ubicaciones más deseadas del mundo
             </p>
 
             <motion.div 
-              className="search-container bg-white/95 backdrop-blur-md rounded-2xl p-6 shadow-2xl"
-              whileHover={{ scale: 1.02 }}
+              className="search-container glass-card p-6"
+              whileHover={{ scale: 1.02, y: -4 }}
               transition={{ duration: 0.3 }}
             >
               <div className="flex flex-col lg:flex-row gap-4">
                 <div className="flex-1 relative">
-                  <MapPin className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: '#717171' }} size={20} />
+                  <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: '#a3a3a3' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
                   <input
                     type="text"
                     placeholder="Ubicación"
-                    className="w-full pl-12 pr-4 py-4 border border-gray-200 rounded-lg focus:outline-none transition-colors"
-                    onFocus={(e) => e.target.style.borderColor = '#ff385c'}
-                    onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                    className="w-full pl-12 pr-4 py-4 rounded-lg focus:outline-none transition-all duration-300"
+                    style={{ 
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      color: '#ffffff'
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = '#ffffff'
+                      e.target.style.boxShadow = '0 0 0 2px rgba(255, 255, 255, 0.1)'
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'
+                      e.target.style.boxShadow = 'none'
+                    }}
                   />
                 </div>
                 
                 <div className="flex-1 relative">
-                  <Home className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: '#717171' }} size={20} />
-                  <select className="w-full pl-12 pr-4 py-4 border border-gray-200 rounded-lg focus:outline-none transition-colors appearance-none bg-white" onFocus={(e) => e.target.style.borderColor = '#c9a961'} onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}>
+                  <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: '#a3a3a3' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                  </svg>
+                  <select className="w-full pl-12 pr-4 py-4 rounded-lg focus:outline-none transition-all duration-300 appearance-none" style={{ 
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    color: '#ffffff'
+                  }} onFocus={(e) => {
+                    e.target.style.borderColor = '#ffffff'
+                    e.target.style.boxShadow = '0 0 0 2px rgba(255, 255, 255, 0.1)'
+                  }} onBlur={(e) => {
+                    e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'
+                    e.target.style.boxShadow = 'none'
+                  }}>
                     <option>Todos los Tipos</option>
                     <option>Villa</option>
                     <option>Penthouse</option>
@@ -96,7 +122,17 @@ export default function Hero() {
                 </div>
 
                 <div className="flex-1">
-                  <select className="w-full px-4 py-4 border border-gray-200 rounded-lg focus:outline-none transition-colors appearance-none bg-white" onFocus={(e) => e.target.style.borderColor = '#c9a961'} onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}>
+                  <select className="w-full px-4 py-4 rounded-lg focus:outline-none transition-all duration-300 appearance-none" style={{ 
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    color: '#ffffff'
+                  }} onFocus={(e) => {
+                    e.target.style.borderColor = '#ffffff'
+                    e.target.style.boxShadow = '0 0 0 2px rgba(255, 255, 255, 0.1)'
+                  }} onBlur={(e) => {
+                    e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'
+                    e.target.style.boxShadow = 'none'
+                  }}>
                     <option>Rango de Precio</option>
                     <option>$500K - $1M</option>
                     <option>$1M - $3M</option>
@@ -106,7 +142,9 @@ export default function Hero() {
                 </div>
 
                 <button className="btn-primary flex items-center justify-center gap-2 px-8">
-                  <Search size={20} />
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
                   Buscar
                 </button>
               </div>

@@ -5,7 +5,8 @@ export class Address {
     public readonly state: string,
     public readonly country: string,
     public readonly postalCode: string,
-    public readonly coordinates?: Coordinates
+    public readonly coordinates?: Coordinates,
+    public readonly displayPrivacy: boolean = false
   ) {
     if (!street.trim()) throw new Error('Street is required')
     if (!city.trim()) throw new Error('City is required')
@@ -24,7 +25,8 @@ export class Address {
       this.city === other.city &&
       this.state === other.state &&
       this.country === other.country &&
-      this.postalCode === other.postalCode
+      this.postalCode === other.postalCode &&
+      this.displayPrivacy === other.displayPrivacy
     )
   }
 }

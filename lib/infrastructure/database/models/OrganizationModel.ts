@@ -1,0 +1,1 @@
+export { OrganizationModel as default } from '../schemas/OrganizationSchema'

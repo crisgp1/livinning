@@ -205,7 +205,7 @@ export default function PhotoGallery({ images, title }: PhotoGalleryProps) {
                 key={index}
                 className={`relative h-20 w-32 flex-shrink-0 rounded-lg overflow-hidden cursor-pointer transition-all duration-300 ${
                   index === currentIndex 
-                    ? 'ring-2 ring-[#ff385c] scale-105' 
+                    ? 'ring-2 ring-white scale-105' 
                     : 'hover:scale-105 opacity-70 hover:opacity-100'
                 }`}
                 onClick={() => changeImage(index)}

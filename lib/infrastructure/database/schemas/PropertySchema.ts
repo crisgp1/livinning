@@ -21,6 +21,7 @@ export interface PropertyDocument extends Document {
       latitude: number
       longitude: number
     }
+    displayPrivacy: boolean
   }
   features: {
     bedrooms: number
@@ -50,7 +51,8 @@ const AddressSchema = new Schema({
   state: { type: String, required: true, trim: true },
   country: { type: String, required: true, trim: true },
   postalCode: { type: String, required: true, trim: true },
-  coordinates: { type: CoordinatesSchema, required: false }
+  coordinates: { type: CoordinatesSchema, required: false },
+  displayPrivacy: { type: Boolean, default: false }
 }, { _id: false })
 
 const PriceSchema = new Schema({

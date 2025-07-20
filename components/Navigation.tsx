@@ -4,13 +4,16 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
-import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
+import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton, useUser } from '@clerk/nextjs'
 import { gsap } from 'gsap'
 
 export default function Navigation() {
+  const { user } = useUser()
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isOnWhitePage, setIsOnWhitePage] = useState(false)
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false)
+  const [isAgency, setIsAgency] = useState(false)
   const navRef = useRef<HTMLElement>(null)
   const logoRef = useRef<HTMLHeadingElement>(null)
   const menuItemsRef = useRef<HTMLDivElement>(null)
@@ -38,6 +41,18 @@ export default function Navigation() {
       window.removeEventListener('popstate', checkPageBackground)
     }
   }, [])
+
+  useEffect(() => {
+    // Check if user is superadmin
+    if (user) {
+      const userEmails = user.emailAddresses?.map(email => email.emailAddress) || []
+      setIsSuperAdmin(userEmails.includes('cristiangp2001@gmail.com'))
+      
+      // Check if user is an agency from Clerk metadata
+      const metadata = user.publicMetadata as any
+      setIsAgency(metadata?.isAgency === true)
+    }
+  }, [user])
 
   useEffect(() => {
     const tl = gsap.timeline()
@@ -97,14 +112,23 @@ export default function Navigation() {
     setIsMobileMenuOpen(!isMobileMenuOpen)
   }
 
-  const shouldShowDarkText = isScrolled || isOnWhitePage
+  const shouldShowDarkText = false // Always show light text for dark theme
 
   return (
     <nav
       ref={navRef}
       className={`fixed w-full z-50 transition-all duration-500 ${
-        isScrolled || isOnWhitePage ? 'bg-white/95 backdrop-blur-md shadow-lg py-4' : 'bg-transparent py-6'
+        isScrolled || isOnWhitePage ? 'py-4' : 'py-6'
       }`}
+      style={{
+        background: isScrolled || isOnWhitePage 
+          ? 'rgba(10, 10, 10, 0.9)' 
+          : 'transparent',
+        backdropFilter: isScrolled || isOnWhitePage ? 'blur(12px)' : 'none',
+        borderBottom: isScrolled || isOnWhitePage 
+          ? '1px solid rgba(255, 255, 255, 0.1)' 
+          : 'none'
+      }}
     >
       <div className="section-container">
         <div className="flex items-center justify-between">
@@ -112,7 +136,12 @@ export default function Navigation() {
             <h1 
               ref={logoRef}
               className="text-2xl font-bold transition-colors duration-300 cursor-pointer"
-              style={{ color: shouldShowDarkText ? '#ff385c' : 'white' }}
+              style={{ 
+                background: 'linear-gradient(135deg, #ffffff, #a3a3a3)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}
             >
               Livinning
             </h1>
@@ -121,8 +150,12 @@ export default function Navigation() {
           <div ref={menuItemsRef} className="hidden md:flex items-center space-x-8 relative">
             <div 
               ref={magicLineRef}
-              className="absolute bottom-0 h-0.5 bg-gradient-to-r from-[#ff385c] to-[#ff6b8a] rounded-full transition-all duration-300 opacity-0"
-              style={{ width: '0px', left: '0px' }}
+              className="absolute bottom-0 h-0.5 rounded-full transition-all duration-300 opacity-0"
+              style={{ 
+                width: '0px', 
+                left: '0px',
+                background: 'linear-gradient(135deg, #ffffff, #a3a3a3)'
+              }}
             />
             {[
               { label: 'Propiedades', href: '/propiedades' },
@@ -133,13 +166,12 @@ export default function Navigation() {
               <Link
                 key={item.label}
                 href={item.href}
-                className="font-medium transition-colors duration-300 text-sm relative py-2 px-3 rounded-lg"
-                style={{ 
-                  color: shouldShowDarkText ? '#222222' : 'white',
-                }}
+                className="font-medium transition-all duration-300 text-sm relative py-2 px-3 rounded-lg"
+                style={{ color: '#e5e5e5' }}
                 onMouseEnter={(e) => {
-                  const target = e.target as HTMLElement;
-                  target.style.color = '#ff385c'
+                  const target = e.target as HTMLElement
+                  target.style.color = '#ffffff'
+                  target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'
                   const rect = target.getBoundingClientRect()
                   const parentRect = menuItemsRef.current?.getBoundingClientRect()
                   if (parentRect && magicLineRef.current) {
@@ -153,8 +185,9 @@ export default function Navigation() {
                   }
                 }}
                 onMouseLeave={(e) => {
-                  const target = e.target as HTMLElement;
-                  target.style.color = shouldShowDarkText ? '#222222' : 'white'
+                  const target = e.target as HTMLElement
+                  target.style.color = '#e5e5e5'
+                  target.style.backgroundColor = 'transparent'
                   gsap.to(magicLineRef.current, {
                     opacity: 0,
                     duration: 0.3,
@@ -170,27 +203,7 @@ export default function Navigation() {
           <div ref={buttonsRef} className="hidden md:flex items-center space-x-4">
             <SignedOut>
               <SignInButton mode="modal">
-                <button className={`transition-colors duration-300 border px-6 py-2 rounded-lg font-medium ${
-                  shouldShowDarkText ? 'btn-secondary' : 'border-white text-white hover:bg-white'
-                }`}
-                style={!shouldShowDarkText ? { 
-                  borderColor: 'white', 
-                  color: 'white'
-                } : {}}
-                onMouseEnter={(e) => {
-                  if (!shouldShowDarkText) {
-                    const target = e.target as HTMLElement;
-                    target.style.backgroundColor = 'white'
-                    target.style.color = '#ff385c'
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!shouldShowDarkText) {
-                    const target = e.target as HTMLElement;
-                    target.style.backgroundColor = 'transparent'
-                    target.style.color = 'white'
-                  }
-                }}>
+                <button className="btn-secondary">
                   Iniciar Sesión
                 </button>
               </SignInButton>
@@ -201,11 +214,14 @@ export default function Navigation() {
               </SignUpButton>
             </SignedOut>
             <SignedIn>
-              <Link href="/dashboard" className={`px-4 py-2 rounded-lg font-medium transition-colors duration-300 ${
-                shouldShowDarkText ? 'text-gray-700 hover:text-[#ff385c]' : 'text-white hover:text-[#ff385c]'
-              }`}>
+              <Link href="/dashboard" className="px-4 py-2 rounded-lg font-medium transition-all duration-300" style={{ color: '#e5e5e5' }} onMouseEnter={(e) => { (e.target as HTMLElement).style.color = '#ffffff'; (e.target as HTMLElement).style.backgroundColor = 'rgba(255, 255, 255, 0.1)' }} onMouseLeave={(e) => { (e.target as HTMLElement).style.color = '#e5e5e5'; (e.target as HTMLElement).style.backgroundColor = 'transparent' }}>
                 Dashboard
               </Link>
+              {isSuperAdmin && (
+                <Link href="/superadmin" className="px-4 py-2 rounded-lg font-medium transition-all duration-300" style={{ color: '#a3a3a3' }} onMouseEnter={(e) => { (e.target as HTMLElement).style.color = '#ffffff'; (e.target as HTMLElement).style.backgroundColor = 'rgba(255, 255, 255, 0.1)' }} onMouseLeave={(e) => { (e.target as HTMLElement).style.color = '#a3a3a3'; (e.target as HTMLElement).style.backgroundColor = 'transparent' }}>
+                  Superadmin
+                </Link>
+              )}
               <Link href="/publish" className="btn-primary">
                 Publicar Propiedad
               </Link>
@@ -221,8 +237,7 @@ export default function Navigation() {
 
           <button
             onClick={toggleMobileMenu}
-            className="md:hidden transition-colors duration-300 relative z-10"
-            style={{ color: shouldShowDarkText ? '#1a1f36' : 'white' }}
+            className="md:hidden transition-colors duration-300 relative z-10 text-white"
           >
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -231,9 +246,14 @@ export default function Navigation() {
 
       <div
         ref={mobileMenuRef}
-        className={`md:hidden bg-white/95 backdrop-blur-md shadow-lg overflow-hidden transition-all duration-500 ${
+        className={`md:hidden overflow-hidden transition-all duration-500 ${
           isMobileMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
         }`}
+        style={{
+          background: 'rgba(10, 10, 10, 0.95)',
+          backdropFilter: 'blur(12px)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+        }}
       >
         <div className="px-4 py-6 space-y-4">
           {[
@@ -250,19 +270,19 @@ export default function Navigation() {
                   ? 'translate-x-0 opacity-100' 
                   : '-translate-x-4 opacity-0'
               }`}
-              style={{ 
-                color: '#222222',
-                transitionDelay: isMobileMenuOpen ? `${index * 100}ms` : '0ms'
-              }}
               onMouseEnter={(e) => {
-                const target = e.target as HTMLElement;
-                target.style.color = '#ff385c'
-                target.style.backgroundColor = '#f8f9fa'
+                const target = e.target as HTMLElement
+                target.style.color = '#ffffff'
+                target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'
               }}
               onMouseLeave={(e) => {
-                const target = e.target as HTMLElement;
-                target.style.color = '#222222'
+                const target = e.target as HTMLElement
+                target.style.color = '#e5e5e5'
                 target.style.backgroundColor = 'transparent'
+              }}
+              style={{ 
+                transitionDelay: isMobileMenuOpen ? `${index * 100}ms` : '0ms',
+                color: '#e5e5e5'
               }}
               onClick={() => setIsMobileMenuOpen(false)}
             >

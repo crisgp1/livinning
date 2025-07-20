@@ -1,0 +1,1 @@
+export { ServiceOrderModel as default } from '../schemas/ServiceOrderSchema'

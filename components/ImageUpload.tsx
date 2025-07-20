@@ -77,8 +77,8 @@ export default function ImageUpload({
     if (dropRef.current) {
       gsap.to(dropRef.current, {
         scale: 1.02,
-        borderColor: '#ff385c',
-        backgroundColor: '#fff5f5',
+        borderColor: '#ffffff',
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
         duration: 0.2,
         ease: "power2.out"
       })
@@ -93,8 +93,8 @@ export default function ImageUpload({
     if (dropRef.current) {
       gsap.to(dropRef.current, {
         scale: 1,
-        borderColor: '#d1d5db',
-        backgroundColor: '#f9fafb',
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        backgroundColor: 'rgba(17, 17, 17, 0.8)',
         duration: 0.2,
         ease: "power2.out"
       })
@@ -109,8 +109,8 @@ export default function ImageUpload({
     if (dropRef.current) {
       gsap.to(dropRef.current, {
         scale: 1,
-        borderColor: '#d1d5db',
-        backgroundColor: '#f9fafb',
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        backgroundColor: 'rgba(17, 17, 17, 0.8)',
         duration: 0.2,
         ease: "power2.out"
       })
@@ -155,7 +155,19 @@ export default function ImageUpload({
     <div className="space-y-4">
       <div
         ref={dropRef}
-        className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center bg-gray-50 transition-colors duration-200 cursor-pointer hover:border-[#ff385c] hover:bg-red-50"
+        className="border-2 border-dashed rounded-xl p-8 text-center transition-colors duration-200 cursor-pointer"
+        style={{ 
+          borderColor: 'rgba(255, 255, 255, 0.2)',
+          background: 'rgba(17, 17, 17, 0.8)'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.borderColor = '#ffffff'
+          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)'
+          e.currentTarget.style.background = 'rgba(17, 17, 17, 0.8)'
+        }}
         onDragEnter={handleDragIn}
         onDragLeave={handleDragOut}
         onDragOver={handleDrag}
@@ -172,22 +184,22 @@ export default function ImageUpload({
         />
         
         <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg">
+          <div className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg" style={{ background: 'rgba(255, 255, 255, 0.1)' }}>
             {uploading ? (
-              <div className="w-6 h-6 border-2 border-[#ff385c] border-t-transparent rounded-full animate-spin" />
+              <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
-              <Upload size={24} className="text-[#ff385c]" />
+              <Upload size={24} className="text-white" />
             )}
           </div>
           
           <div>
-            <h3 className="text-lg font-semibold text-gray-700">
+            <h3 className="text-lg font-semibold" style={{ color: '#ffffff' }}>
               {uploading ? 'Subiendo imágenes...' : 'Sube las fotos de tu propiedad'}
             </h3>
-            <p className="text-gray-500 mt-1">
+            <p className="mt-1" style={{ color: '#a3a3a3' }}>
               Arrastra y suelta las imágenes aquí o haz clic para seleccionar
             </p>
-            <p className="text-sm text-gray-400 mt-2">
+            <p className="text-sm mt-2" style={{ color: '#666666' }}>
               Máximo {maxImages} imágenes • PNG, JPG, WebP • Máximo 10MB cada una
             </p>
           </div>
@@ -196,7 +208,7 @@ export default function ImageUpload({
 
       {images.length > 0 && (
         <div>
-          <h4 className="text-lg font-semibold mb-4 text-gray-700">
+          <h4 className="text-lg font-semibold mb-4" style={{ color: '#ffffff' }}>
             Imágenes subidas ({images.length}/{maxImages})
           </h4>
           
@@ -207,7 +219,7 @@ export default function ImageUpload({
             {images.map((image, index) => (
               <div
                 key={index}
-                className="image-item relative group aspect-square rounded-lg overflow-hidden bg-gray-100"
+                className="image-item relative group aspect-square rounded-lg overflow-hidden" style={{ background: 'rgba(17, 17, 17, 0.8)' }}
               >
                 <Image
                   src={image}
@@ -222,14 +234,14 @@ export default function ImageUpload({
                       e.stopPropagation()
                       removeImage(index)
                     }}
-                    className="bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition-colors duration-200"
+                    className="rounded-full p-2 transition-colors duration-200" style={{ background: 'rgba(255, 255, 255, 0.9)', color: '#000000' }}
                   >
                     <X size={16} />
                   </button>
                 </div>
 
                 {index === 0 && (
-                  <div className="absolute top-2 left-2 bg-[#ff385c] text-white text-xs px-2 py-1 rounded-full font-medium">
+                  <div className="absolute top-2 left-2 text-xs px-2 py-1 rounded-full font-medium" style={{ background: 'rgba(255, 255, 255, 0.9)', color: '#000000' }}>
                     Principal
                   </div>
                 )}
@@ -241,8 +253,8 @@ export default function ImageUpload({
 
       {images.length === 0 && (
         <div className="text-center py-8">
-          <ImageIcon size={48} className="mx-auto text-gray-300 mb-4" />
-          <p className="text-gray-500">No hay imágenes subidas aún</p>
+          <ImageIcon size={48} className="mx-auto mb-4" style={{ color: '#666666' }} />
+          <p style={{ color: '#a3a3a3' }}>No hay imágenes subidas aún</p>
         </div>
       )}
     </div>

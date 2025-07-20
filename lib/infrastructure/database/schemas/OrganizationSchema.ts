@@ -24,6 +24,38 @@ export interface OrganizationDocument extends Document {
       newPropertyNotifications: boolean
       inquiryNotifications: boolean
     }
+    maxProperties?: number
+    allowBranding?: boolean
+    allowAnalytics?: boolean
+    allowAPI?: boolean
+    allowMultiUser?: boolean
+  }
+  credits: {
+    properties: {
+      total: number
+      used: number
+      remaining: number
+    }
+    premiumFeatures: {
+      virtualTours: number
+      professionalPhotos: number
+      marketAnalysis: number
+      featuredListings: number
+    }
+    serviceCredits: {
+      photography: number
+      legal: number
+      virtualTour: number
+      homeStaging: number
+      marketAnalysis: number
+      documentation: number
+    }
+  }
+  metadata?: {
+    isPaymentUpgrade?: boolean
+    upgradedAt?: Date
+    userEmail?: string
+    planFeatures?: any
   }
   createdAt: Date
   updatedAt: Date
@@ -57,16 +89,55 @@ const OrganizationSchema = new Schema<OrganizationDocument>({
     requireApproval: { type: Boolean, default: false },
     customDomain: { type: String },
     branding: {
-      logoUrl: { type: String },
-      primaryColor: { type: String },
-      secondaryColor: { type: String },
-      customCss: { type: String }
+      type: {
+        logoUrl: { type: String, default: '' },
+        primaryColor: { type: String, default: '#ff385c' },
+        secondaryColor: { type: String, default: '#ff6b8a' },
+        customCss: { type: String, default: '' }
+      },
+      default: {}
     },
     notifications: {
-      emailNotifications: { type: Boolean, default: true },
-      newPropertyNotifications: { type: Boolean, default: true },
-      inquiryNotifications: { type: Boolean, default: true }
+      type: {
+        emailNotifications: { type: Boolean, default: true },
+        newPropertyNotifications: { type: Boolean, default: true },
+        inquiryNotifications: { type: Boolean, default: true }
+      },
+      default: {}
+    },
+    // Extended settings for paid plans
+    maxProperties: { type: Number, default: 5 },
+    allowBranding: { type: Boolean, default: false },
+    allowAnalytics: { type: Boolean, default: false },
+    allowAPI: { type: Boolean, default: false },
+    allowMultiUser: { type: Boolean, default: false }
+  },
+  credits: {
+    properties: {
+      total: { type: Number, default: 5 },
+      used: { type: Number, default: 0 },
+      remaining: { type: Number, default: 5 }
+    },
+    premiumFeatures: {
+      virtualTours: { type: Number, default: 0 },
+      professionalPhotos: { type: Number, default: 0 },
+      marketAnalysis: { type: Number, default: 0 },
+      featuredListings: { type: Number, default: 0 }
+    },
+    serviceCredits: {
+      photography: { type: Number, default: 0 },
+      legal: { type: Number, default: 0 },
+      virtualTour: { type: Number, default: 0 },
+      homeStaging: { type: Number, default: 0 },
+      marketAnalysis: { type: Number, default: 0 },
+      documentation: { type: Number, default: 0 }
     }
+  },
+  metadata: {
+    isPaymentUpgrade: { type: Boolean, default: false },
+    upgradedAt: { type: Date },
+    userEmail: { type: String },
+    planFeatures: { type: Schema.Types.Mixed }
   },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }

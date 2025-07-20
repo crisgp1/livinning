@@ -9,7 +9,7 @@ export const CreatePropertyDTOSchema = z.object({
     currency: z.string().length(3, 'Currency must be 3 characters').default('EUR')
   }),
   propertyType: z.nativeEnum(PropertyTypeEnum, {
-    errorMap: () => ({ message: 'Invalid property type' })
+    message: 'Invalid property type'
   }),
   address: z.object({
     street: z.string().min(5, 'Street address is required'),
@@ -20,7 +20,8 @@ export const CreatePropertyDTOSchema = z.object({
     coordinates: z.object({
       latitude: z.number().min(-90).max(90),
       longitude: z.number().min(-180).max(180)
-    }).optional()
+    }).optional(),
+    displayPrivacy: z.boolean().default(false)
   }),
   features: z.object({
     bedrooms: z.number().min(0, 'Bedrooms cannot be negative').max(20, 'Too many bedrooms'),

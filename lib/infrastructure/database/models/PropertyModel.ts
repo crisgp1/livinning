@@ -1,0 +1,1 @@
+export { PropertyModel as default } from '../schemas/PropertySchema'

@@ -4,41 +4,43 @@ import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
 import { gsap } from 'gsap'
-import { z } from 'zod'
-import { ArrowLeft, ArrowRight, Home, MapPin, Euro, Camera, FileText, CheckCircle } from 'lucide-react'
+import { motion } from 'framer-motion'
 import Navigation from '@/components/Navigation'
 import ImageUpload from '@/components/ImageUpload'
+import LocationAutocomplete from '@/components/LocationAutocomplete'
 import { PropertyTypeEnum } from '@/lib/domain/value-objects/PropertyType'
+import { useToast } from '@/components/Toast'
 
 const steps = [
-  { id: 1, title: 'Información Básica', icon: Home },
-  { id: 2, title: 'Ubicación', icon: MapPin },
-  { id: 3, title: 'Precio y Características', icon: Euro },
-  { id: 4, title: 'Fotos', icon: Camera },
-  { id: 5, title: 'Descripción', icon: FileText },
-  { id: 6, title: 'Revisión', icon: CheckCircle }
+  { id: 1, title: 'Información' },
+  { id: 2, title: 'Ubicación' },
+  { id: 3, title: 'Detalles' },
+  { id: 4, title: 'Fotos' },
+  { id: 5, title: 'Descripción' },
+  { id: 6, title: 'Revisión' }
 ]
 
 const propertyTypes = [
-  { value: PropertyTypeEnum.VILLA, label: 'Villa', description: 'Casa independiente de lujo' },
-  { value: PropertyTypeEnum.PENTHOUSE, label: 'Penthouse', description: 'Último piso con terraza' },
-  { value: PropertyTypeEnum.APARTMENT, label: 'Apartamento', description: 'Vivienda en edificio' },
-  { value: PropertyTypeEnum.HOUSE, label: 'Casa', description: 'Vivienda unifamiliar' },
-  { value: PropertyTypeEnum.LOFT, label: 'Loft', description: 'Espacio abierto y moderno' },
-  { value: PropertyTypeEnum.TOWNHOUSE, label: 'Casa Adosada', description: 'Casa conectada a otras' },
-  { value: PropertyTypeEnum.STUDIO, label: 'Estudio', description: 'Espacio compacto' },
-  { value: PropertyTypeEnum.DUPLEX, label: 'Dúplex', description: 'Vivienda de dos plantas' }
+  { value: PropertyTypeEnum.VILLA, label: 'Villa' },
+  { value: PropertyTypeEnum.PENTHOUSE, label: 'Penthouse' },
+  { value: PropertyTypeEnum.APARTMENT, label: 'Departamento' },
+  { value: PropertyTypeEnum.HOUSE, label: 'Casa' },
+  { value: PropertyTypeEnum.LOFT, label: 'Loft' },
+  { value: PropertyTypeEnum.TOWNHOUSE, label: 'Townhouse' },
+  { value: PropertyTypeEnum.STUDIO, label: 'Estudio' },
+  { value: PropertyTypeEnum.DUPLEX, label: 'Dúplex' }
 ]
 
 const amenities = [
-  'Piscina', 'Jardín', 'Garaje', 'Terraza', 'Balcón', 'Aire acondicionado',
-  'Calefacción', 'Chimenea', 'Ascensor', 'Trastero', 'Gimnasio', 'Portero',
-  'Seguridad 24h', 'Zona comunitaria', 'Barbacoa', 'Spa', 'Sala de juegos'
+  'Alberca', 'Jardín', 'Estacionamiento', 'Terraza', 'Balcón', 'Aire acondicionado',
+  'Calefacción', 'Chimenea', 'Elevador', 'Bodega', 'Gimnasio', 'Portero',
+  'Seguridad 24h', 'Áreas comunes', 'Asador', 'Spa', 'Sala de juegos'
 ]
 
 export default function PublishProperty() {
   const { user, isLoaded } = useUser()
   const router = useRouter()
+  const { showToast } = useToast()
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
   
@@ -53,11 +55,12 @@ export default function PublishProperty() {
       street: '',
       city: '',
       state: '',
-      country: 'España',
+      country: 'México',
       postalCode: '',
-      coordinates: { latitude: 0, longitude: 0 }
+      coordinates: { latitude: 0, longitude: 0 },
+      displayPrivacy: false
     },
-    price: { amount: 0, currency: 'EUR' },
+    price: { amount: 0, currency: 'USD' },
     features: {
       bedrooms: 1,
       bathrooms: 1,
@@ -80,7 +83,6 @@ export default function PublishProperty() {
   }, [user, isLoaded, router])
 
   useEffect(() => {
-    // Animate step change
     if (stepRef.current) {
       gsap.fromTo(stepRef.current,
         { x: 50, opacity: 0 },
@@ -88,7 +90,6 @@ export default function PublishProperty() {
       )
     }
 
-    // Update progress bar
     if (progressRef.current) {
       const progress = (currentStep / steps.length) * 100
       gsap.to(progressRef.current, {
@@ -134,6 +135,8 @@ export default function PublishProperty() {
   const nextStep = () => {
     if (validateStep(currentStep)) {
       setCurrentStep(prev => Math.min(prev + 1, steps.length))
+    } else {
+      showToast('Por favor completa todos los campos requeridos', 'warning')
     }
   }
 
@@ -145,6 +148,7 @@ export default function PublishProperty() {
     if (!validateStep(5)) return
 
     setIsSubmitting(true)
+    showToast('Publicando propiedad...', 'info')
 
     try {
       const response = await fetch('/api/properties', {
@@ -157,7 +161,7 @@ export default function PublishProperty() {
 
       if (result.success) {
         setCurrentStep(6)
-        // Animate success
+        showToast('¡Propiedad publicada exitosamente!', 'success')
         setTimeout(() => {
           router.push(`/properties/${result.data.id}`)
         }, 2000)
@@ -166,7 +170,7 @@ export default function PublishProperty() {
       }
     } catch (error) {
       console.error('Submit error:', error)
-      alert('Error al publicar la propiedad. Inténtalo de nuevo.')
+      showToast('Error al publicar la propiedad. Inténtalo de nuevo.', 'error')
     } finally {
       setIsSubmitting(false)
     }
@@ -186,224 +190,234 @@ export default function PublishProperty() {
 
   if (!isLoaded || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ff385c]"></div>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0a0a' }}>
+        <div className="loading-spinner"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ background: '#0a0a0a' }}>
       <Navigation />
       
-      <main className="pt-20">
-        <div className="section-container py-8">
+      <main className="pt-24 pb-16">
+        <div className="max-w-4xl mx-auto px-6">
+          
           {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-              Publica tu Propiedad
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-light mb-4" style={{ color: '#ffffff' }}>
+              Publicar Propiedad
             </h1>
-            <p className="text-lg text-gray-600">
-              Completa los siguientes pasos para publicar tu propiedad
+            <p className="text-lg" style={{ color: '#666666' }}>
+              Completa la información de tu propiedad
             </p>
           </div>
 
-          {/* Progress Bar */}
-          <div className="mb-8">
-            <div className="flex justify-between items-center mb-4">
+          {/* Progress */}
+          <div className="mb-12">
+            <div className="flex justify-between items-center mb-6">
               {steps.map((step) => (
                 <div
                   key={step.id}
                   className={`flex flex-col items-center ${
-                    step.id <= currentStep ? 'text-[#ff385c]' : 'text-gray-400'
+                    step.id <= currentStep ? 'opacity-100' : 'opacity-40'
                   }`}
                 >
                   <div
-                    className={`w-10 h-10 rounded-full border-2 flex items-center justify-center mb-2 transition-colors duration-300 ${
+                    className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 transition-all duration-300 ${
                       step.id <= currentStep
-                        ? 'border-[#ff385c] bg-[#ff385c] text-white'
-                        : 'border-gray-300 bg-white'
+                        ? 'bg-white text-black'
+                        : 'border border-gray-600 text-gray-600'
                     }`}
                   >
-                    <step.icon size={16} />
+                    <div className="w-1 h-1 rounded-full bg-current"></div>
                   </div>
-                  <span className="text-xs font-medium text-center hidden md:block">
+                  <span className="text-xs font-medium" style={{ color: step.id <= currentStep ? '#ffffff' : '#666666' }}>
                     {step.title}
                   </span>
                 </div>
               ))}
             </div>
             
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-gray-800 rounded-full h-1">
               <div
                 ref={progressRef}
-                className="bg-[#ff385c] h-2 rounded-full transition-all duration-500"
+                className="bg-white h-1 rounded-full transition-all duration-500"
                 style={{ width: `${(currentStep / steps.length) * 100}%` }}
               />
             </div>
           </div>
 
-          {/* Form Steps */}
+          {/* Form */}
           <div className="max-w-2xl mx-auto">
-            <div ref={stepRef} className="bg-white rounded-xl shadow-lg p-8">
+            <motion.div 
+              ref={stepRef} 
+              className="glass-card p-8"
+              key={currentStep}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              
               {currentStep === 1 && (
-                <div className="space-y-6">
-                  <h2 className="text-2xl font-bold text-gray-800 mb-6">Información Básica</h2>
-                  
+                <div className="space-y-8">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Título de la propiedad *
+                    <label className="block text-sm font-medium mb-3" style={{ color: '#ffffff' }}>
+                      Título
                     </label>
                     <input
                       type="text"
                       value={formData.title}
                       onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                      className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff385c] ${
-                        errors.title ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                      placeholder="Ej. Villa moderna con vistas al mar"
+                      className="w-full px-4 py-3 rounded-lg font-light transition-all duration-300"
+                      style={{ 
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: '#ffffff'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = '#ffffff'
+                        e.target.style.background = 'rgba(255, 255, 255, 0.1)'
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'
+                        e.target.style.background = 'rgba(255, 255, 255, 0.05)'
+                      }}
+                      placeholder="Casa moderna en zona residencial"
                     />
-                    {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
+                    {errors.title && <p className="text-red-400 text-sm mt-2">{errors.title}</p>}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Tipo de propiedad *
+                    <label className="block text-sm font-medium mb-3" style={{ color: '#ffffff' }}>
+                      Tipo de propiedad
                     </label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                       {propertyTypes.map((type) => (
                         <button
                           key={type.value}
                           type="button"
                           onClick={() => setFormData(prev => ({ ...prev, propertyType: type.value }))}
-                          className={`p-4 border rounded-lg text-left transition-all duration-200 hover:border-[#ff385c] ${
+                          className={`p-4 rounded-lg text-center transition-all duration-300 ${
                             formData.propertyType === type.value
-                              ? 'border-[#ff385c] bg-red-50'
-                              : 'border-gray-300'
+                              ? 'bg-white text-black'
+                              : 'bg-gray-800/50 text-gray-400 hover:bg-gray-800'
                           }`}
                         >
-                          <div className="font-medium text-gray-800">{type.label}</div>
-                          <div className="text-sm text-gray-500">{type.description}</div>
+                          <div className="text-sm font-medium">{type.label}</div>
                         </button>
                       ))}
                     </div>
-                    {errors.propertyType && <p className="text-red-500 text-sm mt-1">{errors.propertyType}</p>}
+                    {errors.propertyType && <p className="text-red-400 text-sm mt-2">{errors.propertyType}</p>}
                   </div>
                 </div>
               )}
 
               {currentStep === 2 && (
-                <div className="space-y-6">
-                  <h2 className="text-2xl font-bold text-gray-800 mb-6">Ubicación</h2>
-                  
+                <div className="space-y-8">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Dirección *
+                    <label className="block text-sm font-medium mb-3" style={{ color: '#ffffff' }}>
+                      Dirección
                     </label>
-                    <input
-                      type="text"
-                      value={formData.address.street}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        address: { ...prev.address, street: e.target.value }
-                      }))}
-                      className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff385c] ${
-                        errors.street ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                      placeholder="Calle, número, piso..."
+                    <LocationAutocomplete
+                      onLocationSelect={(location) => {
+                        setFormData(prev => ({
+                          ...prev,
+                          address: {
+                            ...prev.address,
+                            ...location
+                          }
+                        }))
+                      }}
+                      placeholder="Buscar dirección..."
                     />
-                    {errors.street && <p className="text-red-500 text-sm mt-1">{errors.street}</p>}
+                    {errors.street && <p className="text-red-400 text-sm mt-2">{errors.street}</p>}
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Ciudad *
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.address.city}
-                        onChange={(e) => setFormData(prev => ({
-                          ...prev,
-                          address: { ...prev.address, city: e.target.value }
-                        }))}
-                        className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff385c] ${
-                          errors.city ? 'border-red-500' : 'border-gray-300'
-                        }`}
-                        placeholder="Madrid, Barcelona..."
-                      />
-                      {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
+                  {formData.address.street && (
+                    <div className="p-4 rounded-lg" style={{ background: 'rgba(255, 255, 255, 0.05)' }}>
+                      <div className="text-sm font-medium mb-2" style={{ color: '#ffffff' }}>
+                        Dirección seleccionada
+                      </div>
+                      <div className="text-sm" style={{ color: '#a3a3a3' }}>
+                        {formData.address.street}, {formData.address.city}, {formData.address.state}
+                      </div>
                     </div>
+                  )}
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Provincia *
-                      </label>
+                  <div className="flex items-center gap-3">
+                    <div className="w-1 h-1 rounded-full bg-white opacity-60"></div>
+                    <label className="flex items-center gap-2 cursor-pointer">
                       <input
-                        type="text"
-                        value={formData.address.state}
+                        type="checkbox"
+                        checked={formData.address.displayPrivacy}
                         onChange={(e) => setFormData(prev => ({
                           ...prev,
-                          address: { ...prev.address, state: e.target.value }
+                          address: {
+                            ...prev.address,
+                            displayPrivacy: e.target.checked
+                          }
                         }))}
-                        className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff385c] ${
-                          errors.state ? 'border-red-500' : 'border-gray-300'
-                        }`}
-                        placeholder="Madrid, Cataluña..."
+                        className="sr-only"
                       />
-                      {errors.state && <p className="text-red-500 text-sm mt-1">{errors.state}</p>}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Código Postal *
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.address.postalCode}
-                        onChange={(e) => setFormData(prev => ({
-                          ...prev,
-                          address: { ...prev.address, postalCode: e.target.value }
-                        }))}
-                        className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff385c] ${
-                          errors.postalCode ? 'border-red-500' : 'border-gray-300'
-                        }`}
-                        placeholder="28001, 08001..."
-                      />
-                      {errors.postalCode && <p className="text-red-500 text-sm mt-1">{errors.postalCode}</p>}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        País
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.address.country}
-                        onChange={(e) => setFormData(prev => ({
-                          ...prev,
-                          address: { ...prev.address, country: e.target.value }
-                        }))}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff385c]"
-                        placeholder="España"
-                      />
-                    </div>
+                      <div className={`w-4 h-4 rounded border transition-all duration-300 ${
+                        formData.address.displayPrivacy ? 'bg-white border-white' : 'border-gray-600'
+                      }`}>
+                        {formData.address.displayPrivacy && (
+                          <div className="w-full h-full bg-black rounded-sm"></div>
+                        )}
+                      </div>
+                      <span className="text-sm" style={{ color: '#a3a3a3' }}>
+                        Mantener ubicación privada
+                      </span>
+                    </label>
                   </div>
                 </div>
               )}
 
               {currentStep === 3 && (
-                <div className="space-y-6">
-                  <h2 className="text-2xl font-bold text-gray-800 mb-6">Precio y Características</h2>
-                  
+                <div className="space-y-8">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Precio *
+                    <label className="block text-sm font-medium mb-3" style={{ color: '#ffffff' }}>
+                      Precio
                     </label>
+                    
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <button
+                        type="button"
+                        onClick={() => setFormData(prev => ({
+                          ...prev,
+                          price: { ...prev.price, currency: 'USD' }
+                        }))}
+                        className={`p-3 rounded-lg text-center transition-all duration-300 ${
+                          formData.price.currency === 'USD'
+                            ? 'bg-white text-black'
+                            : 'bg-gray-800/50 text-gray-400 hover:bg-gray-800'
+                        }`}
+                      >
+                        USD
+                      </button>
+                      
+                      <button
+                        type="button"
+                        onClick={() => setFormData(prev => ({
+                          ...prev,
+                          price: { ...prev.price, currency: 'MXN' }
+                        }))}
+                        className={`p-3 rounded-lg text-center transition-all duration-300 ${
+                          formData.price.currency === 'MXN'
+                            ? 'bg-white text-black'
+                            : 'bg-gray-800/50 text-gray-400 hover:bg-gray-800'
+                        }`}
+                      >
+                        MXN
+                      </button>
+                    </div>
+                    
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">€</span>
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                        {formData.price.currency === 'USD' ? '$' : 'MX$'}
+                      </span>
                       <input
                         type="number"
                         value={formData.price.amount || ''}
@@ -411,19 +425,30 @@ export default function PublishProperty() {
                           ...prev,
                           price: { ...prev.price, amount: Number(e.target.value) }
                         }))}
-                        className={`w-full pl-8 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff385c] ${
-                          errors.price ? 'border-red-500' : 'border-gray-300'
-                        }`}
-                        placeholder="750000"
+                        className="w-full pl-12 pr-4 py-3 rounded-lg font-light transition-all duration-300"
+                        style={{ 
+                          background: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          color: '#ffffff'
+                        }}
+                        onFocus={(e) => {
+                          e.target.style.borderColor = '#ffffff'
+                          e.target.style.background = 'rgba(255, 255, 255, 0.1)'
+                        }}
+                        onBlur={(e) => {
+                          e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'
+                          e.target.style.background = 'rgba(255, 255, 255, 0.05)'
+                        }}
+                        placeholder="0"
                       />
                     </div>
-                    {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
+                    {errors.price && <p className="text-red-400 text-sm mt-2">{errors.price}</p>}
                   </div>
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Dormitorios
+                      <label className="block text-sm font-medium mb-2" style={{ color: '#ffffff' }}>
+                        Habitaciones
                       </label>
                       <input
                         type="number"
@@ -433,12 +458,25 @@ export default function PublishProperty() {
                           ...prev,
                           features: { ...prev.features, bedrooms: Number(e.target.value) }
                         }))}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff385c]"
+                        className="w-full px-4 py-3 rounded-lg font-light transition-all duration-300"
+                        style={{ 
+                          background: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          color: '#ffffff'
+                        }}
+                        onFocus={(e) => {
+                          e.target.style.borderColor = '#ffffff'
+                          e.target.style.background = 'rgba(255, 255, 255, 0.1)'
+                        }}
+                        onBlur={(e) => {
+                          e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'
+                          e.target.style.background = 'rgba(255, 255, 255, 0.05)'
+                        }}
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium mb-2" style={{ color: '#ffffff' }}>
                         Baños
                       </label>
                       <input
@@ -449,13 +487,26 @@ export default function PublishProperty() {
                           ...prev,
                           features: { ...prev.features, bathrooms: Number(e.target.value) }
                         }))}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff385c]"
+                        className="w-full px-4 py-3 rounded-lg font-light transition-all duration-300"
+                        style={{ 
+                          background: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          color: '#ffffff'
+                        }}
+                        onFocus={(e) => {
+                          e.target.style.borderColor = '#ffffff'
+                          e.target.style.background = 'rgba(255, 255, 255, 0.1)'
+                        }}
+                        onBlur={(e) => {
+                          e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'
+                          e.target.style.background = 'rgba(255, 255, 255, 0.05)'
+                        }}
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        M² *
+                      <label className="block text-sm font-medium mb-2" style={{ color: '#ffffff' }}>
+                        M²
                       </label>
                       <input
                         type="number"
@@ -465,15 +516,26 @@ export default function PublishProperty() {
                           ...prev,
                           features: { ...prev.features, squareMeters: Number(e.target.value) }
                         }))}
-                        className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff385c] ${
-                          errors.squareMeters ? 'border-red-500' : 'border-gray-300'
-                        }`}
+                        className="w-full px-4 py-3 rounded-lg font-light transition-all duration-300"
+                        style={{ 
+                          background: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          color: '#ffffff'
+                        }}
+                        onFocus={(e) => {
+                          e.target.style.borderColor = '#ffffff'
+                          e.target.style.background = 'rgba(255, 255, 255, 0.1)'
+                        }}
+                        onBlur={(e) => {
+                          e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'
+                          e.target.style.background = 'rgba(255, 255, 255, 0.05)'
+                        }}
                       />
-                      {errors.squareMeters && <p className="text-red-500 text-sm mt-1">{errors.squareMeters}</p>}
+                      {errors.squareMeters && <p className="text-red-400 text-sm mt-2">{errors.squareMeters}</p>}
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium mb-2" style={{ color: '#ffffff' }}>
                         Parking
                       </label>
                       <input
@@ -484,25 +546,38 @@ export default function PublishProperty() {
                           ...prev,
                           features: { ...prev.features, parking: Number(e.target.value) || 0 }
                         }))}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff385c]"
+                        className="w-full px-4 py-3 rounded-lg font-light transition-all duration-300"
+                        style={{ 
+                          background: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          color: '#ffffff'
+                        }}
+                        onFocus={(e) => {
+                          e.target.style.borderColor = '#ffffff'
+                          e.target.style.background = 'rgba(255, 255, 255, 0.1)'
+                        }}
+                        onBlur={(e) => {
+                          e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'
+                          e.target.style.background = 'rgba(255, 255, 255, 0.05)'
+                        }}
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Características adicionales
+                    <label className="block text-sm font-medium mb-3" style={{ color: '#ffffff' }}>
+                      Características
                     </label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                       {amenities.map((amenity) => (
                         <button
                           key={amenity}
                           type="button"
                           onClick={() => toggleAmenity(amenity)}
-                          className={`p-3 border rounded-lg text-sm transition-all duration-200 ${
+                          className={`p-3 rounded-lg text-sm transition-all duration-300 ${
                             formData.features.amenities.includes(amenity)
-                              ? 'border-[#ff385c] bg-red-50 text-[#ff385c]'
-                              : 'border-gray-300 hover:border-[#ff385c]'
+                              ? 'bg-white text-black'
+                              : 'bg-gray-800/50 text-gray-400 hover:bg-gray-800'
                           }`}
                         >
                           {amenity}
@@ -514,39 +589,50 @@ export default function PublishProperty() {
               )}
 
               {currentStep === 4 && (
-                <div className="space-y-6">
-                  <h2 className="text-2xl font-bold text-gray-800 mb-6">Fotos de la Propiedad</h2>
-                  
-                  <ImageUpload
-                    onImagesChange={(images) => setFormData(prev => ({ ...prev, images }))}
-                    maxImages={10}
-                    existingImages={formData.images}
-                  />
-                  
-                  {errors.images && <p className="text-red-500 text-sm mt-1">{errors.images}</p>}
+                <div className="space-y-8">
+                  <div>
+                    <label className="block text-sm font-medium mb-3" style={{ color: '#ffffff' }}>
+                      Fotos
+                    </label>
+                    <ImageUpload
+                      onImagesChange={(images) => setFormData(prev => ({ ...prev, images }))}
+                      maxImages={10}
+                      existingImages={formData.images}
+                    />
+                    {errors.images && <p className="text-red-400 text-sm mt-2">{errors.images}</p>}
+                  </div>
                 </div>
               )}
 
               {currentStep === 5 && (
-                <div className="space-y-6">
-                  <h2 className="text-2xl font-bold text-gray-800 mb-6">Descripción</h2>
-                  
+                <div className="space-y-8">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Describe tu propiedad *
+                    <label className="block text-sm font-medium mb-3" style={{ color: '#ffffff' }}>
+                      Descripción
                     </label>
                     <textarea
-                      rows={8}
+                      rows={6}
                       value={formData.description}
                       onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                      className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff385c] resize-none ${
-                        errors.description ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                      placeholder="Describe las características únicas de tu propiedad, ubicación, vistas, acabados, etc. Mínimo 20 caracteres."
+                      className="w-full px-4 py-3 rounded-lg font-light transition-all duration-300 resize-none"
+                      style={{ 
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: '#ffffff'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = '#ffffff'
+                        e.target.style.background = 'rgba(255, 255, 255, 0.1)'
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'
+                        e.target.style.background = 'rgba(255, 255, 255, 0.05)'
+                      }}
+                      placeholder="Describe tu propiedad..."
                     />
                     <div className="flex justify-between items-center mt-2">
-                      {errors.description && <p className="text-red-500 text-sm">{errors.description}</p>}
-                      <p className="text-sm text-gray-500 ml-auto">
+                      {errors.description && <p className="text-red-400 text-sm">{errors.description}</p>}
+                      <p className="text-sm ml-auto" style={{ color: '#666666' }}>
                         {formData.description.length} caracteres
                       </p>
                     </div>
@@ -556,29 +642,42 @@ export default function PublishProperty() {
 
               {currentStep === 6 && (
                 <div className="text-center space-y-6">
-                  <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-                    <CheckCircle size={40} className="text-green-500" />
+                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto">
+                    <div className="w-3 h-3 rounded-full bg-black"></div>
                   </div>
                   
-                  <h2 className="text-2xl font-bold text-gray-800">¡Propiedad Creada!</h2>
-                  <p className="text-gray-600">
-                    Tu propiedad ha sido creada exitosamente. Serás redirigido a la página de la propiedad.
+                  <h2 className="text-2xl font-light" style={{ color: '#ffffff' }}>
+                    Propiedad Publicada
+                  </h2>
+                  <p style={{ color: '#666666' }}>
+                    Redirigiendo a tu propiedad...
                   </p>
                   
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#ff385c] mx-auto"></div>
+                  <div className="loading-spinner mx-auto"></div>
                 </div>
               )}
 
-              {/* Navigation Buttons */}
+              {/* Navigation */}
               {currentStep < 6 && (
-                <div className="flex justify-between pt-8 border-t">
+                <div className="flex justify-between pt-8 mt-8 border-t" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
                   <button
                     type="button"
                     onClick={prevStep}
                     disabled={currentStep === 1}
-                    className="flex items-center gap-2 px-6 py-3 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:border-[#ff385c] transition-colors duration-200"
+                    className="px-6 py-3 rounded-lg transition-all duration-300 disabled:opacity-50"
+                    style={{ 
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      color: '#ffffff'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (currentStep > 1) {
+                        (e.target as HTMLElement).style.background = 'rgba(255, 255, 255, 0.2)'
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.target as HTMLElement).style.background = 'rgba(255, 255, 255, 0.1)'
+                    }}
                   >
-                    <ArrowLeft size={20} />
                     Anterior
                   </button>
 
@@ -586,34 +685,30 @@ export default function PublishProperty() {
                     <button
                       type="button"
                       onClick={nextStep}
-                      className="flex items-center gap-2 px-6 py-3 bg-[#ff385c] text-white rounded-lg hover:bg-[#e5315a] transition-colors duration-200"
+                      className="btn-primary px-6 py-3"
                     >
                       Siguiente
-                      <ArrowRight size={20} />
                     </button>
                   ) : (
                     <button
                       type="button"
                       onClick={handleSubmit}
                       disabled={isSubmitting}
-                      className="flex items-center gap-2 px-6 py-3 bg-[#ff385c] text-white rounded-lg hover:bg-[#e5315a] disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                      className="btn-primary px-6 py-3 disabled:opacity-50"
                     >
                       {isSubmitting ? (
                         <>
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin inline-block mr-2" />
                           Publicando...
                         </>
                       ) : (
-                        <>
-                          Publicar Propiedad
-                          <CheckCircle size={20} />
-                        </>
+                        'Publicar'
                       )}
                     </button>
                   )}
                 </div>
               )}
-            </div>
+            </motion.div>
           </div>
         </div>
       </main>

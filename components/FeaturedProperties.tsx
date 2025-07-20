@@ -101,27 +101,27 @@ export default function FeaturedProperties() {
   }, [])
 
   return (
-    <section ref={sectionRef} className="py-20" style={{ backgroundColor: '#f7f7f7' }}>
+    <section ref={sectionRef} className="py-20" style={{ background: 'linear-gradient(135deg, #111111 0%, #1a1a1a 100%)' }}>
       <div className="section-container">
         <div className="flex flex-col md:flex-row items-end justify-between mb-12">
           <div>
-            <h2 ref={titleRef} className="text-3xl md:text-4xl font-bold mb-4" style={{ color: '#222222' }}>
+            <h2 ref={titleRef} className="text-3xl md:text-4xl font-bold mb-4 gradient-text">
               Propiedades Destacadas
             </h2>
-            <p className="text-lg" style={{ color: '#717171' }}>
+            <p className="text-lg" style={{ color: '#e5e5e5' }}>
               Propiedades cuidadosamente seleccionadas para compradores exigentes
             </p>
           </div>
           
-          <Link href="/properties">
+          <Link href="/propiedades">
             <motion.button
               className="flex items-center gap-2 font-medium mt-6 md:mt-0"
-              style={{ color: '#ff385c' }}
+              style={{ color: '#a3a3a3' }}
               whileHover={{ x: 5 }}
               transition={{ duration: 0.2 }}
             >
               Ver Todas las Propiedades
-              <ArrowRight size={20} />
+              <div className="w-1 h-1 rounded-full bg-current opacity-60"></div>
             </motion.button>
           </Link>
         </div>
