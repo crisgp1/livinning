@@ -1,260 +1,164 @@
 import Link from 'next/link'
-import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react'
+import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin } from 'lucide-react'
 
 export default function Footer() {
   return (
-    <footer className="text-white py-16" style={{ background: 'linear-gradient(135deg, #0a0a0a 0%, #111111 100%)' }}>
+    <footer className="bg-gray-100 text-gray-700 py-12 mt-16">
       <div className="section-container">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-          <div>
-            <h3 className="text-2xl font-bold mb-4">Livinning</h3>
-            <p className="mb-6" style={{ color: '#b3b3b3' }}>
-              Inmobiliaria redefinida. Experimenta propiedades excepcionales y servicio sin igual.
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
+          {/* Logo and Description */}
+          <div className="lg:col-span-2">
+            <h3 className="text-2xl font-bold text-primary mb-3">Livinning</h3>
+            <p className="text-gray-600 mb-4 text-sm">
+              La plataforma líder de bienes raíces en México. Encuentra tu hogar ideal con nosotros.
             </p>
-            <div className="flex space-x-4">
-              <Link href="#" className="transition-colors" style={{ color: '#999999' }} 
-                onMouseEnter={(e) => {
-                  const target = e.target as HTMLElement;
-                  target.style.setProperty('color', '#ffffff');
-                }} 
-                onMouseLeave={(e) => {
-                  const target = e.target as HTMLElement;
-                  target.style.setProperty('color', '#999999');
-                }}>
-                <Facebook size={20} />
+            {/* App Download Buttons */}
+            <div className="flex gap-3 mb-4">
+              <Link href="#" className="inline-block">
+                <img 
+                  src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" 
+                  alt="Google Play" 
+                  className="h-10"
+                />
               </Link>
-              <Link href="#" className="transition-colors" style={{ color: '#999999' }} 
-                onMouseEnter={(e) => {
-                  const target = e.target as HTMLElement;
-                  target.style.setProperty('color', '#ffffff');
-                }} 
-                onMouseLeave={(e) => {
-                  const target = e.target as HTMLElement;
-                  target.style.setProperty('color', '#999999');
-                }}>
-                <Twitter size={20} />
-              </Link>
-              <Link href="#" className="transition-colors" style={{ color: '#999999' }} 
-                onMouseEnter={(e) => {
-                  const target = e.target as HTMLElement;
-                  target.style.setProperty('color', '#ffffff');
-                }} 
-                onMouseLeave={(e) => {
-                  const target = e.target as HTMLElement;
-                  target.style.setProperty('color', '#999999');
-                }}>
-                <Instagram size={20} />
-              </Link>
-              <Link href="#" className="transition-colors" style={{ color: '#999999' }} 
-                onMouseEnter={(e) => {
-                  const target = e.target as HTMLElement;
-                  target.style.setProperty('color', '#ffffff');
-                }} 
-                onMouseLeave={(e) => {
-                  const target = e.target as HTMLElement;
-                  target.style.setProperty('color', '#999999');
-                }}>
-                <Linkedin size={20} />
+              <Link href="#" className="inline-block">
+                <img 
+                  src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" 
+                  alt="App Store" 
+                  className="h-10"
+                />
               </Link>
             </div>
           </div>
 
+          {/* Company Links */}
           <div>
-            <h4 className="font-semibold text-lg mb-4">Empresa</h4>
-            <ul className="space-y-2">
+            <h4 className="font-semibold text-gray-900 mb-4">Compañía</h4>
+            <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/about" className="transition-colors" style={{ color: '#b3b3b3' }} 
-                  onMouseEnter={(e) => {
-                    const target = e.target as HTMLElement;
-                    target.style.setProperty('color', '#ffffff');
-                  }} 
-                  onMouseLeave={(e) => {
-                    const target = e.target as HTMLElement;
-                    target.style.setProperty('color', '#b3b3b3');
-                  }}>
-                  Acerca de Nosotros
+                <Link href="/about" className="text-gray-600 hover:text-primary transition-colors">
+                  Acerca de
                 </Link>
               </li>
               <li>
-                <Link href="/team" className="transition-colors" style={{ color: '#b3b3b3' }} 
-                  onMouseEnter={(e) => {
-                    const target = e.target as HTMLElement;
-                    target.style.setProperty('color', '#ffffff');
-                  }} 
-                  onMouseLeave={(e) => {
-                    const target = e.target as HTMLElement;
-                    target.style.setProperty('color', '#b3b3b3');
-                  }}>
-                  Nuestro Equipo
-                </Link>
-              </li>
-              <li>
-                <Link href="/careers" className="transition-colors" style={{ color: '#b3b3b3' }} 
-                  onMouseEnter={(e) => {
-                    const target = e.target as HTMLElement;
-                    target.style.setProperty('color', '#ffffff');
-                  }} 
-                  onMouseLeave={(e) => {
-                    const target = e.target as HTMLElement;
-                    target.style.setProperty('color', '#b3b3b3');
-                  }}>
+                <Link href="/careers" className="text-gray-600 hover:text-primary transition-colors">
                   Carreras
                 </Link>
               </li>
               <li>
-                <Link href="/press" className="transition-colors" style={{ color: '#b3b3b3' }} 
-                  onMouseEnter={(e) => {
-                    const target = e.target as HTMLElement;
-                    target.style.setProperty('color', '#ffffff');
-                  }} 
-                  onMouseLeave={(e) => {
-                    const target = e.target as HTMLElement;
-                    target.style.setProperty('color', '#b3b3b3');
-                  }}>
+                <Link href="/press" className="text-gray-600 hover:text-primary transition-colors">
                   Prensa
                 </Link>
               </li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold text-lg mb-4">Servicios</h4>
-            <ul className="space-y-2">
               <li>
-                <Link href="/comprar" className="transition-colors" style={{ color: '#b3b3b3' }} 
-                  onMouseEnter={(e) => {
-                    const target = e.target as HTMLElement;
-                    target.style.setProperty('color', '#ffffff');
-                  }} 
-                  onMouseLeave={(e) => {
-                    const target = e.target as HTMLElement;
-                    target.style.setProperty('color', '#b3b3b3');
-                  }}>
-                  Comprar Propiedad
-                </Link>
-              </li>
-              <li>
-                <Link href="/vender" className="transition-colors" style={{ color: '#b3b3b3' }} 
-                  onMouseEnter={(e) => {
-                    const target = e.target as HTMLElement;
-                    target.style.setProperty('color', '#ffffff');
-                  }} 
-                  onMouseLeave={(e) => {
-                    const target = e.target as HTMLElement;
-                    target.style.setProperty('color', '#b3b3b3');
-                  }}>
-                  Vender Propiedad
-                </Link>
-              </li>
-              <li>
-                <Link href="/alquilar" className="transition-colors" style={{ color: '#b3b3b3' }} 
-                  onMouseEnter={(e) => {
-                    const target = e.target as HTMLElement;
-                    target.style.setProperty('color', '#ffffff');
-                  }} 
-                  onMouseLeave={(e) => {
-                    const target = e.target as HTMLElement;
-                    target.style.setProperty('color', '#b3b3b3');
-                  }}>
-                  Alquileres
-                </Link>
-              </li>
-              <li>
-                <Link href="/inversion" className="transition-colors" style={{ color: '#b3b3b3' }} 
-                  onMouseEnter={(e) => {
-                    const target = e.target as HTMLElement;
-                    target.style.setProperty('color', '#ffffff');
-                  }} 
-                  onMouseLeave={(e) => {
-                    const target = e.target as HTMLElement;
-                    target.style.setProperty('color', '#b3b3b3');
-                  }}>
-                  Inversión
+                <Link href="/investors" className="text-gray-600 hover:text-primary transition-colors">
+                  Inversionistas
                 </Link>
               </li>
             </ul>
           </div>
 
+          {/* Services */}
           <div>
-            <h4 className="font-semibold text-lg mb-4">Contacto</h4>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3" style={{ color: '#b3b3b3' }}>
-                <Mail size={18} />
-                <a href="mailto:hola@livinning.com" className="transition-colors" 
-                  onMouseEnter={(e) => {
-                    const target = e.target as HTMLElement;
-                    target.style.setProperty('color', '#ffffff');
-                  }} 
-                  onMouseLeave={(e) => {
-                    const target = e.target as HTMLElement;
-                    target.style.setProperty('color', '#b3b3b3');
-                  }}>
-                  hola@livinning.com
-                </a>
-              </div>
-              <div className="flex items-center gap-3" style={{ color: '#b3b3b3' }}>
-                <Phone size={18} />
-                <a href="tel:+34912345678" className="transition-colors" 
-                  onMouseEnter={(e) => {
-                    const target = e.target as HTMLElement;
-                    target.style.setProperty('color', '#ffffff');
-                  }} 
-                  onMouseLeave={(e) => {
-                    const target = e.target as HTMLElement;
-                    target.style.setProperty('color', '#b3b3b3');
-                  }}>
-                  +34 91 234 56 78
-                </a>
-              </div>
-              <div className="flex items-start gap-3" style={{ color: '#b3b3b3' }}>
-                <MapPin size={18} className="mt-1" />
-                <span>
-                  Calle Gran Vía, 123<br />
-                  Madrid, España 28013
-                </span>
-              </div>
-            </div>
+            <h4 className="font-semibold text-gray-900 mb-4">Servicios</h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link href="/propiedades" className="text-gray-600 hover:text-primary transition-colors">
+                  Comprar
+                </Link>
+              </li>
+              <li>
+                <Link href="/rent" className="text-gray-600 hover:text-primary transition-colors">
+                  Rentar
+                </Link>
+              </li>
+              <li>
+                <Link href="/publish" className="text-gray-600 hover:text-primary transition-colors">
+                  Vender
+                </Link>
+              </li>
+              <li>
+                <Link href="/servicios" className="text-gray-600 hover:text-primary transition-colors">
+                  Agentes
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Support */}
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-4">Soporte</h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link href="/help" className="text-gray-600 hover:text-primary transition-colors">
+                  Centro de Ayuda
+                </Link>
+              </li>
+              <li>
+                <Link href="/contacto" className="text-gray-600 hover:text-primary transition-colors">
+                  Contacto
+                </Link>
+              </li>
+              <li>
+                <Link href="/faq" className="text-gray-600 hover:text-primary transition-colors">
+                  Preguntas Frecuentes
+                </Link>
+              </li>
+              <li>
+                <Link href="/guides" className="text-gray-600 hover:text-primary transition-colors">
+                  Guías
+                </Link>
+              </li>
+            </ul>
           </div>
         </div>
 
-        <div className="border-t pt-8" style={{ borderColor: '#404040' }}>
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm" style={{ color: '#999999' }}>
-              &copy; 2024 Livinning. Todos los derechos reservados.
+        {/* Contact Info and Social Media */}
+        <div className="border-t border-gray-200 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+            {/* Contact Information */}
+            <div className="flex flex-wrap gap-6 text-sm text-gray-600">
+              <a href="mailto:contacto@livinning.com" className="flex items-center gap-2 hover:text-primary transition-colors">
+                <Mail size={16} />
+                contacto@livinning.com
+              </a>
+              <a href="tel:+525512345678" className="flex items-center gap-2 hover:text-primary transition-colors">
+                <Phone size={16} />
+                +52 55 1234 5678
+              </a>
+            </div>
+
+            {/* Social Media */}
+            <div className="flex items-center gap-4">
+              <Link href="#" className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm hover:shadow-md transition-shadow">
+                <Facebook size={18} className="text-gray-600" />
+              </Link>
+              <Link href="#" className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm hover:shadow-md transition-shadow">
+                <Twitter size={18} className="text-gray-600" />
+              </Link>
+              <Link href="#" className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm hover:shadow-md transition-shadow">
+                <Instagram size={18} className="text-gray-600" />
+              </Link>
+              <Link href="#" className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm hover:shadow-md transition-shadow">
+                <Youtube size={18} className="text-gray-600" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-8 pt-8 border-t border-gray-200">
+            <p className="text-sm text-gray-600">
+              © 2024 Livinning. Todos los derechos reservados.
             </p>
             <div className="flex gap-6 text-sm">
-              <Link href="/privacidad" className="transition-colors" style={{ color: '#999999' }} 
-                onMouseEnter={(e) => {
-                  const target = e.target as HTMLElement;
-                  target.style.setProperty('color', '#ffffff');
-                }} 
-                onMouseLeave={(e) => {
-                  const target = e.target as HTMLElement;
-                  target.style.setProperty('color', '#999999');
-                }}>
-                Política de Privacidad
+              <Link href="/privacy" className="text-gray-600 hover:text-primary transition-colors">
+                Privacidad
               </Link>
-              <Link href="/terminos" className="transition-colors" style={{ color: '#999999' }} 
-                onMouseEnter={(e) => {
-                  const target = e.target as HTMLElement;
-                  target.style.setProperty('color', '#ffffff');
-                }} 
-                onMouseLeave={(e) => {
-                  const target = e.target as HTMLElement;
-                  target.style.setProperty('color', '#999999');
-                }}>
-                Términos de Servicio
+              <Link href="/terms" className="text-gray-600 hover:text-primary transition-colors">
+                Términos
               </Link>
-              <Link href="/cookies" className="transition-colors" style={{ color: '#999999' }} 
-                onMouseEnter={(e) => {
-                  const target = e.target as HTMLElement;
-                  target.style.setProperty('color', '#ffffff');
-                }} 
-                onMouseLeave={(e) => {
-                  const target = e.target as HTMLElement;
-                  target.style.setProperty('color', '#999999');
-                }}>
-                Política de Cookies
+              <Link href="/sitemap" className="text-gray-600 hover:text-primary transition-colors">
+                Mapa del Sitio
               </Link>
             </div>
           </div>

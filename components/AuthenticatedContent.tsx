@@ -8,76 +8,105 @@ export default function AuthenticatedContent() {
   return (
     <>
       <SignedIn>
-        <section className="py-16" style={{ background: 'linear-gradient(135deg, #111111 0%, #1a1a1a 100%)' }}>
-          <div className="section-container">
+        <section className="py-16 relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-blue-50">
+          {/* Background decoration */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-20 left-20 w-72 h-72 bg-blue-400 rounded-full filter blur-3xl"></div>
+            <div className="absolute bottom-20 right-20 w-72 h-72 bg-purple-400 rounded-full filter blur-3xl"></div>
+          </div>
+          
+          <div className="section-container relative z-10">
             <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 gradient-text">
-                Tu Panel Personal
-              </h2>
-              <p className="text-lg" style={{ color: '#e5e5e5' }}>
-                Gestiona tus propiedades favoritas y búsquedas guardadas
-              </p>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+              >
+                <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
+                  Tu Panel Personal
+                </h2>
+                <p className="text-lg text-gray-600">
+                  Gestiona tus propiedades favoritas y búsquedas guardadas
+                </p>
+              </motion.div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <motion.div
-                className="property-card p-6 text-center"
+                className="relative group"
                 whileHover={{ y: -4 }}
                 transition={{ duration: 0.2 }}
               >
-                <div className="inline-flex p-4 rounded-full mb-4" style={{ background: 'rgba(255, 255, 255, 0.1)' }}>
-                  <div className="w-3 h-3 rounded-full bg-white opacity-60"></div>
+                <div className="h-full p-6 text-center glass-icon-container glass-hover rounded-2xl">
+                  <div className="inline-flex p-4 rounded-full mb-4 glass">
+                    <div className="p-3 rounded-full bg-gradient-to-br from-red-500 to-pink-500">
+                      <Heart className="w-6 h-6 text-white" />
+                    </div>
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2 text-gray-900">
+                    Favoritos
+                  </h3>
+                  <p className="text-2xl font-bold text-gray-900">12</p>
+                  <p className="text-sm text-gray-600">Propiedades guardadas</p>
                 </div>
-                <h3 className="text-lg font-semibold mb-2" style={{ color: '#ffffff' }}>
-                  Favoritos
-                </h3>
-                <p className="text-2xl font-bold" style={{ color: '#ffffff' }}>12</p>
-                <p className="text-sm" style={{ color: '#a3a3a3' }}>Propiedades guardadas</p>
               </motion.div>
 
               <motion.div
-                className="property-card p-6 text-center"
+                className="relative group"
                 whileHover={{ y: -4 }}
                 transition={{ duration: 0.2 }}
               >
-                <div className="inline-flex p-4 rounded-full mb-4" style={{ background: 'rgba(255, 255, 255, 0.1)' }}>
-                  <div className="w-3 h-3 rounded-full bg-white opacity-60"></div>
+                <div className="h-full p-6 text-center glass-icon-container glass-hover rounded-2xl">
+                  <div className="inline-flex p-4 rounded-full mb-4 glass">
+                    <div className="p-3 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500">
+                      <Search className="w-6 h-6 text-white" />
+                    </div>
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2 text-gray-900">
+                    Búsquedas
+                  </h3>
+                  <p className="text-2xl font-bold text-gray-900">5</p>
+                  <p className="text-sm text-gray-600">Búsquedas guardadas</p>
                 </div>
-                <h3 className="text-lg font-semibold mb-2" style={{ color: '#ffffff' }}>
-                  Búsquedas
-                </h3>
-                <p className="text-2xl font-bold" style={{ color: '#ffffff' }}>5</p>
-                <p className="text-sm" style={{ color: '#a3a3a3' }}>Búsquedas guardadas</p>
               </motion.div>
 
               <motion.div
-                className="property-card p-6 text-center"
+                className="relative group"
                 whileHover={{ y: -4 }}
                 transition={{ duration: 0.2 }}
               >
-                <div className="inline-flex p-4 rounded-full mb-4" style={{ background: 'rgba(255, 255, 255, 0.1)' }}>
-                  <div className="w-3 h-3 rounded-full bg-white opacity-60"></div>
+                <div className="h-full p-6 text-center glass-icon-container glass-hover rounded-2xl">
+                  <div className="inline-flex p-4 rounded-full mb-4 glass">
+                    <div className="p-3 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500">
+                      <Home className="w-6 h-6 text-white" />
+                    </div>
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2 text-gray-900">
+                    Mis Propiedades
+                  </h3>
+                  <p className="text-2xl font-bold text-gray-900">2</p>
+                  <p className="text-sm text-gray-600">Propiedades publicadas</p>
                 </div>
-                <h3 className="text-lg font-semibold mb-2" style={{ color: '#ffffff' }}>
-                  Mis Propiedades
-                </h3>
-                <p className="text-2xl font-bold" style={{ color: '#ffffff' }}>2</p>
-                <p className="text-sm" style={{ color: '#a3a3a3' }}>Propiedades publicadas</p>
               </motion.div>
 
               <motion.div
-                className="property-card p-6 text-center"
+                className="relative group"
                 whileHover={{ y: -4 }}
                 transition={{ duration: 0.2 }}
               >
-                <div className="inline-flex p-4 rounded-full mb-4" style={{ background: 'rgba(255, 255, 255, 0.1)' }}>
-                  <div className="w-3 h-3 rounded-full bg-white opacity-60"></div>
+                <div className="h-full p-6 text-center glass-icon-container glass-hover rounded-2xl">
+                  <div className="inline-flex p-4 rounded-full mb-4 glass">
+                    <div className="p-3 rounded-full bg-gradient-to-br from-yellow-500 to-orange-500">
+                      <Bell className="w-6 h-6 text-white" />
+                    </div>
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2 text-gray-900">
+                    Alertas
+                  </h3>
+                  <p className="text-2xl font-bold text-gray-900">8</p>
+                  <p className="text-sm text-gray-600">Notificaciones nuevas</p>
                 </div>
-                <h3 className="text-lg font-semibold mb-2" style={{ color: '#ffffff' }}>
-                  Alertas
-                </h3>
-                <p className="text-2xl font-bold" style={{ color: '#ffffff' }}>8</p>
-                <p className="text-sm" style={{ color: '#a3a3a3' }}>Notificaciones nuevas</p>
               </motion.div>
             </div>
 
@@ -96,12 +125,12 @@ export default function AuthenticatedContent() {
       </SignedIn>
 
       <SignedOut>
-        <section className="py-16" style={{ background: 'linear-gradient(135deg, #111111 0%, #1a1a1a 100%)' }}>
+        <section className="py-16 bg-gray-50">
           <div className="section-container text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 gradient-text">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
               Únete a Livinning
             </h2>
-            <p className="text-lg mb-8" style={{ color: '#e5e5e5' }}>
+            <p className="text-lg mb-8 text-gray-600">
               Crea tu cuenta gratuita y accede a funciones exclusivas para encontrar tu hogar ideal
             </p>
             

@@ -27,7 +27,7 @@ export default function Home() {
   }, [])
 
   return (
-    <div className="min-h-screen" style={{ background: '#0a0a0a' }}>
+    <div className="min-h-screen bg-white overflow-x-hidden">
       <Navigation />
       <Hero />
       <FeaturedProperties />

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Users, Building2, Settings, Shield, Plus, Edit, Trash2, Eye, X, LayoutDashboard, Home } from 'lucide-react'
+import { Users, Building2, Settings, Shield, Plus, Edit, Trash2, Eye, X, LayoutDashboard, Home, Menu } from 'lucide-react'
 import Navigation from '@/components/Navigation'
 
 interface Organization {
@@ -43,6 +43,7 @@ export default function SuperAdminDashboard() {
   const [organizations, setOrganizations] = useState<Organization[]>([])
   const [activeTab, setActiveTab] = useState('overview')
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false)
   const [createForm, setCreateForm] = useState<CreateOrgForm>({
     name: '',
     slug: '',
@@ -148,120 +149,186 @@ export default function SuperAdminDashboard() {
 
   if (!isLoaded || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0a0a' }}>
-        <div className="w-16 h-16 border-4 border-white border-opacity-20 border-t-white rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-gray-200 border-t-primary rounded-full animate-spin"></div>
       </div>
     )
   }
 
   if (!isSuperAdmin) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0a0a' }}>
-        <div className="text-center">
-          <div 
-            className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
-            style={{ 
-              background: 'rgba(255, 59, 48, 0.1)',
-              border: '1px solid rgba(255, 59, 48, 0.2)'
-            }}
-          >
-            <Shield className="w-10 h-10" style={{ color: '#ff3b30' }} />
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        {/* Background decorations */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-blue-200 to-cyan-200 rounded-full filter blur-3xl opacity-60"></div>
+          <div className="absolute top-80 -left-40 w-96 h-96 bg-gradient-to-br from-purple-200 to-pink-200 rounded-full filter blur-3xl opacity-60"></div>
+          <div className="absolute bottom-20 right-20 w-72 h-72 bg-gradient-to-br from-green-200 to-emerald-200 rounded-full filter blur-3xl opacity-40"></div>
+        </div>
+        
+        <div className="text-center relative z-10">
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center mx-auto mb-6 glass-icon-container">
+            <Shield className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-2xl font-light mb-2" style={{ color: '#ffffff' }}>Acceso Denegado</h1>
-          <p style={{ color: '#a3a3a3' }}>No tienes permisos de superadministrador</p>
+          <h1 className="text-2xl font-light mb-2 text-gray-900">Acceso Denegado</h1>
+          <p className="text-gray-600">No tienes permisos de superadministrador</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen" style={{ background: '#0a0a0a' }}>
+    <div className="min-h-screen bg-white">
       <Navigation />
       
-      <div className="pt-20 flex">
-        {/* Sidebar */}
-        <div className="w-64 h-screen sticky top-20">
-          <div className="glass-card m-4 p-6" style={{ height: 'calc(100vh - 6rem)' }}>
-            <div className="border-b pb-6 mb-6" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
-              <div className="flex items-center gap-3">
-                <div 
-                  className="w-10 h-10 rounded-lg flex items-center justify-center"
-                  style={{ 
-                    background: 'linear-gradient(135deg, #ffffff, #e5e5e5)',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
-                  }}
-                >
-                  <Shield className="w-6 h-6" style={{ color: '#000000' }} />
-                </div>
-                <div>
-                  <h2 className="font-light" style={{ color: '#ffffff' }}>Superadmin</h2>
-                  <p className="text-xs" style={{ color: '#a3a3a3' }}>Panel de Control</p>
-                </div>
+      {/* Background decorations */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-blue-200 to-cyan-200 rounded-full filter blur-3xl opacity-60"></div>
+        <div className="absolute top-80 -left-40 w-96 h-96 bg-gradient-to-br from-purple-200 to-pink-200 rounded-full filter blur-3xl opacity-60"></div>
+        <div className="absolute bottom-20 right-20 w-72 h-72 bg-gradient-to-br from-green-200 to-emerald-200 rounded-full filter blur-3xl opacity-40"></div>
+      </div>
+      
+      <div className="pt-20 relative z-10">
+        {/* Mobile Header */}
+        <div className="lg:hidden px-4 py-4 border-b border-gray-100">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                <Shield className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <h2 className="font-medium text-gray-900">Superadmin</h2>
+                <p className="text-xs text-gray-600">Panel de Control</p>
               </div>
             </div>
-
-            <nav className="space-y-2">
-              {[
-                { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
-                { id: 'organizations', label: 'Organizaciones', icon: Building2 },
-                { id: 'settings', label: 'Configuración', icon: Settings }
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200"
-                  style={{
-                    background: activeTab === tab.id 
-                      ? 'rgba(255, 255, 255, 0.2)' 
-                      : 'transparent',
-                    color: activeTab === tab.id ? '#ffffff' : '#a3a3a3',
-                    border: activeTab === tab.id 
-                      ? '1px solid rgba(255, 255, 255, 0.2)' 
-                      : '1px solid transparent'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (activeTab !== tab.id) {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (activeTab !== tab.id) {
-                      e.currentTarget.style.background = 'transparent'
-                    }
-                  }}
-                >
-                  <tab.icon size={20} />
-                  <span className="font-light">{tab.label}</span>
-                </button>
-              ))}
-            </nav>
-
-            <div className="absolute bottom-6 left-6 right-6">
-              <button 
-                onClick={() => router.push('/dashboard')}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  color: '#a3a3a3',
-                  border: '1px solid rgba(255, 255, 255, 0.1)'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
-                }}
-              >
-                <Home size={20} />
-                <span>Volver al Dashboard</span>
-              </button>
-            </div>
+            <button
+              onClick={() => setShowMobileSidebar(true)}
+              className="p-2 rounded-lg glass-icon-container text-gray-600 hover:text-gray-900"
+            >
+              <Menu size={20} />
+            </button>
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="flex-1 p-8">
-          <div className="max-w-7xl mx-auto">
+        <div className="flex">
+          {/* Desktop Sidebar */}
+          <div className="hidden lg:block w-64 h-screen sticky top-20">
+            <div className="glass-icon-container m-4 p-6" style={{ height: 'calc(100vh - 6rem)' }}>
+              <div className="border-b border-gray-100 pb-6 mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                    <Shield className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="font-light text-gray-900">Superadmin</h2>
+                    <p className="text-xs text-gray-600">Panel de Control</p>
+                  </div>
+                </div>
+              </div>
+
+              <nav className="space-y-2">
+                {[
+                  { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
+                  { id: 'organizations', label: 'Organizaciones', icon: Building2 },
+                  { id: 'settings', label: 'Configuración', icon: Settings }
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
+                      activeTab === tab.id 
+                        ? 'bg-primary text-white shadow-lg shadow-primary/20' 
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+                    }`}
+                  >
+                    <tab.icon size={20} />
+                    <span className="font-light">{tab.label}</span>
+                  </button>
+                ))}
+              </nav>
+
+              <div className="absolute bottom-6 left-6 right-6">
+                <button 
+                  onClick={() => router.push('/dashboard')}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                >
+                  <Home size={20} />
+                  <span>Volver al Dashboard</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile Sidebar Overlay */}
+          {showMobileSidebar && (
+            <div 
+              className="lg:hidden fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50"
+              onClick={() => setShowMobileSidebar(false)}
+            >
+              <motion.div 
+                initial={{ x: -300 }}
+                animate={{ x: 0 }}
+                exit={{ x: -300 }}
+                className="w-80 h-full glass-icon-container"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                        <Shield className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <h2 className="font-light text-gray-900">Superadmin</h2>
+                        <p className="text-xs text-gray-600">Panel de Control</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setShowMobileSidebar(false)}
+                      className="p-2 rounded-lg text-gray-500 hover:text-gray-700"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+
+                  <nav className="space-y-2 mb-6">
+                    {[
+                      { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
+                      { id: 'organizations', label: 'Organizaciones', icon: Building2 },
+                      { id: 'settings', label: 'Configuración', icon: Settings }
+                    ].map((tab) => (
+                      <button
+                        key={tab.id}
+                        onClick={() => {
+                          setActiveTab(tab.id)
+                          setShowMobileSidebar(false)
+                        }}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
+                          activeTab === tab.id 
+                            ? 'bg-primary text-white shadow-lg shadow-primary/20' 
+                            : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+                        }`}
+                      >
+                        <tab.icon size={20} />
+                        <span className="font-light">{tab.label}</span>
+                      </button>
+                    ))}
+                  </nav>
+
+                  <button 
+                    onClick={() => router.push('/dashboard')}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  >
+                    <Home size={20} />
+                    <span>Volver al Dashboard</span>
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+
+          {/* Main Content */}
+          <div className="flex-1 p-4 lg:p-8">
+            <div className="max-w-7xl mx-auto">
 
             {/* Dashboard Header */}
             {activeTab === 'overview' && (
@@ -270,8 +337,8 @@ export default function SuperAdminDashboard() {
                 animate={{ opacity: 1, y: 0 }}
                 className="mb-8"
               >
-                <h1 className="text-3xl font-light mb-2" style={{ color: '#ffffff' }}>Dashboard</h1>
-                <p style={{ color: '#a3a3a3' }}>Vista general del sistema y estadísticas</p>
+                <h1 className="text-3xl font-light mb-2 text-gray-900">Dashboard</h1>
+                <p className="text-gray-600">Vista general del sistema y estadísticas</p>
               </motion.div>
             )}
 
@@ -279,30 +346,22 @@ export default function SuperAdminDashboard() {
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-8 flex justify-between items-center"
+                className="mb-8"
               >
-                <div>
-                  <h1 className="text-3xl font-light mb-2" style={{ color: '#ffffff' }}>Organizaciones</h1>
-                  <p style={{ color: '#a3a3a3' }}>Gestiona todas las organizaciones del sistema</p>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div>
+                    <h1 className="text-2xl lg:text-3xl font-light mb-2 text-gray-900">Organizaciones</h1>
+                    <p className="text-gray-600">Gestiona todas las organizaciones del sistema</p>
+                  </div>
+                  <button
+                    onClick={() => setShowCreateModal(true)}
+                    className="btn-primary flex items-center gap-2 w-full sm:w-auto justify-center"
+                  >
+                    <Plus size={20} />
+                    <span className="hidden sm:inline">Nueva Organización</span>
+                    <span className="sm:hidden">Nueva</span>
+                  </button>
                 </div>
-                <button
-                  onClick={() => setShowCreateModal(true)}
-                  className="flex items-center gap-2 px-6 py-3 rounded-lg transition-all duration-200"
-                  style={{
-                    background: 'linear-gradient(135deg, #ffffff, #e5e5e5)',
-                    color: '#000000',
-                    border: '1px solid rgba(255, 255, 255, 0.2)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'linear-gradient(135deg, #e5e5e5, #d4d4d4)'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'linear-gradient(135deg, #ffffff, #e5e5e5)'
-                  }}
-                >
-                  <Plus size={20} />
-                  Nueva Organización
-                </button>
               </motion.div>
             )}
 
@@ -312,8 +371,8 @@ export default function SuperAdminDashboard() {
                 animate={{ opacity: 1, y: 0 }}
                 className="mb-8"
               >
-                <h1 className="text-3xl font-light mb-2" style={{ color: '#ffffff' }}>Configuración</h1>
-                <p style={{ color: '#a3a3a3' }}>Configuraciones del sistema y parámetros globales</p>
+                <h1 className="text-3xl font-light mb-2 text-gray-900">Configuración</h1>
+                <p className="text-gray-600">Configuraciones del sistema y parámetros globales</p>
               </motion.div>
             )}
 
@@ -322,101 +381,73 @@ export default function SuperAdminDashboard() {
               <div className="space-y-8">
                 {/* Stats Cards */}
                 {stats && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
                     <motion.div 
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.1 }}
-                      className="glass-card p-6 transition-all duration-200"
+                      className="glass-card p-6"
                       whileHover={{ y: -4 }}
                     >
-                      <div className="flex items-center gap-4">
-                        <div 
-                          className="p-3 rounded-lg"
-                          style={{ 
-                            background: 'linear-gradient(135deg, #666666, #525252)',
-                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
-                          }}
-                        >
-                          <Users className="h-6 w-6" style={{ color: '#ffffff' }} />
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500">
+                          <Users className="h-6 w-6 text-white" />
                         </div>
-                        <div>
-                          <p className="text-sm" style={{ color: '#a3a3a3' }}>Total Usuarios</p>
-                          <p className="text-2xl font-light" style={{ color: '#ffffff' }}>{stats.totalUsers}</p>
-                        </div>
+                        <span className="text-xs font-medium text-gray-500">Total</span>
                       </div>
+                      <div className="text-3xl font-light mb-1 text-gray-900">{stats.totalUsers}</div>
+                      <div className="text-sm text-gray-600">Usuarios</div>
                     </motion.div>
 
                     <motion.div 
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.2 }}
-                      className="glass-card p-6 transition-all duration-200"
+                      className="glass-card p-6"
                       whileHover={{ y: -4 }}
                     >
-                      <div className="flex items-center gap-4">
-                        <div 
-                          className="p-3 rounded-lg"
-                          style={{ 
-                            background: 'linear-gradient(135deg, #e5e5e5, #a3a3a3)',
-                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
-                          }}
-                        >
-                          <Building2 className="h-6 w-6" style={{ color: '#000000' }} />
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="p-3 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500">
+                          <Building2 className="h-6 w-6 text-white" />
                         </div>
-                        <div>
-                          <p className="text-sm" style={{ color: '#a3a3a3' }}>Organizaciones</p>
-                          <p className="text-2xl font-light" style={{ color: '#ffffff' }}>{stats.totalOrganizations}</p>
-                        </div>
+                        <span className="text-xs font-medium text-gray-500">Total</span>
                       </div>
+                      <div className="text-3xl font-light mb-1 text-gray-900">{stats.totalOrganizations}</div>
+                      <div className="text-sm text-gray-600">Organizaciones</div>
                     </motion.div>
 
                     <motion.div 
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.3 }}
-                      className="glass-card p-6 transition-all duration-200"
+                      className="glass-card p-6"
                       whileHover={{ y: -4 }}
                     >
-                      <div className="flex items-center gap-4">
-                        <div 
-                          className="p-3 rounded-lg"
-                          style={{ 
-                            background: 'linear-gradient(135deg, #ffffff, #e5e5e5)',
-                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
-                          }}
-                        >
-                          <Home className="h-6 w-6" style={{ color: '#000000' }} />
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500">
+                          <Home className="h-6 w-6 text-white" />
                         </div>
-                        <div>
-                          <p className="text-sm" style={{ color: '#a3a3a3' }}>Propiedades</p>
-                          <p className="text-2xl font-light" style={{ color: '#ffffff' }}>{stats.totalProperties}</p>
-                        </div>
+                        <span className="text-xs font-medium text-gray-500">Total</span>
                       </div>
+                      <div className="text-3xl font-light mb-1 text-gray-900">{stats.totalProperties}</div>
+                      <div className="text-sm text-gray-600">Propiedades</div>
                     </motion.div>
 
                     <motion.div 
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.4 }}
-                      className="glass-card p-6 transition-all duration-200"
+                      className="glass-card p-6"
                       whileHover={{ y: -4 }}
                     >
-                      <div className="flex items-center gap-4">
-                        <div 
-                          className="p-3 rounded-lg"
-                          style={{ 
-                            background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
-                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
-                          }}
-                        >
-                          <Shield className="h-6 w-6" style={{ color: '#000000' }} />
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="p-3 rounded-xl bg-gradient-to-br from-orange-500 to-red-500">
+                          <Shield className="h-6 w-6 text-white" />
                         </div>
-                        <div>
-                          <p className="text-sm" style={{ color: '#a3a3a3' }}>Org. Activas</p>
-                          <p className="text-2xl font-light" style={{ color: '#ffffff' }}>{stats.activeOrganizations}</p>
-                        </div>
+                        <span className="text-xs font-medium text-gray-500">Activas</span>
                       </div>
+                      <div className="text-3xl font-light mb-1 text-gray-900">{stats.activeOrganizations}</div>
+                      <div className="text-sm text-gray-600">Org. Activas</div>
                     </motion.div>
                   </div>
                 )}
@@ -426,30 +457,24 @@ export default function SuperAdminDashboard() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5 }}
-                  className="glass-card"
+                  className="glass-icon-container rounded-2xl"
                 >
-                  <div className="p-6 border-b" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
-                    <h3 className="text-lg font-light" style={{ color: '#ffffff' }}>Organizaciones Recientes</h3>
+                  <div className="p-6 border-b border-gray-100">
+                    <h3 className="text-lg font-light text-gray-900">Organizaciones Recientes</h3>
                   </div>
                   <div className="p-6">
                     {organizations.slice(0, 5).map((org) => (
-                      <div key={org.id} className="flex items-center justify-between py-3 border-b last:border-0" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+                      <div key={org.id} className="flex items-center justify-between py-3 border-b last:border-0 border-gray-100">
                         <div>
-                          <h4 className="font-light" style={{ color: '#ffffff' }}>{org.name}</h4>
-                          <p className="text-sm" style={{ color: '#a3a3a3' }}>{org.slug} • {org.plan}</p>
+                          <h4 className="font-light text-gray-900">{org.name}</h4>
+                          <p className="text-sm text-gray-600">{org.slug} • {org.plan}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="px-3 py-1 text-xs rounded-full font-medium" style={{
-                            background: org.status === 'active' 
-                              ? 'rgba(52, 211, 153, 0.2)' 
-                              : 'rgba(239, 68, 68, 0.2)',
-                            color: org.status === 'active' 
-                              ? '#34d399' 
-                              : '#ef4444',
-                            border: org.status === 'active' 
-                              ? '1px solid rgba(52, 211, 153, 0.3)' 
-                              : '1px solid rgba(239, 68, 68, 0.3)'
-                          }}>
+                          <span className={`px-3 py-1 text-xs rounded-full font-medium ${
+                            org.status === 'active' 
+                              ? 'bg-green-100 text-green-700 border border-green-200' 
+                              : 'bg-red-100 text-red-700 border border-red-200'
+                          }`}>
                             {org.status}
                           </span>
                         </div>
@@ -466,98 +491,73 @@ export default function SuperAdminDashboard() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="glass-card overflow-hidden"
+                className="glass-icon-container rounded-2xl overflow-hidden"
               >
-                <div className="overflow-x-auto">
+                {/* Desktop Table */}
+                <div className="hidden lg:block overflow-x-auto">
                   <table className="w-full">
-                    <thead className="border-b" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
-                      <tr>
-                        <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider" style={{ color: '#a3a3a3' }}>
+                    <thead>
+                      <tr className="border-b border-gray-100">
+                        <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">
                           Organización
                         </th>
-                        <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider" style={{ color: '#a3a3a3' }}>
+                        <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">
                           Plan
                         </th>
-                        <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider" style={{ color: '#a3a3a3' }}>
+                        <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">
                           Estado
                         </th>
-                        <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider" style={{ color: '#a3a3a3' }}>
+                        <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">
                           Creado
                         </th>
-                        <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider" style={{ color: '#a3a3a3' }}>
+                        <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">
                           Acciones
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+                    <tbody className="divide-y divide-gray-50">
                       {organizations.map((org) => (
-                        <tr key={org.id} className="transition-colors hover:bg-white hover:bg-opacity-5">
+                        <tr key={org.id} className="hover:bg-white/50 transition-colors">
                           <td className="px-6 py-4">
                             <div>
-                              <div className="font-light" style={{ color: '#ffffff' }}>{org.name}</div>
-                              <div className="text-sm" style={{ color: '#a3a3a3' }}>{org.slug}</div>
+                              <div className="font-medium text-gray-900">{org.name}</div>
+                              <div className="text-sm text-gray-600">{org.slug}</div>
                               {org.ownerEmail && (
-                                <div className="text-xs" style={{ color: '#71717a' }}>{org.ownerEmail}</div>
+                                <div className="text-xs text-gray-500">{org.ownerEmail}</div>
                               )}
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <span className="px-3 py-1 text-xs rounded-full font-medium" style={{
-                              background: org.plan === 'free' ? 'rgba(107, 114, 128, 0.2)' :
-                                         org.plan === 'basic' ? 'rgba(59, 130, 246, 0.2)' :
-                                         org.plan === 'premium' ? 'rgba(147, 51, 234, 0.2)' :
-                                         'rgba(245, 158, 11, 0.2)',
-                              color: org.plan === 'free' ? '#6b7280' :
-                                    org.plan === 'basic' ? '#3b82f6' :
-                                    org.plan === 'premium' ? '#9333ea' :
-                                    '#f59e0b',
-                              border: org.plan === 'free' ? '1px solid rgba(107, 114, 128, 0.3)' :
-                                     org.plan === 'basic' ? '1px solid rgba(59, 130, 246, 0.3)' :
-                                     org.plan === 'premium' ? '1px solid rgba(147, 51, 234, 0.3)' :
-                                     '1px solid rgba(245, 158, 11, 0.3)'
-                            }}>
+                            <span className={`px-3 py-1 text-xs rounded-full font-medium ${
+                              org.plan === 'free' ? 'bg-gray-100 text-gray-700 border border-gray-200' :
+                              org.plan === 'basic' ? 'bg-blue-100 text-blue-700 border border-blue-200' :
+                              org.plan === 'premium' ? 'bg-purple-100 text-purple-700 border border-purple-200' :
+                              'bg-yellow-100 text-yellow-700 border border-yellow-200'
+                            }`}>
                               {org.plan.toUpperCase()}
                             </span>
                           </td>
                           <td className="px-6 py-4">
-                            <span className="px-3 py-1 text-xs rounded-full font-medium" style={{
-                              background: org.status === 'active' 
-                                ? 'rgba(52, 211, 153, 0.2)' 
-                                : 'rgba(239, 68, 68, 0.2)',
-                              color: org.status === 'active' 
-                                ? '#34d399' 
-                                : '#ef4444',
-                              border: org.status === 'active' 
-                                ? '1px solid rgba(52, 211, 153, 0.3)' 
-                                : '1px solid rgba(239, 68, 68, 0.3)'
-                            }}>
+                            <span className={`px-3 py-1 text-xs rounded-full font-medium ${
+                              org.status === 'active' 
+                                ? 'bg-green-100 text-green-700 border border-green-200' 
+                                : 'bg-red-100 text-red-700 border border-red-200'
+                            }`}>
                               {org.status.toUpperCase()}
                             </span>
                           </td>
-                          <td className="px-6 py-4 text-sm" style={{ color: '#a3a3a3' }}>
+                          <td className="px-6 py-4 text-sm text-gray-600">
                             {new Date(org.createdAt).toLocaleDateString('es-ES')}
                           </td>
                           <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              <button className="p-2 rounded-lg transition-all duration-200" style={{
-                                background: 'rgba(59, 130, 246, 0.1)',
-                                color: '#3b82f6',
-                                border: '1px solid rgba(59, 130, 246, 0.2)'
-                              }}>
+                            <div className="flex items-center gap-2">
+                              <button className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">
                                 <Eye size={16} />
                               </button>
-                              <button className="p-2 rounded-lg transition-all duration-200" style={{
-                                background: 'rgba(107, 114, 128, 0.1)',
-                                color: '#6b7280',
-                                border: '1px solid rgba(107, 114, 128, 0.2)'
-                              }}>
+                              <button className="p-2 rounded-lg bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors">
                                 <Edit size={16} />
                               </button>
-                              <button className="p-2 rounded-lg transition-all duration-200" style={{
-                                background: 'rgba(239, 68, 68, 0.1)',
-                                color: '#ef4444',
-                                border: '1px solid rgba(239, 68, 68, 0.2)'
-                              }}>
+                              <button className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors">
                                 <Trash2 size={16} />
                               </button>
                             </div>
@@ -566,6 +566,56 @@ export default function SuperAdminDashboard() {
                       ))}
                     </tbody>
                   </table>
+                </div>
+
+                {/* Mobile Cards */}
+                <div className="lg:hidden divide-y divide-gray-50">
+                  {organizations.map((org) => (
+                    <div key={org.id} className="p-4 hover:bg-white/50 transition-colors">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900 mb-1">{org.name}</div>
+                          <div className="text-sm text-gray-600 mb-1">{org.slug}</div>
+                          {org.ownerEmail && (
+                            <div className="text-xs text-gray-500">{org.ownerEmail}</div>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 ml-4">
+                          <button className="p-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">
+                            <Eye size={14} />
+                          </button>
+                          <button className="p-1.5 rounded-lg bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors">
+                            <Edit size={14} />
+                          </button>
+                          <button className="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors">
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                            org.plan === 'free' ? 'bg-gray-100 text-gray-700 border border-gray-200' :
+                            org.plan === 'basic' ? 'bg-blue-100 text-blue-700 border border-blue-200' :
+                            org.plan === 'premium' ? 'bg-purple-100 text-purple-700 border border-purple-200' :
+                            'bg-yellow-100 text-yellow-700 border border-yellow-200'
+                          }`}>
+                            {org.plan.toUpperCase()}
+                          </span>
+                          <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                            org.status === 'active' 
+                              ? 'bg-green-100 text-green-700 border border-green-200' 
+                              : 'bg-red-100 text-red-700 border border-red-200'
+                          }`}>
+                            {org.status.toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {new Date(org.createdAt).toLocaleDateString('es-ES')}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </motion.div>
             )}
@@ -576,10 +626,10 @@ export default function SuperAdminDashboard() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="glass-card p-8"
+                className="glass-icon-container rounded-2xl p-8"
               >
-                <h2 className="text-xl font-light mb-4" style={{ color: '#ffffff' }}>Configuración del Sistema</h2>
-                <p style={{ color: '#a3a3a3' }}>Configuraciones del sistema próximamente...</p>
+                <h2 className="text-xl font-light mb-4 text-gray-900">Configuración del Sistema</h2>
+                <p className="text-gray-600">Configuraciones del sistema próximamente...</p>
               </motion.div>
             )}
 
@@ -589,21 +639,18 @@ export default function SuperAdminDashboard() {
 
       {/* Create Organization Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="glass-card w-full max-w-md"
+            className="glass-icon-container rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto"
           >
-            <div className="p-6 border-b" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+            <div className="p-6 border-b border-gray-100">
               <div className="flex justify-between items-center">
-                <h3 className="text-lg font-light" style={{ color: '#ffffff' }}>Nueva Organización</h3>
+                <h3 className="text-lg font-light text-gray-900">Nueva Organización</h3>
                 <button
                   onClick={() => setShowCreateModal(false)}
-                  className="transition-colors p-1 rounded-lg"
-                  style={{ color: '#a3a3a3' }}
-                  onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'}
-                  onMouseLeave={(e) => e.currentTarget.style.color = '#a3a3a3'}
+                  className="transition-colors p-1 rounded-lg text-gray-500 hover:text-gray-700"
                 >
                   <X size={24} />
                 </button>
@@ -612,66 +659,50 @@ export default function SuperAdminDashboard() {
 
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: '#a3a3a3' }}>
+                <label className="block text-sm font-medium mb-2 text-gray-700">
                   Nombre de la Organización *
                 </label>
                 <input
                   type="text"
                   value={createForm.name}
                   onChange={(e) => handleNameChange(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg transition-all duration-200"
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    color: '#ffffff'
-                  }}
+                  className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                   placeholder="Ej. Inmobiliaria XYZ"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: '#a3a3a3' }}>
+                <label className="block text-sm font-medium mb-2 text-gray-700">
                   Slug (URL) *
                 </label>
                 <input
                   type="text"
                   value={createForm.slug}
                   onChange={(e) => setCreateForm(prev => ({ ...prev, slug: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-lg transition-all duration-200"
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    color: '#ffffff'
-                  }}
+                  className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                   placeholder="inmobiliaria-xyz"
                 />
-                <p className="text-xs mt-1" style={{ color: '#71717a' }}>Solo letras minúsculas, números y guiones</p>
+                <p className="text-xs mt-1 text-gray-500">Solo letras minúsculas, números y guiones</p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: '#a3a3a3' }}>
+                <label className="block text-sm font-medium mb-2 text-gray-700">
                   ID del Propietario (Clerk User ID) *
                 </label>
                 <input
                   type="text"
                   value={createForm.ownerId}
                   onChange={(e) => setCreateForm(prev => ({ ...prev, ownerId: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-lg transition-all duration-200"
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    color: '#ffffff'
-                  }}
+                  className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                   placeholder="user_2..."
                 />
                 {user && (
-                  <div className="mt-2 p-2 rounded text-xs" style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
-                    <p className="mb-1" style={{ color: '#3b82f6' }}><strong>Tu ID:</strong> {user.id}</p>
+                  <div className="mt-2 p-3 rounded-lg bg-blue-50 border border-blue-200">
+                    <p className="mb-1 text-xs text-blue-700"><strong>Tu ID:</strong> {user.id}</p>
                     <button
                       type="button"
                       onClick={() => setCreateForm(prev => ({ ...prev, ownerId: user.id }))}
-                      className="underline transition-colors"
-                      style={{ color: '#3b82f6' }}
+                      className="text-xs text-blue-600 hover:text-blue-800 underline"
                     >
                       Usar mi ID
                     </button>
@@ -680,54 +711,39 @@ export default function SuperAdminDashboard() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: '#a3a3a3' }}>
+                <label className="block text-sm font-medium mb-2 text-gray-700">
                   Descripción
                 </label>
                 <textarea
                   value={createForm.description}
                   onChange={(e) => setCreateForm(prev => ({ ...prev, description: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-lg transition-all duration-200"
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    color: '#ffffff'
-                  }}
+                  className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 resize-none"
                   placeholder="Descripción de la organización..."
                   rows={3}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: '#a3a3a3' }}>
+                <label className="block text-sm font-medium mb-2 text-gray-700">
                   Plan
                 </label>
                 <select
                   value={createForm.plan}
                   onChange={(e) => setCreateForm(prev => ({ ...prev, plan: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-lg transition-all duration-200"
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    color: '#ffffff'
-                  }}
+                  className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                 >
-                  <option value="free" style={{ background: '#0a0a0a', color: '#ffffff' }}>Free</option>
-                  <option value="basic" style={{ background: '#0a0a0a', color: '#ffffff' }}>Basic</option>
-                  <option value="premium" style={{ background: '#0a0a0a', color: '#ffffff' }}>Premium</option>
-                  <option value="enterprise" style={{ background: '#0a0a0a', color: '#ffffff' }}>Enterprise</option>
+                  <option value="free">Free</option>
+                  <option value="basic">Basic</option>
+                  <option value="premium">Premium</option>
+                  <option value="enterprise">Enterprise</option>
                 </select>
               </div>
             </div>
 
-            <div className="p-6 border-t flex justify-end gap-3" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+            <div className="p-6 border-t border-gray-100 flex justify-end gap-3">
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="px-4 py-2 rounded-lg transition-colors"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  color: '#a3a3a3',
-                  border: '1px solid rgba(255, 255, 255, 0.1)'
-                }}
+                className="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
                 disabled={isCreating}
               >
                 Cancelar
@@ -735,16 +751,11 @@ export default function SuperAdminDashboard() {
               <button
                 onClick={handleCreateOrganization}
                 disabled={isCreating || !createForm.name || !createForm.slug || !createForm.ownerId}
-                className="px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                style={{
-                  background: 'linear-gradient(135deg, #ffffff, #e5e5e5)',
-                  color: '#000000',
-                  border: '1px solid rgba(255, 255, 255, 0.2)'
-                }}
+                className="btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isCreating ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     Creando...
                   </>
                 ) : (
@@ -756,5 +767,6 @@ export default function SuperAdminDashboard() {
         </div>
       )}
     </div>
+  </div>
   )
 }

@@ -190,14 +190,14 @@ export default function PublishProperty() {
 
   if (!isLoaded || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0a0a' }}>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="loading-spinner"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen" style={{ background: '#0a0a0a' }}>
+    <div className="min-h-screen bg-gray-50">
       <Navigation />
       
       <main className="pt-24 pb-16">

@@ -1,11 +1,10 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import gsap from 'gsap'
-import { Bed, Bath, Square, Heart, MapPin } from 'lucide-react'
+import { Bed, Bath, Square, Heart, MapPin, Camera } from 'lucide-react'
 
 interface PropertyCardProps {
   id: string
@@ -18,6 +17,7 @@ interface PropertyCardProps {
   image: string
   badge?: string | null
   index: number
+  images?: string[]
 }
 
 export default function PropertyCard({
@@ -30,158 +30,118 @@ export default function PropertyCard({
   sqft,
   image,
   badge,
-  index
+  index,
+  images = []
 }: PropertyCardProps) {
-  const cardRef = useRef<HTMLDivElement>(null)
-  const imageRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(cardRef.current, {
-        y: 50,
-        opacity: 0,
-        duration: 0.8,
-        delay: index * 0.1,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: cardRef.current,
-          start: 'top bottom-=100',
-          toggleActions: 'play none none reverse'
-        }
-      })
-
-      const handleMouseMove = (e: MouseEvent) => {
-        if (!cardRef.current || !imageRef.current) return
-        const rect = cardRef.current.getBoundingClientRect()
-        const x = e.clientX - rect.left
-        const y = e.clientY - rect.top
-        const centerX = rect.width / 2
-        const centerY = rect.height / 2
-        const rotateX = (y - centerY) / 20
-        const rotateY = (centerX - x) / 20
-
-        gsap.to(imageRef.current, {
-          rotationY: rotateY,
-          rotationX: rotateX,
-          transformPerspective: 1000,
-          duration: 0.5,
-          ease: 'power2.out'
-        })
-      }
-
-      const handleMouseLeave = () => {
-        if (!imageRef.current) return
-        gsap.to(imageRef.current, {
-          rotationY: 0,
-          rotationX: 0,
-          duration: 0.5,
-          ease: 'power2.out'
-        })
-      }
-
-      if (cardRef.current) {
-        cardRef.current.addEventListener('mousemove', handleMouseMove)
-        cardRef.current.addEventListener('mouseleave', handleMouseLeave)
-      }
-
-      return () => {
-        if (cardRef.current) {
-          cardRef.current.removeEventListener('mousemove', handleMouseMove)
-          cardRef.current.removeEventListener('mouseleave', handleMouseLeave)
-        }
-      }
-    }, cardRef)
-
-    return () => ctx.revert()
-  }, [index])
+  const [isFavorite, setIsFavorite] = useState(false)
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const allImages = [image, ...(images || [])]
 
   return (
     <motion.div
-      ref={cardRef}
-      className="property-card group cursor-pointer"
-      whileHover={{ y: -8 }}
-      transition={{ duration: 0.3 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: index * 0.1 }}
+      className="group"
     >
-      <Link href={`/properties/${id}`}>
-        <div ref={imageRef} className="relative h-72 overflow-hidden">
+      <Link href={`/properties/${id}`} className="block">
+        <div className="relative overflow-hidden rounded-2xl glass-icon-container h-full">
+          <div className="relative h-64 overflow-hidden rounded-t-xl">
           <Image
-            src={image}
+            src={allImages[currentImageIndex] || image}
             alt={title}
             fill
-            className="object-cover transition-transform duration-700 group-hover:scale-110"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           
           {badge && (
-            <div className="absolute top-4 left-4 text-white px-3 py-1 rounded-full text-xs font-medium" style={{ 
-              background: 'rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(8px)',
-              border: '1px solid rgba(255, 255, 255, 0.2)'
-            }}>
+            <div className="absolute top-3 left-3 px-3 py-1.5 rounded-full text-xs font-semibold bg-white/90 backdrop-blur-sm text-primary shadow-lg">
               {badge}
             </div>
           )}
           
-          <button className="absolute top-4 right-4 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110" style={{ background: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(8px)' }}>
-            <div className="w-2 h-2 rounded-full bg-white opacity-60"></div>
-          </button>
-        </div>
-
-        <div className="p-6">
-          <div className="flex items-start justify-between mb-2">
-            <h3 className="text-lg font-semibold" style={{ color: '#ffffff' }}>
-              {title}
-            </h3>
-          </div>
+          {allImages.length > 1 && (
+            <div className="absolute bottom-3 left-3 px-2.5 py-1.5 rounded-full text-xs flex items-center gap-1 bg-white/90 backdrop-blur-sm text-gray-700 shadow-lg">
+              <Camera size={14} />
+              <span>{allImages.length}</span>
+            </div>
+          )}
           
-          <div className="flex items-center gap-2 mb-4" style={{ color: '#a3a3a3' }}>
-            <div className="w-1 h-1 rounded-full bg-current opacity-60"></div>
-            <p className="text-sm">{location}</p>
+          <button 
+            onClick={(e) => {
+              e.preventDefault()
+              setIsFavorite(!isFavorite)
+            }}
+            className="absolute top-3 right-3 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-110"
+          >
+            <Heart 
+              size={20} 
+              className={`transition-all duration-200 ${
+                isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400 hover:text-red-500'
+              }`}
+            />
+          </button>
+
+          {/* Image Navigation Dots */}
+          {allImages.length > 1 && (
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1">
+              {allImages.slice(0, 5).map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setCurrentImageIndex(idx)
+                  }}
+                  className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${
+                    idx === currentImageIndex 
+                      ? 'bg-white w-4' 
+                      : 'bg-white/60'
+                  }`}
+                />
+              ))}
+            </div>
+          )}
           </div>
 
-          <div className="flex items-center gap-4 text-sm mb-4" style={{ color: '#a3a3a3' }}>
-            <div className="flex items-center gap-1">
-              <div className="w-1 h-1 rounded-full bg-current opacity-60"></div>
-              <span>{beds} Hab</span>
+          <div className="p-6 bg-white/50 backdrop-blur-sm">
+            <div className="mb-3">
+              <h3 className="text-2xl font-light text-gray-900">
+                ${price}
+              </h3>
             </div>
-            <div className="flex items-center gap-1">
-              <div className="w-1 h-1 rounded-full bg-current opacity-60"></div>
-              <span>{baths} Bañ</span>
+            
+            <div className="flex items-center gap-4 text-sm mb-3">
+              <div className="flex items-center gap-1.5">
+                <div className="p-1.5 rounded-lg bg-gray-50">
+                  <Bed size={14} className="text-gray-600" />
+                </div>
+                <span className="font-medium text-gray-700">{beds}</span>
+                <span className="text-gray-500">rec</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="p-1.5 rounded-lg bg-gray-50">
+                  <Bath size={14} className="text-gray-600" />
+                </div>
+                <span className="font-medium text-gray-700">{baths}</span>
+                <span className="text-gray-500">baños</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="p-1.5 rounded-lg bg-gray-50">
+                  <Square size={14} className="text-gray-600" />
+                </div>
+                <span className="font-medium text-gray-700">{sqft.toLocaleString()}</span>
+                <span className="text-gray-500">m²</span>
+              </div>
             </div>
-            <div className="flex items-center gap-1">
-              <div className="w-1 h-1 rounded-full bg-current opacity-60"></div>
-              <span>{sqft.toLocaleString()} m²</span>
-            </div>
-          </div>
 
-          <div className="flex items-center justify-between pt-4 border-t" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
-            <div className="text-xl font-bold" style={{ color: '#ffffff' }}>
-              €{price}
+            <h4 className="font-medium text-gray-900 mb-2 line-clamp-1">
+              {title}
+            </h4>
+            
+            <div className="flex items-center gap-1.5 text-sm text-gray-500">
+              <MapPin size={14} />
+              <p className="line-clamp-1">{location}</p>
             </div>
-            <motion.button
-              className="px-4 py-2 rounded-lg font-medium transition-all duration-300 text-sm"
-              style={{ 
-                background: 'transparent',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                color: '#a3a3a3'
-              }}
-              onMouseEnter={(e) => {
-                const target = e.target as HTMLElement
-                target.style.background = 'rgba(255, 255, 255, 0.1)'
-                target.style.color = '#ffffff'
-                target.style.borderColor = 'rgba(255, 255, 255, 0.3)'
-              }}
-              onMouseLeave={(e) => {
-                const target = e.target as HTMLElement
-                target.style.background = 'transparent'
-                target.style.color = '#a3a3a3'
-                target.style.borderColor = 'rgba(255, 255, 255, 0.2)'
-              }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Ver Detalles
-            </motion.button>
           </div>
         </div>
       </Link>

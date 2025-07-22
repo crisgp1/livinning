@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Navigation from '@/components/Navigation'
 import PropertyCard from '@/components/PropertyCard'
-import { Search, SlidersHorizontal, MapPin, Home, DollarSign } from 'lucide-react'
+import { Search, SlidersHorizontal, MapPin, Home, DollarSign, Sparkles, Filter } from 'lucide-react'
 
 interface Property {
   id: string
@@ -269,41 +269,40 @@ export default function PropertiesPage() {
   }, [searchTerm, filterType, filterStatus, priceRange, properties])
 
   return (
-    <div className="min-h-screen" style={{ background: '#0a0a0a' }}>
+    <div className="min-h-screen bg-white">
       <Navigation />
       
-      <main className="pt-20">
-        <div className="section-container py-16">
+      <main className="pt-20 relative">
+        {/* Luxury background gradients */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-50 rounded-full filter blur-3xl opacity-50"></div>
+          <div className="absolute top-80 -left-40 w-96 h-96 bg-purple-50 rounded-full filter blur-3xl opacity-50"></div>
+        </div>
+        
+        <div className="section-container py-16 relative z-10">
           {/* Header */}
           <div className="text-center mb-12">
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium mb-6"
-              style={{ 
-                background: 'rgba(255, 255, 255, 0.1)',
-                color: '#ffffff',
-                border: '1px solid rgba(255, 255, 255, 0.1)'
-              }}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium mb-6 glass-icon-container"
             >
-              <div className="w-1 h-1 rounded-full bg-white opacity-60"></div>
-              Explora Nuestras Propiedades
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span className="text-gray-700">Explora Nuestras Propiedades</span>
             </motion.div>
             <motion.h1 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-4xl md:text-5xl font-light mb-6"
-              style={{ color: '#ffffff' }}
+              className="text-4xl md:text-6xl font-light mb-6 text-gray-900"
             >
-              Encuentra tu <span className="gradient-text">hogar ideal</span>
+              Encuentra tu <span className="text-primary font-medium">hogar ideal</span>
             </motion.h1>
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-xl max-w-3xl mx-auto"
-              style={{ color: '#a3a3a3' }}
+              className="text-xl max-w-3xl mx-auto text-gray-600"
             >
               Descubre propiedades exclusivas en las mejores ubicaciones
             </motion.p>
@@ -314,37 +313,31 @@ export default function PropertiesPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="glass-card p-6 mb-8"
+            className="glass-icon-container rounded-2xl p-8 mb-8 shadow-lg"
           >
             <div className="flex flex-col lg:flex-row gap-4">
               {/* Search Bar */}
-              <div className="flex-1 relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5" style={{ color: '#a3a3a3' }} />
+              <div className="flex-1 relative group">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-primary transition-colors" />
                 <input
                   type="text"
                   placeholder="Buscar por ubicación o título..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 rounded-lg transition-all duration-200"
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    color: '#ffffff'
-                  }}
+                  className="w-full pl-12 pr-4 py-4 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                 />
               </div>
 
               {/* Filter Toggle */}
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center gap-2 px-6 py-3 rounded-lg transition-all duration-200"
-                style={{
-                  background: showFilters ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.1)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  color: '#ffffff'
-                }}
+                className={`flex items-center gap-2 px-6 py-4 rounded-xl font-medium transition-all duration-200 ${
+                  showFilters 
+                    ? 'bg-primary text-white shadow-lg shadow-primary/20' 
+                    : 'bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-700 hover:bg-white hover:shadow-md'
+                }`}
               >
-                <SlidersHorizontal className="w-5 h-5" />
+                <Filter className="w-5 h-5" />
                 Filtros
               </button>
             </div>
@@ -354,24 +347,20 @@ export default function PropertiesPage() {
               <motion.div 
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
-                className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 pt-6"
-                style={{ borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}
+                className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6 pt-6 border-t border-gray-100"
               >
                 {/* Type Filter */}
                 <div>
-                  <label className="flex items-center gap-2 text-sm mb-2" style={{ color: '#a3a3a3' }}>
-                    <Home className="w-4 h-4" />
+                  <label className="flex items-center gap-2 text-sm font-medium mb-3 text-gray-700">
+                    <div className="p-1.5 rounded-lg bg-primary/10">
+                      <Home className="w-4 h-4 text-primary" />
+                    </div>
                     Tipo de Propiedad
                   </label>
                   <select
                     value={filterType}
                     onChange={(e) => setFilterType(e.target.value)}
-                    className="w-full px-4 py-2 rounded-lg"
-                    style={{
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      color: '#ffffff'
-                    }}
+                    className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                   >
                     <option value="todos">Todos</option>
                     <option value="casa">Casa</option>
@@ -386,19 +375,16 @@ export default function PropertiesPage() {
 
                 {/* Status Filter */}
                 <div>
-                  <label className="flex items-center gap-2 text-sm mb-2" style={{ color: '#a3a3a3' }}>
-                    <MapPin className="w-4 h-4" />
+                  <label className="flex items-center gap-2 text-sm font-medium mb-3 text-gray-700">
+                    <div className="p-1.5 rounded-lg bg-primary/10">
+                      <MapPin className="w-4 h-4 text-primary" />
+                    </div>
                     Estado
                   </label>
                   <select
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
-                    className="w-full px-4 py-2 rounded-lg"
-                    style={{
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      color: '#ffffff'
-                    }}
+                    className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                   >
                     <option value="todos">Todos</option>
                     <option value="venta">En Venta</option>
@@ -408,19 +394,16 @@ export default function PropertiesPage() {
 
                 {/* Price Range Filter */}
                 <div>
-                  <label className="flex items-center gap-2 text-sm mb-2" style={{ color: '#a3a3a3' }}>
-                    <DollarSign className="w-4 h-4" />
+                  <label className="flex items-center gap-2 text-sm font-medium mb-3 text-gray-700">
+                    <div className="p-1.5 rounded-lg bg-primary/10">
+                      <DollarSign className="w-4 h-4 text-primary" />
+                    </div>
                     Rango de Precio
                   </label>
                   <select
                     value={priceRange}
                     onChange={(e) => setPriceRange(e.target.value)}
-                    className="w-full px-4 py-2 rounded-lg"
-                    style={{
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      color: '#ffffff'
-                    }}
+                    className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                   >
                     <option value="todos">Todos</option>
                     <option value="bajo">Económico</option>
@@ -434,11 +417,16 @@ export default function PropertiesPage() {
 
           {/* Results Count */}
           {!loading && (
-            <div className="mb-8 text-center">
-              <p style={{ color: '#a3a3a3' }}>
-                {filteredProperties.length} {filteredProperties.length === 1 ? 'propiedad encontrada' : 'propiedades encontradas'}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="mb-8 text-center"
+            >
+              <p className="text-gray-600 font-medium">
+                <span className="text-2xl font-light text-gray-900">{filteredProperties.length}</span> {filteredProperties.length === 1 ? 'propiedad encontrada' : 'propiedades encontradas'}
               </p>
-            </div>
+            </motion.div>
           )}
 
           {/* Loading State */}

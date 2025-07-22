@@ -1,167 +1,171 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
-import gsap from 'gsap'
-import { Search, MapPin, Home } from 'lucide-react'
-import Image from 'next/image'
+import { Search, Home, ChevronDown } from 'lucide-react'
+import Link from 'next/link'
 
 export default function Hero() {
-  const heroRef = useRef<HTMLDivElement>(null)
-  const imageRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from('.hero-text', {
-        y: 50,
-        opacity: 0,
-        duration: 1,
-        stagger: 0.2,
-        ease: 'power3.out'
-      })
-
-      gsap.from('.search-container', {
-        y: 30,
-        opacity: 0,
-        duration: 1,
-        delay: 0.8,
-        ease: 'power3.out'
-      })
-
-      gsap.to(imageRef.current, {
-        yPercent: -10,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: heroRef.current,
-          start: 'top top',
-          end: 'bottom top',
-          scrub: true
-        }
-      })
-    }, heroRef)
-
-    return () => ctx.revert()
-  }, [])
+  const [activeTab, setActiveTab] = useState<'buy' | 'rent' | 'sell'>('buy')
 
   return (
-    <section ref={heroRef} className="relative h-screen overflow-hidden" style={{ background: '#0a0a0a' }}>
-      {/* Mysterious geometric background */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0" style={{ 
-          background: 'radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.02) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.03) 0%, transparent 50%), linear-gradient(135deg, #0a0a0a 0%, #111111 100%)'
-        }} />
-        {/* Floating geometric shapes */}
-        <div className="absolute top-20 left-10 w-32 h-32 border border-white/10 rounded-full animate-pulse" />
-        <div className="absolute top-1/3 right-20 w-24 h-24 border border-white/5 rotate-45" style={{ animationDelay: '1s' }} />
-        <div className="absolute bottom-1/4 left-1/4 w-16 h-16 bg-gradient-to-r from-white/5 to-white/10 rounded-lg rotate-12" />
+    <section className="relative pt-20 pb-12 bg-gradient-to-b from-blue-50 to-white overflow-hidden">
+      {/* Background decorations */}
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute top-40 left-10 w-72 h-72 bg-blue-300 rounded-full filter blur-3xl"></div>
+        <div className="absolute bottom-10 right-10 w-96 h-96 bg-purple-300 rounded-full filter blur-3xl"></div>
       </div>
+      <div className="section-container relative z-10">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4"
+          >
+            Encuentra tu hogar ideal
+          </motion.h1>
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-xl text-gray-600 mb-8"
+          >
+            Millones de propiedades en las mejores ubicaciones de México
+          </motion.p>
 
-      <div className="relative z-10 h-full flex items-center">
-        <div className="section-container w-full">
-          <div className="max-w-3xl">
-            <h1 className="hero-text text-4xl md:text-6xl font-bold text-white mb-6">
-              Encuentra tu
-              <span className="block gradient-text">Hogar Perfecto</span>
-            </h1>
-            <p className="hero-text text-lg md:text-xl text-white/90 mb-12">
-              Descubre propiedades excepcionales en las ubicaciones más deseadas del mundo
-            </p>
+          {/* Search Tabs */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="flex justify-center mb-6"
+          >
+            <div className="inline-flex bg-white rounded-lg shadow-sm p-1">
+              <button
+                onClick={() => setActiveTab('buy')}
+                className={`px-6 py-2 rounded-md font-semibold transition-all duration-200 ${
+                  activeTab === 'buy' 
+                    ? 'bg-primary text-white' 
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Comprar
+              </button>
+              <button
+                onClick={() => setActiveTab('rent')}
+                className={`px-6 py-2 rounded-md font-semibold transition-all duration-200 ${
+                  activeTab === 'rent' 
+                    ? 'bg-primary text-white' 
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Rentar
+              </button>
+              <button
+                onClick={() => setActiveTab('sell')}
+                className={`px-6 py-2 rounded-md font-semibold transition-all duration-200 ${
+                  activeTab === 'sell' 
+                    ? 'bg-primary text-white' 
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Vender
+              </button>
+            </div>
+          </motion.div>
 
-            <motion.div 
-              className="search-container glass-card p-6"
-              whileHover={{ scale: 1.02, y: -4 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="flex flex-col lg:flex-row gap-4">
-                <div className="flex-1 relative">
-                  <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: '#a3a3a3' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <input
-                    type="text"
-                    placeholder="Ubicación"
-                    className="w-full pl-12 pr-4 py-4 rounded-lg focus:outline-none transition-all duration-300"
-                    style={{ 
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      color: '#ffffff'
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = '#ffffff'
-                      e.target.style.boxShadow = '0 0 0 2px rgba(255, 255, 255, 0.1)'
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'
-                      e.target.style.boxShadow = 'none'
-                    }}
-                  />
-                </div>
-                
-                <div className="flex-1 relative">
-                  <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: '#a3a3a3' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                  </svg>
-                  <select className="w-full pl-12 pr-4 py-4 rounded-lg focus:outline-none transition-all duration-300 appearance-none" style={{ 
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    color: '#ffffff'
-                  }} onFocus={(e) => {
-                    e.target.style.borderColor = '#ffffff'
-                    e.target.style.boxShadow = '0 0 0 2px rgba(255, 255, 255, 0.1)'
-                  }} onBlur={(e) => {
-                    e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'
-                    e.target.style.boxShadow = 'none'
-                  }}>
-                    <option>Todos los Tipos</option>
-                    <option>Villa</option>
-                    <option>Penthouse</option>
-                    <option>Casa</option>
-                    <option>Apartamento</option>
-                  </select>
-                </div>
-
-                <div className="flex-1">
-                  <select className="w-full px-4 py-4 rounded-lg focus:outline-none transition-all duration-300 appearance-none" style={{ 
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    color: '#ffffff'
-                  }} onFocus={(e) => {
-                    e.target.style.borderColor = '#ffffff'
-                    e.target.style.boxShadow = '0 0 0 2px rgba(255, 255, 255, 0.1)'
-                  }} onBlur={(e) => {
-                    e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'
-                    e.target.style.boxShadow = 'none'
-                  }}>
-                    <option>Rango de Precio</option>
-                    <option>$500K - $1M</option>
-                    <option>$1M - $3M</option>
-                    <option>$3M - $10M</option>
-                    <option>$10M+</option>
-                  </select>
-                </div>
-
-                <button className="btn-primary flex items-center justify-center gap-2 px-8">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  Buscar
-                </button>
+          {/* Search Bar with Glassmorphism */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="max-w-3xl mx-auto glass-icon-container rounded-2xl p-6"
+          >
+            <div className="flex flex-col md:flex-row gap-3">
+              <div className="flex-1 relative">
+                <input
+                  type="text"
+                  placeholder="Ciudad, colonia o código postal"
+                  className="input w-full pl-12 pr-4"
+                />
+                <Home className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               </div>
-            </motion.div>
-          </div>
-        </div>
-      </div>
+              
+              <div className="flex gap-3">
+                <div className="relative">
+                  <select className="input pr-10 pl-4 appearance-none cursor-pointer">
+                    <option>Precio</option>
+                    <option>$0 - $500K</option>
+                    <option>$500K - $1M</option>
+                    <option>$1M - $2M</option>
+                    <option>$2M+</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                </div>
 
-      <motion.div 
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
-        animate={{ y: [0, 10, 0] }}
-        transition={{ duration: 2, repeat: Infinity }}
-      >
-        <div className="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center">
-          <div className="w-1 h-3 bg-white/50 rounded-full mt-2" />
+                <div className="relative">
+                  <select className="input pr-10 pl-4 appearance-none cursor-pointer">
+                    <option>Tipo</option>
+                    <option>Casa</option>
+                    <option>Departamento</option>
+                    <option>Terreno</option>
+                    <option>Local</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                </div>
+
+                <Link href="/propiedades" className="btn-primary flex items-center gap-2 whitespace-nowrap">
+                  <Search size={20} />
+                  <span className="hidden sm:inline">Buscar</span>
+                </Link>
+              </div>
+            </div>
+
+            {/* Quick Links */}
+            <div className="mt-4 flex flex-wrap gap-2 text-sm">
+              <span className="text-gray-600">Búsquedas populares:</span>
+              <Link href="/propiedades?location=cdmx" className="text-primary hover:underline">
+                Ciudad de México
+              </Link>
+              <Link href="/propiedades?location=guadalajara" className="text-primary hover:underline">
+                Guadalajara
+              </Link>
+              <Link href="/propiedades?location=monterrey" className="text-primary hover:underline">
+                Monterrey
+              </Link>
+              <Link href="/propiedades?location=playa-del-carmen" className="text-primary hover:underline">
+                Playa del Carmen
+              </Link>
+            </div>
+          </motion.div>
         </div>
-      </motion.div>
+
+        {/* Feature Stats with Glassmorphism */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto"
+        >
+          <div className="text-center p-6 glass rounded-xl glass-hover">
+            <div className="text-3xl font-bold text-primary">10K+</div>
+            <div className="text-gray-600 mt-1">Propiedades activas</div>
+          </div>
+          <div className="text-center p-6 glass rounded-xl glass-hover">
+            <div className="text-3xl font-bold text-primary">5K+</div>
+            <div className="text-gray-600 mt-1">Propiedades vendidas</div>
+          </div>
+          <div className="text-center p-6 glass rounded-xl glass-hover">
+            <div className="text-3xl font-bold text-primary">1K+</div>
+            <div className="text-gray-600 mt-1">Agentes verificados</div>
+          </div>
+          <div className="text-center p-6 glass rounded-xl glass-hover">
+            <div className="text-3xl font-bold text-primary">50+</div>
+            <div className="text-gray-600 mt-1">Ciudades</div>
+          </div>
+        </motion.div>
+      </div>
     </section>
   )
 }

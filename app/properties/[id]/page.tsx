@@ -205,18 +205,48 @@ export default function PropertyDetail() {
         const response = await fetch(`/api/properties/${id}`)
         const result = await response.json()
         
-        if (result.success) {
-          setProperty(result.data)
+        if (result.success && result.data) {
+          // Map API response to expected format
+          const apiProperty = result.data
+          const mappedProperty = {
+            id: apiProperty.id || apiProperty._id,
+            title: apiProperty.title || 'Título no disponible',
+            description: apiProperty.description || 'Descripción no disponible',
+            price: apiProperty.price || { amount: 0, currency: 'EUR' },
+            propertyType: apiProperty.propertyType || 'No especificado',
+            address: apiProperty.address || {},
+            features: apiProperty.features || {},
+            images: apiProperty.images || [],
+            amenities: apiProperty.amenities || [],
+            // Backward compatibility fields
+            location: apiProperty.address ? 
+              `${apiProperty.address.city || ''}, ${apiProperty.address.state || ''}`.replace(/^,\s*|,\s*$/g, '') :
+              'Ubicación no disponible',
+            beds: apiProperty.features?.bedrooms || 0,
+            baths: apiProperty.features?.bathrooms || 0,
+            sqft: apiProperty.features?.squareMeters || 0,
+            yearBuilt: apiProperty.features?.yearBuilt || new Date().getFullYear(),
+            lotSize: apiProperty.features?.lotSize || `${apiProperty.features?.squareMeters || 0} m²`
+          }
+          setProperty(mappedProperty)
         } else {
           // Fallback to static data if API fails
           const staticProperty = propertyData[id as keyof typeof propertyData]
-          setProperty(staticProperty)
+          if (staticProperty) {
+            setProperty(staticProperty)
+          } else {
+            setProperty(null)
+          }
         }
       } catch (error) {
         console.error('Error fetching property:', error)
         // Fallback to static data
         const staticProperty = propertyData[id as keyof typeof propertyData]
-        setProperty(staticProperty)
+        if (staticProperty) {
+          setProperty(staticProperty)
+        } else {
+          setProperty(null)
+        }
       } finally {
         setLoading(false)
       }
@@ -255,19 +285,20 @@ export default function PropertyDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0a0a' }}>
-        <div className="loading-spinner"></div>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-gray-200 border-t-primary rounded-full animate-spin"></div>
       </div>
     )
   }
 
   if (!property) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0a0a' }}>
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4" style={{ color: '#ffffff' }}>Propiedad No Encontrada</h1>
-          <Link href="/" className="btn-primary">
-            Volver al Inicio
+          <h1 className="text-2xl font-light mb-4 text-gray-900">Propiedad No Encontrada</h1>
+          <p className="text-gray-600 mb-6">La propiedad que buscas no existe o no está disponible</p>
+          <Link href="/propiedades" className="btn-primary">
+            Volver a Propiedades
           </Link>
         </div>
       </div>
@@ -275,20 +306,19 @@ export default function PropertyDetail() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: '#0a0a0a' }}>
+    <div className="min-h-screen bg-white">
       <Navigation />
       
-      <main className="pt-20">
+      {/* Background decorations */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-blue-200 to-cyan-200 rounded-full filter blur-3xl opacity-60"></div>
+        <div className="absolute top-80 -left-40 w-96 h-96 bg-gradient-to-br from-purple-200 to-pink-200 rounded-full filter blur-3xl opacity-60"></div>
+        <div className="absolute bottom-20 right-20 w-72 h-72 bg-gradient-to-br from-green-200 to-emerald-200 rounded-full filter blur-3xl opacity-40"></div>
+      </div>
+      
+      <main className="pt-20 relative z-10">
         <div className="section-container py-8">
-          <Link href="/" className="inline-flex items-center gap-2 transition-colors mb-6" style={{ color: '#666666' }} 
-            onMouseEnter={(e) => {
-              const target = e.target as HTMLElement;
-              target.style.setProperty('color', '#ffffff');
-            }} 
-            onMouseLeave={(e) => {
-              const target = e.target as HTMLElement;
-              target.style.setProperty('color', '#666666');
-            }}>
+          <Link href="/propiedades" className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors mb-6">
             <ArrowLeft size={20} />
             Volver a Propiedades
           </Link>
@@ -309,101 +339,109 @@ export default function PropertyDetail() {
               <div ref={detailsRef} className="property-info">
                 <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
                   <div>
-                    <h1 className="text-3xl md:text-4xl font-light mb-2" style={{ color: '#ffffff' }}>
+                    <h1 className="text-3xl md:text-4xl font-light mb-2 text-gray-900">
                       {property.title}
                     </h1>
-                    <div className="flex items-center gap-2" style={{ color: '#a3a3a3' }}>
-                      <div className="w-1 h-1 rounded-full bg-white opacity-60"></div>
-                      <span className="text-lg">{property.address?.getFullAddress?.() || property.location}</span>
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <div className="w-1 h-1 rounded-full bg-primary opacity-60"></div>
+                      <span className="text-lg">
+                        {property.address ? 
+                          `${property.address.city || ''}, ${property.address.state || ''}, ${property.address.country || ''}`.replace(/^,\s*|,\s*$/g, '').replace(/,\s*,/g, ',') :
+                          property.location || 'Ubicación no disponible'
+                        }
+                      </span>
                     </div>
                   </div>
                   
                   <div className="flex gap-3">
-                    <button className="p-3 rounded-lg transition-colors" style={{ 
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      color: '#a3a3a3'
-                    }} onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
-                      e.currentTarget.style.color = '#ffffff'
-                    }} onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'
-                      e.currentTarget.style.color = '#a3a3a3'
-                    }}>
+                    <button className="p-3 rounded-lg glass-icon-container text-gray-600 hover:text-gray-900 transition-colors">
                       <Heart size={20} />
                     </button>
-                    <button className="p-3 rounded-lg transition-colors" style={{ 
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      color: '#a3a3a3'
-                    }} onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
-                      e.currentTarget.style.color = '#ffffff'
-                    }} onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'
-                      e.currentTarget.style.color = '#a3a3a3'
-                    }}>
+                    <button className="p-3 rounded-lg glass-icon-container text-gray-600 hover:text-gray-900 transition-colors">
                       <Share2 size={20} />
                     </button>
                   </div>
                 </div>
 
-                <div className="text-3xl font-light mb-8" style={{ color: '#ffffff' }}>
-                  €{property.price?.amount || 0}
+                <div className="text-3xl font-light mb-8 text-gray-900">
+                  €{typeof property.price === 'object' ? property.price?.amount?.toLocaleString() : property.price?.toLocaleString() || '0'}
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8 p-6 rounded-xl glass-card">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8 p-6 rounded-xl glass-icon-container">
                   <div className="text-center">
                     <div className="flex items-center justify-center gap-2 mb-2">
-                      <div className="w-1 h-1 rounded-full bg-white opacity-60"></div>
-                      <span className="text-2xl font-light" style={{ color: '#ffffff' }}>{property.features?.bedrooms || property.beds}</span>
+                      <div className="w-1 h-1 rounded-full bg-primary opacity-60"></div>
+                      <span className="text-2xl font-light text-gray-900">{property.features?.bedrooms || property.beds}</span>
                     </div>
-                    <p className="text-sm" style={{ color: '#a3a3a3' }}>Habitaciones</p>
+                    <p className="text-sm text-gray-600">Habitaciones</p>
                   </div>
                   <div className="text-center">
                     <div className="flex items-center justify-center gap-2 mb-2">
-                      <div className="w-1 h-1 rounded-full bg-white opacity-60"></div>
-                      <span className="text-2xl font-light" style={{ color: '#ffffff' }}>{property.features?.bathrooms || property.baths}</span>
+                      <div className="w-1 h-1 rounded-full bg-primary opacity-60"></div>
+                      <span className="text-2xl font-light text-gray-900">{property.features?.bathrooms || property.baths}</span>
                     </div>
-                    <p className="text-sm" style={{ color: '#a3a3a3' }}>Baños</p>
+                    <p className="text-sm text-gray-600">Baños</p>
                   </div>
                   <div className="text-center">
                     <div className="flex items-center justify-center gap-2 mb-2">
-                      <div className="w-1 h-1 rounded-full bg-white opacity-60"></div>
-                      <span className="text-2xl font-light" style={{ color: '#ffffff' }}>{(property.features?.squareMeters || property.sqft)?.toLocaleString() || 'N/A'}</span>
+                      <div className="w-1 h-1 rounded-full bg-primary opacity-60"></div>
+                      <span className="text-2xl font-light text-gray-900">{(property.features?.squareMeters || property.sqft)?.toLocaleString() || 'N/A'}</span>
                     </div>
-                    <p className="text-sm" style={{ color: '#a3a3a3' }}>m²</p>
+                    <p className="text-sm text-gray-600">m²</p>
                   </div>
                   <div className="text-center">
                     <div className="flex items-center justify-center gap-2 mb-2">
-                      <div className="w-1 h-1 rounded-full bg-white opacity-60"></div>
-                      <span className="text-2xl font-light" style={{ color: '#ffffff' }}>{property.features?.yearBuilt || property.yearBuilt}</span>
+                      <div className="w-1 h-1 rounded-full bg-primary opacity-60"></div>
+                      <span className="text-2xl font-light text-gray-900">{property.features?.yearBuilt || property.yearBuilt}</span>
                     </div>
-                    <p className="text-sm" style={{ color: '#a3a3a3' }}>Año Construcción</p>
+                    <p className="text-sm text-gray-600">Año Construcción</p>
                   </div>
                 </div>
 
                 <div className="mb-8">
-                  <h2 className="text-2xl font-light mb-4" style={{ color: '#ffffff' }}>Descripción</h2>
-                  <p className="leading-relaxed text-lg" style={{ color: '#a3a3a3' }}>
+                  <h2 className="text-2xl font-light mb-4 text-gray-900">Descripción</h2>
+                  <p className="leading-relaxed text-lg text-gray-600">
                     {property.description}
                   </p>
                 </div>
 
                 <div className="mb-8">
-                  <h2 className="text-2xl font-light mb-4" style={{ color: '#ffffff' }}>Características</h2>
+                  <h2 className="text-2xl font-light mb-4 text-gray-900">Características</h2>
                   <div className="features-list grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {(property.features?.amenities || property.features || []).map((feature: string, index: number) => (
-                      <motion.div
-                        key={index}
-                        className="feature-item flex items-center gap-3 p-3 rounded-lg glass-card"
-                        whileHover={{ x: 5 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <div className="w-1 h-1 rounded-full bg-white opacity-60" />
-                        <span style={{ color: '#ffffff' }}>{feature}</span>
-                      </motion.div>
-                    ))}
+                    {(() => {
+                      // Handle different feature data structures
+                      let features = [];
+                      if (Array.isArray(property.amenities)) {
+                        features = property.amenities;
+                      } else if (Array.isArray(property.features)) {
+                        features = property.features;
+                      } else if (property.features && typeof property.features === 'object') {
+                        // Convert features object to array of strings
+                        features = Object.entries(property.features)
+                          .filter(([key, value]) => value && typeof value !== 'object')
+                          .map(([key, value]) => `${key}: ${value}`);
+                      } else {
+                        // Fallback basic features
+                        features = [
+                          `${property.features?.bedrooms || property.beds || 0} Habitaciones`,
+                          `${property.features?.bathrooms || property.baths || 0} Baños`,
+                          `${property.features?.squareMeters || property.sqft || 0} m²`,
+                          property.features?.parking ? `${property.features.parking} Espacios de parking` : null
+                        ].filter(Boolean);
+                      }
+                      
+                      return features.map((feature: string, index: number) => (
+                        <motion.div
+                          key={index}
+                          className="feature-item flex items-center gap-3 p-3 rounded-lg glass-icon-container"
+                          whileHover={{ x: 5 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <div className="w-1 h-1 rounded-full bg-primary opacity-60" />
+                          <span className="text-gray-900">{feature}</span>
+                        </motion.div>
+                      ));
+                    })()}
                   </div>
                 </div>
 
@@ -412,90 +450,30 @@ export default function PropertyDetail() {
 
             <div className="lg:col-span-1">
               <div className="sticky top-24">
-                <div className="glass-card p-6">
-                  <h3 className="text-xl font-light mb-4" style={{ color: '#ffffff' }}>
+                <div className="glass-icon-container rounded-2xl p-6">
+                  <h3 className="text-xl font-light mb-4 text-gray-900">
                     Programar Visita
                   </h3>
                   <form className="space-y-4">
                     <input
                       type="text"
                       placeholder="Tu Nombre"
-                      className="w-full px-4 py-3 rounded-lg focus:outline-none transition-colors"
-                      style={{ 
-                        background: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        color: '#ffffff'
-                      }}
-                      onFocus={(e) => {
-                        const target = e.target as HTMLElement;
-                        target.style.setProperty('border-color', '#ffffff');
-                        target.style.setProperty('background', 'rgba(255, 255, 255, 0.1)');
-                      }}
-                      onBlur={(e) => {
-                        const target = e.target as HTMLElement;
-                        target.style.setProperty('border-color', 'rgba(255, 255, 255, 0.1)');
-                        target.style.setProperty('background', 'rgba(255, 255, 255, 0.05)');
-                      }}
+                      className="w-full px-4 py-3 rounded-lg bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                     />
                     <input
                       type="email"
                       placeholder="Correo Electrónico"
-                      className="w-full px-4 py-3 rounded-lg focus:outline-none transition-colors"
-                      style={{ 
-                        background: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        color: '#ffffff'
-                      }}
-                      onFocus={(e) => {
-                        const target = e.target as HTMLElement;
-                        target.style.setProperty('border-color', '#ffffff');
-                        target.style.setProperty('background', 'rgba(255, 255, 255, 0.1)');
-                      }}
-                      onBlur={(e) => {
-                        const target = e.target as HTMLElement;
-                        target.style.setProperty('border-color', 'rgba(255, 255, 255, 0.1)');
-                        target.style.setProperty('background', 'rgba(255, 255, 255, 0.05)');
-                      }}
+                      className="w-full px-4 py-3 rounded-lg bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                     />
                     <input
                       type="tel"
                       placeholder="Número de Teléfono"
-                      className="w-full px-4 py-3 rounded-lg focus:outline-none transition-colors"
-                      style={{ 
-                        background: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        color: '#ffffff'
-                      }}
-                      onFocus={(e) => {
-                        const target = e.target as HTMLElement;
-                        target.style.setProperty('border-color', '#ffffff');
-                        target.style.setProperty('background', 'rgba(255, 255, 255, 0.1)');
-                      }}
-                      onBlur={(e) => {
-                        const target = e.target as HTMLElement;
-                        target.style.setProperty('border-color', 'rgba(255, 255, 255, 0.1)');
-                        target.style.setProperty('background', 'rgba(255, 255, 255, 0.05)');
-                      }}
+                      className="w-full px-4 py-3 rounded-lg bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                     />
                     <textarea
                       placeholder="Mensaje (Opcional)"
                       rows={4}
-                      className="w-full px-4 py-3 rounded-lg focus:outline-none resize-none transition-colors"
-                      style={{ 
-                        background: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        color: '#ffffff'
-                      }}
-                      onFocus={(e) => {
-                        const target = e.target as HTMLElement;
-                        target.style.setProperty('border-color', '#ffffff');
-                        target.style.setProperty('background', 'rgba(255, 255, 255, 0.1)');
-                      }}
-                      onBlur={(e) => {
-                        const target = e.target as HTMLElement;
-                        target.style.setProperty('border-color', 'rgba(255, 255, 255, 0.1)');
-                        target.style.setProperty('background', 'rgba(255, 255, 255, 0.05)');
-                      }}
+                      className="w-full px-4 py-3 rounded-lg bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 resize-none"
                     />
                     <button className="btn-primary w-full">
                       Solicitar Visita
@@ -503,26 +481,28 @@ export default function PropertyDetail() {
                   </form>
                 </div>
 
-                <div className="mt-6 rounded-xl p-6 glass-card">
-                  <h3 className="text-lg font-light mb-4" style={{ color: '#ffffff' }}>
+                <div className="mt-6 rounded-xl p-6 glass-icon-container">
+                  <h3 className="text-lg font-light mb-4 text-gray-900">
                     Detalles de la Propiedad
                   </h3>
                   <div className="space-y-3 text-sm">
                     <div className="flex justify-between">
-                      <span style={{ color: '#a3a3a3' }}>Tipo de Propiedad:</span>
-                      <span className="font-medium" style={{ color: '#ffffff' }}>{property.propertyType?.getDisplayName?.() || property.propertyType?.value || property.propertyType}</span>
+                      <span className="text-gray-600">Tipo de Propiedad:</span>
+                      <span className="font-medium text-gray-900">
+                        {property.propertyType?.value || property.propertyType || 'No especificado'}
+                      </span>
                     </div>
                     <div className="flex justify-between">
-                      <span style={{ color: '#a3a3a3' }}>Tamaño del Lote:</span>
-                      <span className="font-medium" style={{ color: '#ffffff' }}>{property.features?.lotSize || property.lotSize}</span>
+                      <span className="text-gray-600">Tamaño del Lote:</span>
+                      <span className="font-medium text-gray-900">{property.features?.lotSize || property.lotSize}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span style={{ color: '#a3a3a3' }}>Año de Construcción:</span>
-                      <span className="font-medium" style={{ color: '#ffffff' }}>{property.features?.yearBuilt || property.yearBuilt}</span>
+                      <span className="text-gray-600">Año de Construcción:</span>
+                      <span className="font-medium text-gray-900">{property.features?.yearBuilt || property.yearBuilt}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span style={{ color: '#a3a3a3' }}>ID de Propiedad:</span>
-                      <span className="font-medium" style={{ color: '#ffffff' }}>LV{id.padStart(4, '0')}</span>
+                      <span className="text-gray-600">ID de Propiedad:</span>
+                      <span className="font-medium text-gray-900">LV{id.padStart(4, '0')}</span>
                     </div>
                   </div>
                 </div>

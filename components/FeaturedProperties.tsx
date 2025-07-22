@@ -5,7 +5,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import PropertyCard from './PropertyCard'
 import { motion } from 'framer-motion'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -101,27 +101,44 @@ export default function FeaturedProperties() {
   }, [])
 
   return (
-    <section ref={sectionRef} className="py-20" style={{ background: 'linear-gradient(135deg, #111111 0%, #1a1a1a 100%)' }}>
-      <div className="section-container">
+    <section ref={sectionRef} className="py-20 bg-white relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary rounded-full filter blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-purple-500 rounded-full filter blur-3xl"></div>
+      </div>
+      
+      <div className="section-container relative z-10">
         <div className="flex flex-col md:flex-row items-end justify-between mb-12">
           <div>
-            <h2 ref={titleRef} className="text-3xl md:text-4xl font-bold mb-4 gradient-text">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="inline-flex items-center gap-2 mb-4"
+            >
+              <div className="p-2 rounded-lg glass">
+                <Sparkles className="w-5 h-5 text-primary" />
+              </div>
+              <span className="text-sm font-medium text-primary">Propiedades Premium</span>
+            </motion.div>
+            <h2 ref={titleRef} className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
               Propiedades Destacadas
             </h2>
-            <p className="text-lg" style={{ color: '#e5e5e5' }}>
+            <p className="text-lg text-gray-600">
               Propiedades cuidadosamente seleccionadas para compradores exigentes
             </p>
           </div>
           
           <Link href="/propiedades">
             <motion.button
-              className="flex items-center gap-2 font-medium mt-6 md:mt-0"
-              style={{ color: '#a3a3a3' }}
+              className="flex items-center gap-2 font-medium mt-6 md:mt-0 text-primary hover:text-primary-hover"
               whileHover={{ x: 5 }}
               transition={{ duration: 0.2 }}
             >
               Ver Todas las Propiedades
-              <div className="w-1 h-1 rounded-full bg-current opacity-60"></div>
+              <ArrowRight size={20} />
             </motion.button>
           </Link>
         </div>
