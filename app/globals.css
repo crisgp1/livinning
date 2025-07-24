@@ -334,11 +334,20 @@
   }
 
   .glass-icon-container {
-    background: rgba(255, 255, 255, 0.25);
+    background: white !important;
+    color: #1e293b !important;
+    border: 1px solid #e5e7eb !important;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.18);
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  }
+
+  .glass-icon-container h3 {
+    color: #1e293b !important;
+  }
+
+  .glass-icon-container p {
+    color: #64748b !important;
   }
 
   .glass-hover {
@@ -377,5 +386,36 @@
       border: 1px solid rgba(255, 255, 255, 0.3);
       box-shadow: 0 20px 40px 0 rgba(31, 38, 135, 0.5);
     }
+  }
+
+  /* Glassmorphism Overlay Styles */
+  .glassmorphism-overlay {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.05) 50%,
+      rgba(255, 255, 255, 0.1) 100%
+    ) !important;
+    backdrop-filter: blur(12px) saturate(1.5) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(1.5) !important;
+  }
+
+  /* Override default dark overlay with glassmorphism */
+  .fixed.inset-0.bg-black.bg-opacity-50 {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.05) 50%,
+      rgba(255, 255, 255, 0.1) 100%
+    ) !important;
+    backdrop-filter: blur(12px) saturate(1.5) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(1.5) !important;
+  }
+
+  /* Optional: Dark overlay utility for when glassmorphism is disabled */
+  .dark-overlay {
+    background: rgba(0, 0, 0, 0.5) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 }

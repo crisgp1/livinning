@@ -181,7 +181,7 @@ function ServiceCheckoutContent() {
   }
 
   if (!isLoaded) {
-    return <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0a0a' }}>
+    return <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-gray-50">
       <div className="loading-spinner"></div>
     </div>
   }
@@ -200,7 +200,7 @@ function ServiceCheckoutContent() {
   const total = selectedService.price + tax
 
   return (
-    <div className="min-h-screen" style={{ background: '#0a0a0a' }}>
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       <Navigation />
       
       <main className="pt-20">
@@ -210,20 +210,17 @@ function ServiceCheckoutContent() {
           <div className="mb-12">
             <button
               onClick={() => router.back()}
-              className="inline-flex items-center gap-2 mb-6 transition-colors"
-              style={{ color: '#666666' }}
-              onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'}
-              onMouseLeave={(e) => e.currentTarget.style.color = '#666666'}
+              className="inline-flex items-center gap-2 mb-6 text-gray-600 hover:text-gray-900 transition-colors"
             >
               <ArrowLeft size={20} />
               Volver a servicios
             </button>
             
             <div className="text-center">
-              <h1 className="text-3xl font-light mb-4" style={{ color: '#ffffff' }}>
+              <h1 className="text-3xl font-light mb-4 text-gray-900">
                 Solicitar Servicio Profesional
               </h1>
-              <p className="max-w-2xl mx-auto" style={{ color: '#a3a3a3' }}>
+              <p className="max-w-2xl mx-auto text-gray-600">
                 Completa la información para coordinar tu servicio de {selectedService.title}
               </p>
             </div>
@@ -233,11 +230,11 @@ function ServiceCheckoutContent() {
             
             {/* Service Request Form or Stripe Checkout */}
             <div className="lg:col-span-2">
-              <div className="glass-card p-8">
+              <div className="glass-icon-container p-8 rounded-2xl">
                 
                 {!showCheckout ? (
                   <>
-                    <h2 className="text-2xl font-light mb-6" style={{ color: '#ffffff' }}>
+                    <h2 className="text-2xl font-semibold mb-6 text-gray-900">
                       Información del Servicio
                     </h2>
 
@@ -245,7 +242,7 @@ function ServiceCheckoutContent() {
                       
                       {/* Property Information */}
                       <div>
-                        <label className="block text-sm font-medium mb-2" style={{ color: '#ffffff' }}>
+                        <label className="block text-sm font-medium mb-2 text-gray-700">
                           Dirección de la Propiedad *
                         </label>
                         <input
@@ -253,20 +250,7 @@ function ServiceCheckoutContent() {
                           value={serviceRequest.propertyAddress}
                           onChange={(e) => handleInputChange('propertyAddress', e.target.value)}
                           placeholder="Calle 123, Colonia Centro, Ciudad de México"
-                          className="w-full px-4 py-3 rounded-lg focus:outline-none transition-colors"
-                          style={{ 
-                            background: 'rgba(255, 255, 255, 0.05)',
-                            border: '1px solid rgba(255, 255, 255, 0.1)',
-                            color: '#ffffff'
-                          }}
-                          onFocus={(e) => {
-                            e.target.style.borderColor = '#ffffff'
-                            e.target.style.background = 'rgba(255, 255, 255, 0.1)'
-                          }}
-                          onBlur={(e) => {
-                            e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'
-                            e.target.style.background = 'rgba(255, 255, 255, 0.05)'
-                          }}
+                          className="input"
                           required
                         />
                       </div>
@@ -274,24 +258,19 @@ function ServiceCheckoutContent() {
                       {/* Contact Information */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-medium mb-2" style={{ color: '#ffffff' }}>
+                          <label className="block text-sm font-medium mb-2 text-gray-700">
                             Email de contacto
                           </label>
                           <input
                             type="email"
                             value={user.emailAddresses?.[0]?.emailAddress || ''}
                             disabled
-                            className="w-full px-4 py-3 rounded-lg opacity-60"
-                            style={{ 
-                              background: 'rgba(255, 255, 255, 0.05)',
-                              border: '1px solid rgba(255, 255, 255, 0.1)',
-                              color: '#ffffff'
-                            }}
+                            className="input opacity-60"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium mb-2" style={{ color: '#ffffff' }}>
+                          <label className="block text-sm font-medium mb-2 text-gray-700">
                             Teléfono de contacto *
                           </label>
                           <input
@@ -299,20 +278,7 @@ function ServiceCheckoutContent() {
                             value={serviceRequest.contactPhone}
                             onChange={(e) => handleInputChange('contactPhone', e.target.value)}
                             placeholder="+52 55 1234 5678"
-                            className="w-full px-4 py-3 rounded-lg focus:outline-none transition-colors"
-                            style={{ 
-                              background: 'rgba(255, 255, 255, 0.05)',
-                              border: '1px solid rgba(255, 255, 255, 0.1)',
-                              color: '#ffffff'
-                            }}
-                            onFocus={(e) => {
-                              e.target.style.borderColor = '#ffffff'
-                              e.target.style.background = 'rgba(255, 255, 255, 0.1)'
-                            }}
-                            onBlur={(e) => {
-                              e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'
-                              e.target.style.background = 'rgba(255, 255, 255, 0.05)'
-                            }}
+                            className="input"
                             required
                           />
                         </div>
@@ -320,7 +286,7 @@ function ServiceCheckoutContent() {
 
                       {/* Preferred Date */}
                       <div>
-                        <label className="block text-sm font-medium mb-2" style={{ color: '#ffffff' }}>
+                        <label className="block text-sm font-medium mb-2 text-gray-700">
                           Fecha Preferida *
                         </label>
                         <input
@@ -328,27 +294,14 @@ function ServiceCheckoutContent() {
                           value={serviceRequest.preferredDate}
                           onChange={(e) => handleInputChange('preferredDate', e.target.value)}
                           min={new Date().toISOString().split('T')[0]}
-                          className="w-full px-4 py-3 rounded-lg focus:outline-none transition-colors"
-                          style={{ 
-                            background: 'rgba(255, 255, 255, 0.05)',
-                            border: '1px solid rgba(255, 255, 255, 0.1)',
-                            color: '#ffffff'
-                          }}
-                          onFocus={(e) => {
-                            e.target.style.borderColor = '#ffffff'
-                            e.target.style.background = 'rgba(255, 255, 255, 0.1)'
-                          }}
-                          onBlur={(e) => {
-                            e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'
-                            e.target.style.background = 'rgba(255, 255, 255, 0.05)'
-                          }}
+                          className="input"
                           required
                         />
                       </div>
 
                       {/* Special Requests */}
                       <div>
-                        <label className="block text-sm font-medium mb-2" style={{ color: '#ffffff' }}>
+                        <label className="block text-sm font-medium mb-2 text-gray-700">
                           Solicitudes Especiales
                         </label>
                         <textarea
@@ -356,20 +309,7 @@ function ServiceCheckoutContent() {
                           onChange={(e) => handleInputChange('specialRequests', e.target.value)}
                           placeholder="Describe cualquier requerimiento específico para tu servicio..."
                           rows={4}
-                          className="w-full px-4 py-3 rounded-lg focus:outline-none transition-colors resize-none"
-                          style={{ 
-                            background: 'rgba(255, 255, 255, 0.05)',
-                            border: '1px solid rgba(255, 255, 255, 0.1)',
-                            color: '#ffffff'
-                          }}
-                          onFocus={(e) => {
-                            e.target.style.borderColor = '#ffffff'
-                            e.target.style.background = 'rgba(255, 255, 255, 0.1)'
-                          }}
-                          onBlur={(e) => {
-                            e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'
-                            e.target.style.background = 'rgba(255, 255, 255, 0.05)'
-                          }}
+                          className="input resize-none"
                         />
                       </div>
 
@@ -396,8 +336,8 @@ function ServiceCheckoutContent() {
                 ) : (
                   <>
                     <div className="flex items-center gap-3 mb-8">
-                      <div className="w-1 h-1 rounded-full bg-white opacity-60"></div>
-                      <h2 className="text-2xl font-light" style={{ color: '#ffffff' }}>Información de Pago</h2>
+                      <div className="w-2 h-2 rounded-full bg-blue-600"></div>
+                      <h2 className="text-2xl font-semibold text-gray-900">Información de Pago</h2>
                     </div>
 
                     {isLoading ? (
@@ -413,19 +353,10 @@ function ServiceCheckoutContent() {
                       </EmbeddedCheckoutProvider>
                     ) : (
                       <div className="text-center py-12">
-                        <p style={{ color: '#a3a3a3' }}>Error al cargar el formulario de pago</p>
+                        <p className="text-gray-600">Error al cargar el formulario de pago</p>
                         <button
                           onClick={() => setShowCheckout(false)}
-                          className="mt-4 transition-colors"
-                          style={{ color: '#666666' }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.color = '#ffffff'
-                            e.currentTarget.style.textDecoration = 'underline'
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.color = '#666666'
-                            e.currentTarget.style.textDecoration = 'none'
-                          }}
+                          className="mt-4 text-gray-600 hover:text-gray-900 hover:underline transition-colors"
                         >
                           Volver al formulario
                         </button>
@@ -438,56 +369,50 @@ function ServiceCheckoutContent() {
 
             {/* Service Summary */}
             <div>
-              <div className="glass-card p-6 sticky top-24">
-                <h3 className="text-xl font-light mb-6" style={{ color: '#ffffff' }}>
+              <div className="glass-icon-container p-6 rounded-2xl sticky top-24">
+                <h3 className="text-xl font-semibold mb-6 text-gray-900">
                   Resumen del Servicio
                 </h3>
                 
                 <div className="space-y-4 mb-6">
-                  <div className="rounded-lg p-4" style={{ 
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)'
-                  }}>
-                    <h4 className="font-light mb-2" style={{ color: '#ffffff' }}>
+                  <div className="card p-4">
+                    <h4 className="font-semibold mb-2 text-gray-900">
                       {selectedService.title}
                     </h4>
-                    <p className="text-sm mb-3" style={{ color: '#a3a3a3' }}>
+                    <p className="text-sm mb-3 text-gray-600">
                       {selectedService.description}
                     </p>
-                    <div className="flex items-center gap-2 text-sm" style={{ color: '#666666' }}>
-                      <div className="w-1 h-1 rounded-full bg-current opacity-60"></div>
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <div className="w-2 h-2 rounded-full bg-green-500"></div>
                       Entrega: {selectedService.duration}
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-3 pb-4" style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                <div className="space-y-3 pb-4 border-b border-gray-200">
                   <div className="flex justify-between">
-                    <span style={{ color: '#a3a3a3' }}>Precio del servicio</span>
-                    <span className="font-light" style={{ color: '#ffffff' }}>${selectedService.price.toLocaleString()} MXN</span>
+                    <span className="text-gray-600">Precio del servicio</span>
+                    <span className="font-medium text-gray-900">${selectedService.price.toLocaleString()} MXN</span>
                   </div>
                   <div className="flex justify-between">
-                    <span style={{ color: '#a3a3a3' }}>IVA (16%)</span>
-                    <span className="font-light" style={{ color: '#ffffff' }}>${tax.toLocaleString()} MXN</span>
+                    <span className="text-gray-600">IVA (16%)</span>
+                    <span className="font-medium text-gray-900">${tax.toLocaleString()} MXN</span>
                   </div>
                 </div>
 
                 <div className="pt-4 mb-6">
-                  <div className="flex justify-between text-lg font-light">
-                    <span style={{ color: '#ffffff' }}>Total</span>
-                    <span style={{ color: '#ffffff' }}>${total.toLocaleString()} MXN</span>
+                  <div className="flex justify-between text-lg font-semibold">
+                    <span className="text-gray-900">Total</span>
+                    <span className="text-gray-900">${total.toLocaleString()} MXN</span>
                   </div>
                 </div>
 
-                <div className="rounded-lg p-4" style={{ 
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)'
-                }}>
-                  <div className="flex items-center gap-2 text-sm font-light mb-2" style={{ color: '#ffffff' }}>
-                    <div className="w-1 h-1 rounded-full bg-current opacity-60"></div>
+                <div className="card p-4">
+                  <div className="flex items-center gap-2 text-sm font-medium mb-2 text-gray-900">
+                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
                     Proceso Seguro
                   </div>
-                  <ul className="text-xs space-y-1" style={{ color: '#a3a3a3' }}>
+                  <ul className="text-xs space-y-1 text-gray-600">
                     <li>• Profesionales certificados</li>
                     <li>• Garantía de calidad</li>
                     <li>• Soporte 24/7</li>
@@ -505,8 +430,8 @@ function ServiceCheckoutContent() {
 export default function ServiceCheckout() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ff385c]"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-gray-50">
+        <div className="loading-spinner"></div>
       </div>
     }>
       <ServiceCheckoutContent />

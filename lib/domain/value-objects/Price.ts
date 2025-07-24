@@ -9,13 +9,36 @@ export class Price {
   }
 
   getFormattedPrice(): string {
-    const formatter = new Intl.NumberFormat('es-ES', {
+    const locale = this.currency === 'MXN' ? 'es-MX' : 'es-ES';
+    const formatter = new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: this.currency,
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     })
     return formatter.format(this.amount)
+  }
+
+  getFormattedAmount(): string {
+    const locale = this.currency === 'MXN' ? 'es-MX' : 'es-ES';
+    return new Intl.NumberFormat(locale).format(this.amount);
+  }
+
+  getCurrencySymbol(): string {
+    switch (this.currency) {
+      case 'MXN': return '$';
+      case 'EUR': return '€';
+      case 'USD': return '$';
+      default: return this.currency;
+    }
+  }
+
+  getDisplayPrice(): { amount: string; currency: string; symbol: string } {
+    return {
+      amount: this.getFormattedAmount(),
+      currency: this.currency,
+      symbol: this.getCurrencySymbol()
+    };
   }
 
   equals(other: Price): boolean {
