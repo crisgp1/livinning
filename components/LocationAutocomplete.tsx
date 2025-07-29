@@ -158,9 +158,9 @@ export default function LocationAutocomplete({
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           {loading ? (
-            <Loader2 className="h-5 w-5 animate-spin" style={{ color: '#666666' }} />
+            <Loader2 className="h-5 w-5 animate-spin" style={{ color: 'var(--color-text-muted)' }} />
           ) : (
-            <Search className="h-5 w-5" style={{ color: '#666666' }} />
+            <Search className="h-5 w-5" style={{ color: 'var(--color-text-muted)' }} />
           )}
         </div>
         
@@ -170,22 +170,11 @@ export default function LocationAutocomplete({
           value={query}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          onFocus={(e) => {
+          onFocus={() => {
             if (query.length >= 3 && suggestions.length > 0) setShowSuggestions(true)
-            e.target.style.borderColor = '#ffffff'
-            e.target.style.background = 'rgba(255, 255, 255, 0.1)'
           }}
-          onBlur={(e) => {
-            handleBlur()
-            e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'
-            e.target.style.background = 'rgba(255, 255, 255, 0.05)'
-          }}
-          className="w-full pl-10 pr-4 py-3 rounded-lg focus:outline-none transition-all duration-200"
-          style={{ 
-            background: 'rgba(255, 255, 255, 0.05)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            color: '#ffffff'
-          }}
+          onBlur={handleBlur}
+          className="input pl-10"
           placeholder={placeholder}
           autoComplete="off"
         />
@@ -195,9 +184,8 @@ export default function LocationAutocomplete({
         <div 
           ref={suggestionsRef}
           className="absolute z-50 w-full mt-2 rounded-lg shadow-lg overflow-hidden"
+          className="card"
           style={{ 
-            background: 'rgba(17, 17, 17, 0.95)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
             backdropFilter: 'blur(12px)'
           }}
         >
@@ -210,24 +198,24 @@ export default function LocationAutocomplete({
                 index === selectedIndex ? '' : ''
               }`}
               style={{ 
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-                background: index === selectedIndex ? 'rgba(255, 255, 255, 0.1)' : 'transparent'
+                borderColor: 'var(--color-border)',
+                background: index === selectedIndex ? 'var(--color-surface-hover)' : 'transparent'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
+                e.currentTarget.style.background = 'var(--color-surface-hover)'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = index === selectedIndex ? 'rgba(255, 255, 255, 0.1)' : 'transparent'
+                e.currentTarget.style.background = index === selectedIndex ? 'var(--color-surface-hover)' : 'transparent'
               }}
             >
               <div className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 mt-0.5 flex-shrink-0" style={{ color: '#666666' }} />
+                <MapPin className="h-5 w-5 mt-0.5 flex-shrink-0" style={{ color: 'var(--color-text-muted)' }} />
                 <div className="flex-1">
-                  <div className="font-medium" style={{ color: '#ffffff' }}>
+                  <div className="font-medium" style={{ color: 'var(--color-text)' }}>
                     {address.formattedAddress || address.addressLabel}
                   </div>
                   {address.neighborhood && (
-                    <div className="text-sm" style={{ color: '#a3a3a3' }}>
+                    <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                       {address.neighborhood}, {address.city || address.locality}
                     </div>
                   )}
@@ -242,11 +230,10 @@ export default function LocationAutocomplete({
         <div 
           ref={suggestionsRef}
           className="absolute z-50 w-full mt-2 rounded-lg shadow-lg p-4 text-center"
+          className="card"
           style={{ 
-            background: 'rgba(17, 17, 17, 0.95)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
             backdropFilter: 'blur(12px)',
-            color: '#a3a3a3'
+            color: 'var(--color-text-muted)'
           }}
         >
           No se encontraron resultados

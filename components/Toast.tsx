@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { CheckCircle, XCircle, AlertTriangle, Info, X } from 'lucide-react'
 
 interface ToastProps {
   id: string
@@ -42,33 +43,38 @@ function Toast({ id, message, type, duration = 4000, onClose }: ToastProps) {
     switch (type) {
       case 'success':
         return {
-          background: 'rgba(255, 255, 255, 0.1)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          color: '#ffffff'
+          background: 'var(--color-surface)',
+          border: '1px solid var(--color-success)',
+          color: 'var(--color-text)',
+          borderLeft: '4px solid var(--color-success)'
         }
       case 'error':
         return {
-          background: 'rgba(255, 255, 255, 0.1)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          color: '#ffffff'
+          background: 'var(--color-surface)',
+          border: '1px solid var(--color-error)',
+          color: 'var(--color-text)',
+          borderLeft: '4px solid var(--color-error)'
         }
       case 'warning':
         return {
-          background: 'rgba(255, 255, 255, 0.1)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          color: '#ffffff'
+          background: 'var(--color-surface)',
+          border: '1px solid var(--color-warning)',
+          color: 'var(--color-text)',
+          borderLeft: '4px solid var(--color-warning)'
         }
       case 'info':
         return {
-          background: 'rgba(255, 255, 255, 0.1)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          color: '#ffffff'
+          background: 'var(--color-surface)',
+          border: '1px solid var(--color-info)',
+          color: 'var(--color-text)',
+          borderLeft: '4px solid var(--color-info)'
         }
       default:
         return {
-          background: 'rgba(255, 255, 255, 0.1)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          color: '#ffffff'
+          background: 'var(--color-surface)',
+          border: '1px solid var(--color-border)',
+          color: 'var(--color-text)',
+          borderLeft: '4px solid var(--color-border)'
         }
     }
   }
@@ -76,15 +82,15 @@ function Toast({ id, message, type, duration = 4000, onClose }: ToastProps) {
   const getIcon = () => {
     switch (type) {
       case 'success':
-        return <div className="w-1 h-1 rounded-full bg-white opacity-60"></div>
+        return <CheckCircle size={20} style={{ color: 'var(--color-success)' }} />
       case 'error':
-        return <div className="w-1 h-1 rounded-full bg-white opacity-60"></div>
+        return <XCircle size={20} style={{ color: 'var(--color-error)' }} />
       case 'warning':
-        return <div className="w-1 h-1 rounded-full bg-white opacity-60"></div>
+        return <AlertTriangle size={20} style={{ color: 'var(--color-warning)' }} />
       case 'info':
-        return <div className="w-1 h-1 rounded-full bg-white opacity-60"></div>
+        return <Info size={20} style={{ color: 'var(--color-info)' }} />
       default:
-        return <div className="w-1 h-1 rounded-full bg-white opacity-60"></div>
+        return <Info size={20} style={{ color: 'var(--color-text-muted)' }} />
     }
   }
 
@@ -94,17 +100,20 @@ function Toast({ id, message, type, duration = 4000, onClose }: ToastProps) {
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -20, scale: 0.95 }}
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-      className="flex items-center gap-3 p-4 rounded-xl shadow-lg backdrop-blur-md max-w-md pointer-events-auto"
-      style={getTypeStyles()}
+      className="flex items-center gap-3 p-4 rounded-lg max-w-md pointer-events-auto"
+      style={{
+        ...getTypeStyles(),
+        boxShadow: 'var(--shadow-lg)'
+      }}
     >
       {getIcon()}
-      <span className="text-sm font-light flex-1">{message}</span>
+      <span className="text-sm font-medium flex-1">{message}</span>
       <button
         onClick={() => onClose(id)}
         className="ml-2 opacity-60 hover:opacity-100 transition-opacity"
-        style={{ color: '#ffffff' }}
+        style={{ color: 'var(--color-text-muted)' }}
       >
-        <div className="w-1 h-1 rounded-full bg-current opacity-60"></div>
+        <X size={16} />
       </button>
     </motion.div>
   )

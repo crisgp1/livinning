@@ -190,14 +190,14 @@ export default function PublishProperty() {
 
   if (!isLoaded || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-white">
         <div className="loading-spinner"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
       <Navigation />
       
       <main className="pt-24 pb-16">
@@ -205,10 +205,10 @@ export default function PublishProperty() {
           
           {/* Header */}
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-light mb-4" style={{ color: '#ffffff' }}>
+            <h1 className="text-4xl font-light mb-4 text-gray-800">
               Publicar Propiedad
             </h1>
-            <p className="text-lg" style={{ color: '#666666' }}>
+            <p className="text-lg text-gray-600">
               Completa la información de tu propiedad
             </p>
           </div>
@@ -226,23 +226,23 @@ export default function PublishProperty() {
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 transition-all duration-300 ${
                       step.id <= currentStep
-                        ? 'bg-white text-black'
-                        : 'border border-gray-600 text-gray-600'
+                        ? 'bg-blue-600 text-white'
+                        : 'border border-gray-300 text-gray-400'
                     }`}
                   >
                     <div className="w-1 h-1 rounded-full bg-current"></div>
                   </div>
-                  <span className="text-xs font-medium" style={{ color: step.id <= currentStep ? '#ffffff' : '#666666' }}>
+                  <span className="text-xs font-medium" style={{ color: step.id <= currentStep ? '#1e40af' : '#6b7280' }}>
                     {step.title}
                   </span>
                 </div>
               ))}
             </div>
             
-            <div className="w-full bg-gray-800 rounded-full h-1">
+            <div className="w-full bg-gray-200 rounded-full h-1">
               <div
                 ref={progressRef}
-                className="bg-white h-1 rounded-full transition-all duration-500"
+                className="bg-blue-600 h-1 rounded-full transition-all duration-500"
                 style={{ width: `${(currentStep / steps.length) * 100}%` }}
               />
             </div>

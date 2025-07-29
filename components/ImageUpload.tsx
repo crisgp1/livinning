@@ -77,8 +77,8 @@ export default function ImageUpload({
     if (dropRef.current) {
       gsap.to(dropRef.current, {
         scale: 1.02,
-        borderColor: '#ffffff',
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        borderColor: 'var(--color-primary)',
+        backgroundColor: 'var(--color-surface-hover)',
         duration: 0.2,
         ease: "power2.out"
       })
@@ -93,8 +93,8 @@ export default function ImageUpload({
     if (dropRef.current) {
       gsap.to(dropRef.current, {
         scale: 1,
-        borderColor: 'rgba(255, 255, 255, 0.1)',
-        backgroundColor: 'rgba(17, 17, 17, 0.8)',
+        borderColor: 'var(--color-border)',
+        backgroundColor: 'var(--color-surface)',
         duration: 0.2,
         ease: "power2.out"
       })
@@ -109,8 +109,8 @@ export default function ImageUpload({
     if (dropRef.current) {
       gsap.to(dropRef.current, {
         scale: 1,
-        borderColor: 'rgba(255, 255, 255, 0.1)',
-        backgroundColor: 'rgba(17, 17, 17, 0.8)',
+        borderColor: 'var(--color-border)',
+        backgroundColor: 'var(--color-surface)',
         duration: 0.2,
         ease: "power2.out"
       })
@@ -157,16 +157,16 @@ export default function ImageUpload({
         ref={dropRef}
         className="border-2 border-dashed rounded-xl p-8 text-center transition-colors duration-200 cursor-pointer"
         style={{ 
-          borderColor: 'rgba(255, 255, 255, 0.2)',
-          background: 'rgba(17, 17, 17, 0.8)'
+          borderColor: 'var(--color-border)',
+          background: 'var(--color-surface)'
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.borderColor = '#ffffff'
-          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
+          e.currentTarget.style.borderColor = 'var(--color-primary)'
+          e.currentTarget.style.background = 'var(--color-surface-hover)'
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)'
-          e.currentTarget.style.background = 'rgba(17, 17, 17, 0.8)'
+          e.currentTarget.style.borderColor = 'var(--color-border)'
+          e.currentTarget.style.background = 'var(--color-surface)'
         }}
         onDragEnter={handleDragIn}
         onDragLeave={handleDragOut}
@@ -184,22 +184,22 @@ export default function ImageUpload({
         />
         
         <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg" style={{ background: 'rgba(255, 255, 255, 0.1)' }}>
+          <div className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg" style={{ background: 'var(--color-primary)' }}>
             {uploading ? (
-              <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <div className="loading-spinner" />
             ) : (
-              <Upload size={24} className="text-white" />
+              <Upload size={24} style={{ color: '#ffffff' }} />
             )}
           </div>
           
           <div>
-            <h3 className="text-lg font-semibold" style={{ color: '#ffffff' }}>
+            <h3 className="text-lg font-semibold" style={{ color: 'var(--color-text)' }}>
               {uploading ? 'Subiendo imágenes...' : 'Sube las fotos de tu propiedad'}
             </h3>
-            <p className="mt-1" style={{ color: '#a3a3a3' }}>
+            <p className="mt-1" style={{ color: 'var(--color-text-secondary)' }}>
               Arrastra y suelta las imágenes aquí o haz clic para seleccionar
             </p>
-            <p className="text-sm mt-2" style={{ color: '#666666' }}>
+            <p className="text-sm mt-2" style={{ color: 'var(--color-text-muted)' }}>
               Máximo {maxImages} imágenes • PNG, JPG, WebP • Máximo 10MB cada una
             </p>
           </div>
@@ -208,7 +208,7 @@ export default function ImageUpload({
 
       {images.length > 0 && (
         <div>
-          <h4 className="text-lg font-semibold mb-4" style={{ color: '#ffffff' }}>
+          <h4 className="text-lg font-semibold mb-4" style={{ color: 'var(--color-text)' }}>
             Imágenes subidas ({images.length}/{maxImages})
           </h4>
           
