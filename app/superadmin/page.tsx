@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Users, Building2, Settings, Shield, Plus, Edit, Trash2, Eye, X, LayoutDashboard, Home, Menu } from 'lucide-react'
 import Navigation from '@/components/Navigation'
+import Modal from '@/components/ui/Modal'
+import { useModal } from '@/hooks/useModal'
 
 interface Organization {
   id: string
@@ -42,7 +44,7 @@ export default function SuperAdminDashboard() {
   const [stats, setStats] = useState<Stats | null>(null)
   const [organizations, setOrganizations] = useState<Organization[]>([])
   const [activeTab, setActiveTab] = useState('overview')
-  const [showCreateModal, setShowCreateModal] = useState(false)
+  const { isOpen: showCreateModal, openModal: openCreateModal, closeModal: closeCreateModal } = useModal()
   const [showMobileSidebar, setShowMobileSidebar] = useState(false)
   const [createForm, setCreateForm] = useState<CreateOrgForm>({
     name: '',
@@ -123,7 +125,7 @@ export default function SuperAdminDashboard() {
           ownerId: '',
           plan: 'free'
         })
-        setShowCreateModal(false)
+        closeCreateModal()
         // Refresh data
         fetchData()
         alert('Organización creada exitosamente')
@@ -354,7 +356,7 @@ export default function SuperAdminDashboard() {
                     <p className="text-gray-600">Gestiona todas las organizaciones del sistema</p>
                   </div>
                   <button
-                    onClick={() => setShowCreateModal(true)}
+                    onClick={openCreateModal}
                     className="btn-primary flex items-center gap-2 w-full sm:w-auto justify-center"
                   >
                     <Plus size={20} />
@@ -638,26 +640,13 @@ export default function SuperAdminDashboard() {
       </div>
 
       {/* Create Organization Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="glass-icon-container rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto"
-          >
-            <div className="p-6 border-b border-gray-100">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-light text-gray-900">Nueva Organización</h3>
-                <button
-                  onClick={() => setShowCreateModal(false)}
-                  className="transition-colors p-1 rounded-lg text-gray-500 hover:text-gray-700"
-                >
-                  <X size={24} />
-                </button>
-              </div>
-            </div>
-
-            <div className="p-6 space-y-4">
+      <Modal
+        isOpen={showCreateModal}
+        onClose={closeCreateModal}
+        title="Nueva Organización"
+        size="md"
+      >
+        <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2 text-gray-700">
                   Nombre de la Organización *
@@ -738,34 +727,32 @@ export default function SuperAdminDashboard() {
                   <option value="enterprise">Enterprise</option>
                 </select>
               </div>
-            </div>
 
-            <div className="p-6 border-t border-gray-100 flex justify-end gap-3">
-              <button
-                onClick={() => setShowCreateModal(false)}
-                className="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
-                disabled={isCreating}
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleCreateOrganization}
-                disabled={isCreating || !createForm.name || !createForm.slug || !createForm.ownerId}
-                className="btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isCreating ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Creando...
-                  </>
-                ) : (
-                  'Crear Organización'
-                )}
-              </button>
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-6">
+                <button
+                  onClick={closeCreateModal}
+                  className="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+                  disabled={isCreating}
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleCreateOrganization}
+                  disabled={isCreating || !createForm.name || !createForm.slug || !createForm.ownerId}
+                  className="btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isCreating ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Creando...
+                    </>
+                  ) : (
+                    'Crear Organización'
+                  )}
+                </button>
+              </div>
             </div>
-          </motion.div>
-        </div>
-      )}
+      </Modal>
     </div>
   </div>
   )
