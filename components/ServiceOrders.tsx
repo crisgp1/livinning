@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { motion } from 'framer-motion'
+import OrderStatus from '@/components/OrderStatus'
 import { 
   Clock, 
   MapPin, 
@@ -14,7 +15,8 @@ import {
   Loader2,
   Download,
   Eye,
-  User
+  User,
+  X
 } from 'lucide-react'
 
 interface ServiceOrder {
@@ -136,36 +138,20 @@ export default function ServiceOrders({ className }: ServiceOrdersProps) {
   return (
     <div className={className}>
       <div className="mb-6">
-        <h3 className="text-xl font-light mb-4" style={{ color: '#ffffff' }}>Mis Servicios Contratados</h3>
+        <h3 className="text-xl font-medium mb-4 text-gray-900">Mis Servicios Contratados</h3>
         
         {/* Status Filter */}
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-2">
           {['all', 'pending', 'confirmed', 'in_progress', 'completed', 'cancelled'].map((status) => (
             <button
               key={status}
               onClick={() => setSelectedStatus(status)}
-              className="flex items-center gap-2 px-4 py-2 font-medium transition-all whitespace-nowrap"
-              style={{
-                background: selectedStatus === status 
-                  ? 'rgba(255, 255, 255, 0.2)'
-                  : 'rgba(255, 255, 255, 0.05)',
-                color: selectedStatus === status ? '#ffffff' : '#a3a3a3',
-                border: `1px solid ${selectedStatus === status ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`
-              }}
-              onMouseEnter={(e) => {
-                if (selectedStatus !== status) {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
-                  e.currentTarget.style.color = '#ffffff'
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (selectedStatus !== status) {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'
-                  e.currentTarget.style.color = '#a3a3a3'
-                }
-              }}
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                selectedStatus === status 
+                  ? 'bg-primary text-white shadow-lg shadow-primary/20' 
+                  : 'glass-icon-container hover:scale-105'
+              }`}
             >
-              <div className="w-1 h-1 rounded-full bg-current opacity-60"></div>
               {status === 'all' ? 'Todos' : getStatusText(status)}
             </button>
           ))}
@@ -173,16 +159,14 @@ export default function ServiceOrders({ className }: ServiceOrdersProps) {
       </div>
 
       {orders.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ 
-            background: 'rgba(255, 255, 255, 0.1)'
-          }}>
-            <div className="w-2 h-2 rounded-full bg-white opacity-60"></div>
+        <div className="glass-icon-container rounded-2xl p-12 text-center">
+          <div className="w-16 h-16 mx-auto mb-6 glass rounded-2xl flex items-center justify-center">
+            <FileText className="w-8 h-8 text-gray-400" />
           </div>
-          <h3 className="text-lg font-light mb-2" style={{ color: '#ffffff' }}>
+          <h3 className="text-lg font-medium mb-2 text-gray-900">
             No tienes servicios contratados
           </h3>
-          <p style={{ color: '#a3a3a3' }}>
+          <p className="text-sm text-gray-600">
             Cuando contrates servicios profesionales aparecerán aquí
           </p>
         </div>
@@ -193,45 +177,41 @@ export default function ServiceOrders({ className }: ServiceOrdersProps) {
               key={order.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="glass-card p-6 hover:scale-105 transition-transform"
+              className="glass-icon-container rounded-2xl p-6 hover:shadow-xl transition-all duration-300"
+              whileHover={{ y: -4 }}
             >
               {/* Header */}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ 
-                    background: 'rgba(255, 255, 255, 0.1)'
-                  }}>
-                    {getServiceIcon(order.serviceType)}
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-primary to-blue-600">
+                    <FileText className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h4 className="font-light" style={{ color: '#ffffff' }}>{order.serviceName}</h4>
-                    <p className="text-sm" style={{ color: '#a3a3a3' }}>
+                    <h4 className="font-medium text-gray-900">{order.serviceName}</h4>
+                    <p className="text-sm text-gray-600">
                       Solicitado el {formatDate(order.createdAt)}
                     </p>
                   </div>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-light border ${getStatusColor(order.status)}`}>
-                  {getStatusText(order.status)}
-                </span>
               </div>
 
               {/* Details */}
               <div className="space-y-3 mb-4">
-                <div className="flex items-center gap-2 text-sm" style={{ color: '#a3a3a3' }}>
-                  <div className="w-1 h-1 rounded-full bg-current opacity-60"></div>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <MapPin size={14} className="text-gray-400" />
                   <span>{order.propertyAddress}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm" style={{ color: '#a3a3a3' }}>
-                  <div className="w-1 h-1 rounded-full bg-current opacity-60"></div>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Calendar size={14} className="text-gray-400" />
                   <span>Fecha preferida: {formatDate(order.preferredDate)}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm" style={{ color: '#a3a3a3' }}>
-                  <div className="w-1 h-1 rounded-full bg-current opacity-60"></div>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Phone size={14} className="text-gray-400" />
                   <span>{order.contactPhone}</span>
                 </div>
                 {order.assignedTo && (
-                  <div className="flex items-center gap-2 text-sm" style={{ color: '#a3a3a3' }}>
-                    <div className="w-1 h-1 rounded-full bg-current opacity-60"></div>
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <User size={14} className="text-gray-400" />
                     <span>Asignado a: {order.assignedTo}</span>
                   </div>
                 )}
@@ -239,12 +219,9 @@ export default function ServiceOrders({ className }: ServiceOrdersProps) {
 
               {/* Progress */}
               {order.estimatedDelivery && (
-                <div className="mb-4 p-3 rounded-lg" style={{ 
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)'
-                }}>
-                  <div className="flex items-center gap-2 text-sm" style={{ color: '#ffffff' }}>
-                    <div className="w-1 h-1 rounded-full bg-current opacity-60"></div>
+                <div className="mb-4 p-3 rounded-xl bg-blue-50 border border-blue-200">
+                  <div className="flex items-center gap-2 text-sm text-blue-700">
+                    <Clock size={14} />
                     <span>Entrega estimada: {order.estimatedDelivery}</span>
                   </div>
                 </div>
@@ -253,19 +230,19 @@ export default function ServiceOrders({ className }: ServiceOrdersProps) {
               {/* Special Requests */}
               {order.specialRequests && (
                 <div className="mb-4">
-                  <p className="text-sm font-light mb-1" style={{ color: '#ffffff' }}>Solicitudes especiales:</p>
-                  <p className="text-sm" style={{ color: '#a3a3a3' }}>{order.specialRequests}</p>
+                  <p className="text-sm font-medium mb-1 text-gray-700">Solicitudes especiales:</p>
+                  <p className="text-sm text-gray-600">{order.specialRequests}</p>
                 </div>
               )}
 
               {/* Deliverables */}
               {order.deliverables.length > 0 && (
                 <div className="mb-4">
-                  <p className="text-sm font-light mb-2" style={{ color: '#ffffff' }}>Entregables:</p>
+                  <p className="text-sm font-medium mb-2 text-gray-700">Entregables:</p>
                   <div className="space-y-1">
                     {order.deliverables.map((deliverable, index) => (
-                      <div key={index} className="flex items-center gap-2 text-sm" style={{ color: '#a3a3a3' }}>
-                        <div className="w-1 h-1 rounded-full bg-current opacity-60"></div>
+                      <div key={index} className="flex items-center gap-2 text-sm text-gray-600">
+                        <CheckCircle2 size={14} className="text-green-500" />
                         <span>{deliverable}</span>
                       </div>
                     ))}
@@ -273,29 +250,27 @@ export default function ServiceOrders({ className }: ServiceOrdersProps) {
                 </div>
               )}
 
+              {/* Order Status Tracking */}
+              <div className="mb-4">
+                <OrderStatus
+                  status={order.status as 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled'}
+                  serviceName={order.serviceName}
+                  orderDate={order.createdAt}
+                  estimatedDelivery={order.estimatedDelivery}
+                  actualDelivery={order.actualDelivery}
+                />
+              </div>
+
               {/* Footer */}
-              <div className="flex items-center justify-between pt-4" style={{ borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
-                <span className="text-lg font-light" style={{ color: '#ffffff' }}>
+              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                <span className="text-xl font-light text-gray-900">
                   {formatCurrency(order.amount, order.currency)}
                 </span>
                 <button
                   onClick={() => setSelectedOrder(order)}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all"
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    color: '#a3a3a3',
-                    border: '1px solid rgba(255, 255, 255, 0.1)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
-                    e.currentTarget.style.color = '#ffffff'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'
-                    e.currentTarget.style.color = '#a3a3a3'
-                  }}
+                  className="py-2.5 px-4 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-700 text-sm font-medium hover:bg-white hover:shadow-sm transition-all duration-200 flex items-center gap-2"
                 >
-                  <div className="w-1 h-1 rounded-full bg-current opacity-60"></div>
+                  <Eye size={14} />
                   Ver detalles
                 </button>
               </div>
@@ -306,66 +281,54 @@ export default function ServiceOrders({ className }: ServiceOrdersProps) {
 
       {/* Order Details Modal */}
       {selectedOrder && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="glass-card max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
           >
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-light" style={{ color: '#ffffff' }}>Detalles del Servicio</h3>
+                <h3 className="text-2xl font-medium text-gray-900">Detalles del Servicio</h3>
                 <button
                   onClick={() => setSelectedOrder(null)}
-                  className="transition-colors"
-                  style={{ color: '#666666' }}
-                  onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'}
-                  onMouseLeave={(e) => e.currentTarget.style.color = '#666666'}
+                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
                 >
-                  ✕
+                  <X size={20} className="text-gray-500" />
                 </button>
               </div>
 
               <div className="space-y-6">
                 {/* Service Info */}
                 <div>
-                  <h4 className="font-light mb-3" style={{ color: '#ffffff' }}>Información del Servicio</h4>
-                  <div className="rounded-lg p-4 space-y-2" style={{ 
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)'
-                  }}>
-                    <p style={{ color: '#a3a3a3' }}><strong style={{ color: '#ffffff' }}>Servicio:</strong> {selectedOrder.serviceName}</p>
-                    <p style={{ color: '#a3a3a3' }}><strong style={{ color: '#ffffff' }}>Descripción:</strong> {selectedOrder.serviceDescription}</p>
-                    <p style={{ color: '#a3a3a3' }}><strong style={{ color: '#ffffff' }}>Estado:</strong> <span className={`px-2 py-1 rounded text-xs ${getStatusColor(selectedOrder.status)}`}>
+                  <h4 className="font-medium mb-3 text-gray-900">Información del Servicio</h4>
+                  <div className="rounded-xl p-4 space-y-2 bg-gray-50">
+                    <p className="text-gray-700"><span className="font-medium">Servicio:</span> {selectedOrder.serviceName}</p>
+                    <p className="text-gray-700"><span className="font-medium">Descripción:</span> {selectedOrder.serviceDescription}</p>
+                    <p className="text-gray-700"><span className="font-medium">Estado:</span> <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedOrder.status)}`}>
                       {getStatusText(selectedOrder.status)}
                     </span></p>
-                    <p style={{ color: '#a3a3a3' }}><strong style={{ color: '#ffffff' }}>Monto:</strong> {formatCurrency(selectedOrder.amount, selectedOrder.currency)}</p>
+                    <p className="text-gray-700"><span className="font-medium">Monto:</span> {formatCurrency(selectedOrder.amount, selectedOrder.currency)}</p>
                   </div>
                 </div>
 
                 {/* Property Info */}
                 <div>
-                  <h4 className="font-light mb-3" style={{ color: '#ffffff' }}>Información de la Propiedad</h4>
-                  <div className="rounded-lg p-4 space-y-2" style={{ 
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)'
-                  }}>
-                    <p style={{ color: '#a3a3a3' }}><strong style={{ color: '#ffffff' }}>Dirección:</strong> {selectedOrder.propertyAddress}</p>
-                    <p style={{ color: '#a3a3a3' }}><strong style={{ color: '#ffffff' }}>Teléfono de contacto:</strong> {selectedOrder.contactPhone}</p>
-                    <p style={{ color: '#a3a3a3' }}><strong style={{ color: '#ffffff' }}>Fecha preferida:</strong> {formatDate(selectedOrder.preferredDate)}</p>
+                  <h4 className="font-medium mb-3 text-gray-900">Información de la Propiedad</h4>
+                  <div className="rounded-xl p-4 space-y-2 bg-gray-50">
+                    <p className="text-gray-700"><span className="font-medium">Dirección:</span> {selectedOrder.propertyAddress}</p>
+                    <p className="text-gray-700"><span className="font-medium">Teléfono de contacto:</span> {selectedOrder.contactPhone}</p>
+                    <p className="text-gray-700"><span className="font-medium">Fecha preferida:</span> {formatDate(selectedOrder.preferredDate)}</p>
                   </div>
                 </div>
 
                 {/* Notes */}
                 {selectedOrder.notes.length > 0 && (
                   <div>
-                    <h4 className="font-light mb-3" style={{ color: '#ffffff' }}>Notas del Servicio</h4>
-                    <div className="rounded-lg p-4 space-y-2" style={{ 
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.1)'
-                    }}>
+                    <h4 className="font-medium mb-3 text-gray-900">Notas del Servicio</h4>
+                    <div className="rounded-xl p-4 space-y-2 bg-gray-50">
                       {selectedOrder.notes.map((note, index) => (
-                        <p key={index} className="text-sm" style={{ color: '#a3a3a3' }}>• {note}</p>
+                        <p key={index} className="text-sm text-gray-600">• {note}</p>
                       ))}
                     </div>
                   </div>
@@ -373,30 +336,30 @@ export default function ServiceOrders({ className }: ServiceOrdersProps) {
 
                 {/* Timeline */}
                 <div>
-                  <h4 className="font-light mb-3" style={{ color: '#ffffff' }}>Cronología</h4>
+                  <h4 className="font-medium mb-3 text-gray-900">Cronología</h4>
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 bg-white rounded-full opacity-60"></div>
+                      <div className="w-3 h-3 bg-primary rounded-full"></div>
                       <div>
-                        <p className="text-sm font-light" style={{ color: '#ffffff' }}>Servicio solicitado</p>
-                        <p className="text-xs" style={{ color: '#a3a3a3' }}>{formatDate(selectedOrder.createdAt)}</p>
+                        <p className="text-sm font-medium text-gray-900">Servicio solicitado</p>
+                        <p className="text-xs text-gray-600">{formatDate(selectedOrder.createdAt)}</p>
                       </div>
                     </div>
                     {selectedOrder.status !== 'pending' && (
                       <div className="flex items-center gap-3">
-                        <div className="w-3 h-3 bg-white rounded-full opacity-60"></div>
+                        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
                         <div>
-                          <p className="text-sm font-light" style={{ color: '#ffffff' }}>Pago confirmado</p>
-                          <p className="text-xs" style={{ color: '#a3a3a3' }}>{formatDate(selectedOrder.updatedAt)}</p>
+                          <p className="text-sm font-medium text-gray-900">Pago confirmado</p>
+                          <p className="text-xs text-gray-600">{formatDate(selectedOrder.updatedAt)}</p>
                         </div>
                       </div>
                     )}
                     {selectedOrder.actualDelivery && (
                       <div className="flex items-center gap-3">
-                        <div className="w-3 h-3 bg-white rounded-full opacity-60"></div>
+                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                         <div>
-                          <p className="text-sm font-light" style={{ color: '#ffffff' }}>Servicio completado</p>
-                          <p className="text-xs" style={{ color: '#a3a3a3' }}>{formatDate(selectedOrder.actualDelivery)}</p>
+                          <p className="text-sm font-medium text-gray-900">Servicio completado</p>
+                          <p className="text-xs text-gray-600">{formatDate(selectedOrder.actualDelivery)}</p>
                         </div>
                       </div>
                     )}

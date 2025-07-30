@@ -2,11 +2,12 @@
 
 import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ArrowLeft, Plus, ExternalLink, TrendingUp, Clock, CheckCircle, Zap } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Navigation from '@/components/Navigation'
 import ServiceOrders from '@/components/ServiceOrders'
+import OrderStatus from '@/components/OrderStatus'
 import { useToast } from '@/components/Toast'
 
 const quickActions = [
@@ -104,22 +105,22 @@ export default function ServicesPage() {
   const getStatIcon = (type: string) => {
     switch (type) {
       case 'active':
-        return <Clock className="w-4 h-4" />
+        return <Clock className="w-5 h-5" />
       case 'completed':
-        return <CheckCircle className="w-4 h-4" />
+        return <CheckCircle className="w-5 h-5" />
       case 'investment':
-        return <TrendingUp className="w-4 h-4" />
+        return <TrendingUp className="w-5 h-5" />
       case 'month':
-        return <Zap className="w-4 h-4" />
+        return <Zap className="w-5 h-5" />
       default:
-        return <div className="w-4 h-4 rounded-full bg-current opacity-60"></div>
+        return <div className="w-5 h-5 rounded-full bg-current opacity-60"></div>
     }
   }
 
   if (!isLoaded) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0a0a' }}>
-        <div className="loading-spinner"></div>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="w-8 h-8 border-2 border-gray-200 border-t-primary rounded-full animate-spin"></div>
       </div>
     )
   }
@@ -129,12 +130,12 @@ export default function ServicesPage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: '#0a0a0a' }}>
+    <div className="min-h-screen bg-white">
       <Navigation />
       
       <main className="pt-20">
-        <div className="section-container py-16">
-          <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div>
             
             {/* Header */}
             <motion.div 
@@ -144,10 +145,7 @@ export default function ServicesPage() {
             >
               <button
                 onClick={() => router.push('/dashboard')}
-                className="inline-flex items-center gap-2 mb-6 transition-colors"
-                style={{ color: '#666666' }}
-                onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'}
-                onMouseLeave={(e) => e.currentTarget.style.color = '#666666'}
+                className="inline-flex items-center gap-2 mb-6 text-gray-600 hover:text-gray-900 transition-colors"
               >
                 <ArrowLeft size={20} />
                 Volver al Dashboard
@@ -155,10 +153,10 @@ export default function ServicesPage() {
               
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-4xl font-light mb-2" style={{ color: '#ffffff' }}>
+                  <h1 className="text-3xl lg:text-4xl font-light mb-2 text-gray-900">
                     Servicios
                   </h1>
-                  <p className="text-lg" style={{ color: '#a3a3a3' }}>
+                  <p className="text-lg text-gray-600">
                     Gestiona y contrata servicios profesionales
                   </p>
                 </div>
@@ -166,22 +164,9 @@ export default function ServicesPage() {
                 <div className="flex gap-3">
                   <button
                     onClick={() => router.push('/services')}
-                    className="flex items-center gap-2 px-6 py-3 rounded-full font-medium transition-all"
-                    style={{
-                      background: 'rgba(255, 255, 255, 0.2)',
-                      color: '#ffffff',
-                      border: '1px solid rgba(255, 255, 255, 0.3)'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'
-                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.4)'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'
-                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)'
-                    }}
+                    className="btn-primary flex items-center gap-3"
                   >
-                    <div className="w-1 h-1 rounded-full bg-current opacity-60"></div>
+                    <Plus size={20} />
                     Explorar Servicios
                   </button>
                 </div>
@@ -195,7 +180,7 @@ export default function ServicesPage() {
               transition={{ delay: 0.1 }}
               className="mb-8"
             >
-              <div className="flex flex-wrap justify-center gap-4">
+              <div className="flex flex-wrap justify-center gap-2">
                 {[
                   { id: 'overview', label: 'Resumen' },
                   { id: 'active', label: 'Activos' },
@@ -204,28 +189,12 @@ export default function ServicesPage() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className="flex items-center gap-2 px-6 py-3 rounded-full font-medium transition-all"
-                    style={{
-                      background: activeTab === tab.id 
-                        ? 'rgba(255, 255, 255, 0.2)'
-                        : 'rgba(255, 255, 255, 0.05)',
-                      color: activeTab === tab.id ? '#ffffff' : '#a3a3a3',
-                      border: `1px solid ${activeTab === tab.id ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`
-                    }}
-                    onMouseEnter={(e) => {
-                      if (activeTab !== tab.id) {
-                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
-                        e.currentTarget.style.color = '#ffffff'
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (activeTab !== tab.id) {
-                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'
-                        e.currentTarget.style.color = '#a3a3a3'
-                      }
-                    }}
+                    className={`px-6 py-3 rounded-xl text-sm font-medium transition-all ${
+                      activeTab === tab.id 
+                        ? 'bg-primary text-white shadow-lg shadow-primary/20' 
+                        : 'glass-icon-container hover:scale-105'
+                    }`}
                   >
-                    <div className="w-1 h-1 rounded-full bg-current opacity-60"></div>
                     {tab.label}
                   </button>
                 ))}
@@ -256,14 +225,15 @@ export default function ServicesPage() {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.2 + index * 0.1 }}
-                          className="glass-card p-6 hover:scale-105 transition-transform"
+                          className="glass-card p-6 group"
+                          whileHover={{ y: -4 }}
                         >
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="text-sm mb-1" style={{ color: '#a3a3a3' }}>{stat.label}</p>
-                              <p className="text-2xl font-light" style={{ color: '#ffffff' }}>
+                              <p className="text-sm mb-1 text-gray-600">{stat.label}</p>
+                              <p className="text-2xl font-light text-gray-900">
                                 {isLoadingStats ? (
-                                  <div className="w-8 h-6 bg-white bg-opacity-10 rounded animate-pulse"></div>
+                                  <div className="w-8 h-6 bg-gray-200 rounded animate-pulse"></div>
                                 ) : (
                                   stat.format === 'currency' 
                                     ? `$${stats[stat.key as keyof typeof stats].toLocaleString()}`
@@ -271,9 +241,7 @@ export default function ServicesPage() {
                                 )}
                               </p>
                             </div>
-                            <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ 
-                              background: 'rgba(255, 255, 255, 0.1)'
-                            }}>
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white">
                               {getStatIcon(stat.type)}
                             </div>
                           </div>
@@ -283,27 +251,13 @@ export default function ServicesPage() {
                   )}
 
                   {/* Quick Actions */}
-                  <div className="glass-card p-8">
+                  <div className="glass-icon-container rounded-2xl p-8">
                     <div className="flex items-center justify-between mb-6">
-                      <h2 className="text-2xl font-light" style={{ color: '#ffffff' }}>Acciones Rápidas</h2>
+                      <h2 className="text-2xl font-medium text-gray-900">Acciones Rápidas</h2>
                       <button
                         onClick={() => router.push('/services')}
-                        className="flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all"
-                        style={{
-                          background: 'rgba(255, 255, 255, 0.05)',
-                          color: '#a3a3a3',
-                          border: '1px solid rgba(255, 255, 255, 0.1)'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
-                          e.currentTarget.style.color = '#ffffff'
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'
-                          e.currentTarget.style.color = '#a3a3a3'
-                        }}
+                        className="text-sm text-primary hover:text-primary-hover font-medium"
                       >
-                        <div className="w-1 h-1 rounded-full bg-current opacity-60"></div>
                         Ver Todos
                       </button>
                     </div>
@@ -315,37 +269,21 @@ export default function ServicesPage() {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.4 + index * 0.1 }}
-                          className="relative p-4 rounded-lg cursor-pointer transition-all hover:scale-105"
-                          style={{ 
-                            background: 'rgba(255, 255, 255, 0.05)',
-                            border: '1px solid rgba(255, 255, 255, 0.1)'
-                          }}
+                          className="relative glass-icon-container rounded-xl p-4 cursor-pointer hover:shadow-xl transition-all"
                           onClick={() => handleQuickAction(action.id)}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
-                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)'
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'
-                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)'
-                          }}
+                          whileHover={{ y: -4 }}
                         >
                           {action.popular && (
-                            <div className="absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-light" style={{ 
-                              background: 'linear-gradient(135deg, #ffffff, #e5e5e5)',
-                              color: '#000000'
-                            }}>
+                            <div className="absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
                               Popular
                             </div>
                           )}
-                          <div className="w-8 h-8 rounded-full flex items-center justify-center mb-3" style={{ 
-                            background: 'rgba(255, 255, 255, 0.1)'
-                          }}>
-                            <div className="w-2 h-2 rounded-full bg-white opacity-60"></div>
+                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center mb-3">
+                            <Zap className="w-6 h-6 text-white" />
                           </div>
-                          <h3 className="font-light mb-1" style={{ color: '#ffffff' }}>{action.title}</h3>
-                          <p className="text-sm mb-2" style={{ color: '#a3a3a3' }}>{action.description}</p>
-                          <p className="text-sm font-light" style={{ color: '#e5e5e5' }}>{action.price}</p>
+                          <h3 className="font-medium mb-1 text-gray-900">{action.title}</h3>
+                          <p className="text-sm mb-2 text-gray-600">{action.description}</p>
+                          <p className="text-sm font-medium text-primary">{action.price}</p>
                         </motion.div>
                       ))}
                     </div>
@@ -361,9 +299,7 @@ export default function ServicesPage() {
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <div className="glass-card p-8">
-                    <ServiceOrders />
-                  </div>
+                  <ServiceOrders />
                 </motion.div>
               )}
 
@@ -375,20 +311,16 @@ export default function ServicesPage() {
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <div className="glass-card p-8">
-                    <div className="text-center py-12">
-                      <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ 
-                        background: 'rgba(255, 255, 255, 0.1)'
-                      }}>
-                        <div className="w-2 h-2 rounded-full bg-white opacity-60"></div>
-                      </div>
-                      <h3 className="text-lg font-light mb-2" style={{ color: '#ffffff' }}>
-                        Historial de Servicios
-                      </h3>
-                      <p style={{ color: '#a3a3a3' }}>
-                        Aquí aparecerá el historial completo de tus servicios
-                      </p>
+                  <div className="glass-icon-container rounded-2xl p-12 text-center">
+                    <div className="w-16 h-16 mx-auto mb-6 glass rounded-2xl flex items-center justify-center">
+                      <Clock className="w-8 h-8 text-gray-400" />
                     </div>
+                    <h3 className="text-lg font-medium mb-2 text-gray-900">
+                      Historial de Servicios
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      Aquí aparecerá el historial completo de tus servicios
+                    </p>
                   </div>
                 </motion.div>
               )}

@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import Navigation from '@/components/Navigation'
 import ServiceOrders from '@/components/ServiceOrders'
+import OrderStatus from '@/components/OrderStatus'
 import { 
   Home, 
   Building, 
@@ -46,6 +47,27 @@ interface UserStats {
   totalInquiries: number
 }
 
+interface ServiceOrder {
+  id: string
+  serviceType: string
+  serviceName: string
+  serviceDescription: string
+  propertyAddress: string
+  contactPhone: string
+  preferredDate: string
+  specialRequests: string
+  amount: number
+  currency: string
+  status: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled'
+  estimatedDelivery?: string
+  actualDelivery?: string
+  assignedTo?: string
+  deliverables: string[]
+  notes: string[]
+  createdAt: string
+  updatedAt: string
+}
+
 export default function Dashboard() {
   const { user, isLoaded } = useUser()
   const router = useRouter()
@@ -62,6 +84,7 @@ export default function Dashboard() {
   const [isAgent, setIsAgent] = useState(false)
   const [organization, setOrganization] = useState<any>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [recentOrder, setRecentOrder] = useState<ServiceOrder | null>(null)
 
   useEffect(() => {
     if (isLoaded && !user) {
@@ -106,6 +129,15 @@ export default function Dashboard() {
       if (orgResponse.ok) {
         const orgData = await orgResponse.json()
         setOrganization(orgData.data || null)
+      }
+      
+      // Fetch recent service order
+      const ordersResponse = await fetch('/api/services/orders?limit=1')
+      if (ordersResponse.ok) {
+        const ordersData = await ordersResponse.json()
+        if (ordersData.data && ordersData.data.length > 0) {
+          setRecentOrder(ordersData.data[0])
+        }
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
@@ -392,6 +424,30 @@ export default function Dashboard() {
               </motion.div>
             ))}
           </div>
+
+          {/* Service Order Status */}
+          {recentOrder && (
+            <div className="mb-8 lg:mb-12">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl lg:text-2xl font-medium text-gray-900">
+                  Estado de tu Servicio Más Reciente
+                </h2>
+                <button 
+                  onClick={() => router.push('/dashboard/services')}
+                  className="text-sm text-primary hover:text-primary-hover font-medium"
+                >
+                  Ver todos los servicios
+                </button>
+              </div>
+              <OrderStatus
+                status={recentOrder.status}
+                serviceName={recentOrder.serviceName}
+                orderDate={recentOrder.createdAt}
+                estimatedDelivery={recentOrder.estimatedDelivery}
+                actualDelivery={recentOrder.actualDelivery}
+              />
+            </div>
+          )}
 
           {/* Properties Grid */}
           <div className="mb-8 lg:mb-12">
