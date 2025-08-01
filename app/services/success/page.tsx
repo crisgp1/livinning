@@ -12,6 +12,7 @@ function ServiceSuccessContent() {
   const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = useState(true)
   const [serviceName, setServiceName] = useState('')
+  const [orderId, setOrderId] = useState<string | null>(null)
 
   useEffect(() => {
     const sessionId = searchParams.get('session_id')
@@ -21,10 +22,55 @@ function ServiceSuccessContent() {
       return
     }
 
-    // Extract service name from URL or session data
-    // In a real implementation, you might fetch this from your API
-    setServiceName('Servicio Profesional')
-    setIsLoading(false)
+    // Create service order from successful payment session
+    const createServiceOrder = async () => {
+      try {
+        console.log('🔄 Creating service order from successful payment...')
+        
+        // Get session details from Stripe
+        const sessionResponse = await fetch(`/api/payments/get-session?session_id=${sessionId}`)
+        
+        if (sessionResponse.ok) {
+          const sessionData = await sessionResponse.json()
+          console.log('💳 Session data:', sessionData)
+          
+          if (sessionData.success && sessionData.session) {
+            const session = sessionData.session
+            
+            // Create service order if it has serviceId metadata
+            if (session.metadata?.serviceId) {
+              const createOrderResponse = await fetch('/api/services/create-order-from-session', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  sessionId: session.id,
+                  sessionData: session
+                })
+              })
+              
+              if (createOrderResponse.ok) {
+                const orderData = await createOrderResponse.json()
+                console.log('✅ Service order created successfully', orderData)
+                setServiceName(session.metadata.serviceName || 'Servicio Profesional')
+                if (orderData.data?.id) {
+                  setOrderId(orderData.data.id)
+                }
+              } else {
+                console.error('❌ Failed to create service order')
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error('❌ Error creating service order:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    createServiceOrder()
   }, [searchParams, router])
 
   if (isLoading) {
@@ -92,6 +138,16 @@ function ServiceSuccessContent() {
                 <div className="w-1 h-1 rounded-full bg-current opacity-60"></div>
                 Ir al Dashboard
               </button>
+              
+              {orderId && (
+                <button
+                  onClick={() => router.push(`/services/invoice?orderId=${orderId}`)}
+                  className="btn-secondary inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-light"
+                >
+                  <FileText size={20} />
+                  Descargar Factura
+                </button>
+              )}
               
               <button
                 onClick={() => router.push('/services')}

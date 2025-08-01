@@ -305,9 +305,9 @@ export default function ServiceOrders({ className }: ServiceOrdersProps) {
                   <div className="rounded-xl p-4 space-y-2 bg-gray-50">
                     <p className="text-gray-700"><span className="font-medium">Servicio:</span> {selectedOrder.serviceName}</p>
                     <p className="text-gray-700"><span className="font-medium">Descripción:</span> {selectedOrder.serviceDescription}</p>
-                    <p className="text-gray-700"><span className="font-medium">Estado:</span> <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedOrder.status)}`}>
+                    <div className="text-gray-700"><span className="font-medium">Estado:</span> <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedOrder.status)}`}>
                       {getStatusText(selectedOrder.status)}
-                    </span></p>
+                    </span></div>
                     <p className="text-gray-700"><span className="font-medium">Monto:</span> {formatCurrency(selectedOrder.amount, selectedOrder.currency)}</p>
                   </div>
                 </div>
@@ -365,6 +365,21 @@ export default function ServiceOrders({ className }: ServiceOrdersProps) {
                     )}
                   </div>
                 </div>
+
+                {/* Actions */}
+                {(selectedOrder.status === 'confirmed' || selectedOrder.status === 'completed') && (
+                  <div className="pt-6 border-t border-gray-200">
+                    <button
+                      onClick={() => {
+                        window.location.href = `/services/invoice?orderId=${selectedOrder.id}`
+                      }}
+                      className="w-full py-3 px-4 rounded-xl bg-primary text-white font-medium hover:bg-primary-hover transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Download size={20} />
+                      Descargar Factura
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>

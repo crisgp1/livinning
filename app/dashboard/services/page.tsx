@@ -231,7 +231,7 @@ export default function ServicesPage() {
                           <div className="flex items-center justify-between">
                             <div>
                               <p className="text-sm mb-1 text-gray-600">{stat.label}</p>
-                              <p className="text-2xl font-light text-gray-900">
+                              <div className="text-2xl font-light text-gray-900">
                                 {isLoadingStats ? (
                                   <div className="w-8 h-6 bg-gray-200 rounded animate-pulse"></div>
                                 ) : (
@@ -239,7 +239,7 @@ export default function ServicesPage() {
                                     ? `$${stats[stat.key as keyof typeof stats].toLocaleString()}`
                                     : stats[stat.key as keyof typeof stats]
                                 )}
-                              </p>
+                              </div>
                             </div>
                             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white">
                               {getStatIcon(stat.type)}

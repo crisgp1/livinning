@@ -41,7 +41,7 @@ export default function Navigation() {
 
   const navItems = [
     { label: 'Comprar', href: '/propiedades', icon: Home },
-    { label: 'Vender', href: '/publish', icon: Building2 },
+    { label: 'Vender', href: '/publish', icon: Building2, requiresAuth: true },
     { label: 'Servicios', href: '/servicios', icon: User2 },
     { label: 'Contacto', href: '/contacto', icon: Phone }
   ]
@@ -64,14 +64,23 @@ export default function Navigation() {
 
           <div className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="flex items-center space-x-2 font-medium text-gray-700 hover:text-primary transition-colors duration-200"
-              >
-                <item.icon size={18} />
-                <span>{item.label}</span>
-              </Link>
+              item.requiresAuth && !user ? (
+                <SignUpButton key={item.label} mode="modal">
+                  <button className="flex items-center space-x-2 font-medium text-gray-700 hover:text-primary transition-colors duration-200">
+                    <item.icon size={18} />
+                    <span>{item.label}</span>
+                  </button>
+                </SignUpButton>
+              ) : (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className="flex items-center space-x-2 font-medium text-gray-700 hover:text-primary transition-colors duration-200"
+                >
+                  <item.icon size={18} />
+                  <span>{item.label}</span>
+                </Link>
+              )
             ))}
           </div>
 
@@ -134,15 +143,27 @@ export default function Navigation() {
       >
         <div className="px-4 py-6 space-y-4">
           {navItems.map((item) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              className="flex items-center space-x-3 py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors duration-200"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <item.icon size={20} className="text-gray-600" />
-              <span className="font-medium text-gray-700">{item.label}</span>
-            </Link>
+            item.requiresAuth && !user ? (
+              <SignUpButton key={item.label} mode="modal">
+                <button
+                  className="flex items-center space-x-3 py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors duration-200 w-full text-left"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <item.icon size={20} className="text-gray-600" />
+                  <span className="font-medium text-gray-700">{item.label}</span>
+                </button>
+              </SignUpButton>
+            ) : (
+              <Link
+                key={item.label}
+                href={item.href}
+                className="flex items-center space-x-3 py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <item.icon size={20} className="text-gray-600" />
+                <span className="font-medium text-gray-700">{item.label}</span>
+              </Link>
+            )
           ))}
           
           <div className="pt-4 border-t border-gray-200 space-y-3">

@@ -8,10 +8,17 @@ import ServiceOrderModel from '@/lib/infrastructure/database/models/ServiceOrder
 import { ServiceOrderStatus, ServiceType } from '@/lib/domain/entities/ServiceOrder'
 
 export async function POST(request: Request) {
+  console.log('🔔 Webhook received at:', new Date().toISOString())
+  
   const body = await request.text()
   const signature = (await headers()).get('stripe-signature')
 
+  console.log('📥 Webhook body length:', body.length)
+  console.log('🔐 Stripe signature present:', !!signature)
+  console.log('🔑 Webhook secret configured:', !!process.env.STRIPE_WEBHOOK_SECRET)
+
   if (!signature) {
+    console.error('❌ No signature provided in webhook request')
     return NextResponse.json(
       { error: 'No signature provided' },
       { status: 400 }
@@ -21,13 +28,18 @@ export async function POST(request: Request) {
   let event: Stripe.Event
 
   try {
+    console.log('🔐 Verifying webhook signature...')
     event = stripe.webhooks.constructEvent(
       body,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET!
     )
+    console.log('✅ Webhook signature verified successfully')
+    console.log('📦 Event type:', event.type)
+    console.log('🆔 Event ID:', event.id)
   } catch (err) {
-    console.error('Webhook signature verification failed:', err)
+    console.error('❌ Webhook signature verification failed:', err)
+    console.error('❌ Error details:', err instanceof Error ? err.message : 'Unknown error')
     return NextResponse.json(
       { error: 'Invalid signature' },
       { status: 400 }
@@ -77,10 +89,18 @@ export async function POST(request: Request) {
           }
         } else if (session.metadata?.serviceId) {
           // Service payment - create service order directly
+          console.log('🔄 Processing service payment for serviceId:', session.metadata.serviceId)
+          console.log('📝 Session metadata:', JSON.stringify(session.metadata, null, 2))
+          console.log('💰 Amount total:', session.amount_total)
+          console.log('👤 User ID:', userId)
+          console.log('📧 Customer email:', customerEmail)
+          
           try {
+            console.log('🔌 Connecting to MongoDB...')
             await connectDB()
+            console.log('✅ MongoDB connection successful')
 
-            const serviceOrder = new ServiceOrderModel({
+            const serviceOrderData = {
               _id: uuidv4(),
               userId,
               serviceType: session.metadata.serviceId,
@@ -100,16 +120,32 @@ export async function POST(request: Request) {
               notes: [],
               createdAt: new Date(),
               updatedAt: new Date()
-            })
+            }
 
-            await serviceOrder.save()
-            console.log('Service order created:', serviceOrder._id)
+            console.log('📄 Creating service order with data:', JSON.stringify(serviceOrderData, null, 2))
+            
+            const serviceOrder = new ServiceOrderModel(serviceOrderData)
+            
+            console.log('💾 Saving service order to database...')
+            const savedOrder = await serviceOrder.save()
+            console.log('✅ Service order created successfully:', savedOrder._id)
+            console.log('🎉 Service order saved with status:', savedOrder.status)
 
             // TODO: Send notification email to service team
             // TODO: Send confirmation email to customer
           } catch (error) {
-            console.error('Failed to create service order:', error)
+            console.error('❌ Failed to create service order:', error)
+            console.error('❌ Error details:', error instanceof Error ? error.message : 'Unknown error')
+            console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack trace')
+            
+            // Also try to log more details about the error
+            if (error instanceof Error && error.name === 'ValidationError') {
+              console.error('❌ Mongoose validation error details:', (error as any).errors)
+            }
           }
+        } else {
+          console.log('⚠️  No serviceId or planId found in session metadata')
+          console.log('📝 Available metadata keys:', Object.keys(session.metadata || {}))
         }
 
         console.log('Checkout session completed:', session.id)

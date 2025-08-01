@@ -20,7 +20,8 @@ import {
   TrendingUp,
   Eye,
   MessageSquare,
-  Sparkles
+  Sparkles,
+  FileText
 } from 'lucide-react'
 
 interface Property {
@@ -176,14 +177,16 @@ export default function Dashboard() {
 
   const sidebarItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3, href: '/dashboard' },
-    { id: 'properties', label: 'Propiedades', icon: Building, href: '/dashboard/properties' },
     { id: 'publish', label: 'Publicar', icon: PlusCircle, href: '/publish' },
+    { id: 'properties', label: 'Propiedades', icon: Building, href: '/dashboard/properties' },
     { id: 'services', label: 'Servicios', icon: Wrench, href: '/services' },
+    { id: 'my-services', label: 'Servicios Contratados', icon: FileText, href: '/dashboard/services' },
     { id: 'settings', label: 'Configuración', icon: Settings, href: '/dashboard/settings' },
+    { id: 'home', label: 'Ir al Inicio', icon: Home, href: '/' },
   ]
 
   if (isAgent) {
-    sidebarItems.splice(4, 0, { id: 'team', label: 'Equipo', icon: Users, href: '/dashboard/team' })
+    sidebarItems.splice(5, 0, { id: 'team', label: 'Equipo', icon: Users, href: '/dashboard/team' })
   }
 
   return (
@@ -238,7 +241,7 @@ export default function Dashboard() {
             </div>
 
             {/* Navigation */}
-            <nav className="space-y-2 mb-6">
+            <nav className="space-y-2">
               {sidebarItems.map((item) => {
                 const isActive = pathname === item.href || (item.id === 'dashboard' && pathname === '/dashboard')
                 return (
@@ -259,25 +262,11 @@ export default function Dashboard() {
                     }`}>
                       <item.icon size={18} className={isActive ? 'text-white' : ''} />
                     </div>
-                    <span className="font-medium">{item.label}</span>
+                    <span className="font-medium text-sm leading-tight">{item.label}</span>
                   </button>
                 )
               })}
             </nav>
-
-            {/* Go to Home Button */}
-            <div className="absolute bottom-6 left-6 right-6">
-              <button 
-                onClick={() => {
-                  router.push('/')
-                  setSidebarOpen(false)
-                }}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-700 hover:bg-white hover:shadow-md transition-all duration-200"
-              >
-                <Home size={20} />
-                <span className="font-medium">Ir al Inicio</span>
-              </button>
-            </div>
           </div>
         </div>
 
@@ -637,12 +626,10 @@ export default function Dashboard() {
             </motion.div>
           </div>
 
-          {/* Service Orders Section */}
-          {isAgent && (
-            <div className="mt-16">
-              <ServiceOrders />
-            </div>
-          )}
+          {/* Mis Servicios Contratados Section */}
+          <div className="mb-8 lg:mb-12">
+            <ServiceOrders />
+          </div>
             </div>
           </main>
         </div>
