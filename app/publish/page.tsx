@@ -1,3 +1,4 @@
+
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
@@ -190,27 +191,42 @@ export default function PublishProperty() {
 
   if (!isLoaded || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-white">
+      <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="loading-spinner"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
+    <div className="min-h-screen bg-white">
       <Navigation />
       
-      <main className="pt-24 pb-16">
-        <div className="max-w-4xl mx-auto px-6">
+      <main className="pt-20 pb-16 relative">
+        {/* Luxury background gradients */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-50 rounded-full filter blur-3xl opacity-50"></div>
+          <div className="absolute top-80 -left-40 w-96 h-96 bg-purple-50 rounded-full filter blur-3xl opacity-50"></div>
+        </div>
+        
+        <div className="max-w-4xl mx-auto px-6 relative z-10">
           
           {/* Header */}
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-light mb-4 text-gray-800">
-              Publicar Propiedad
-            </h1>
-            <p className="text-lg text-gray-600">
+            <motion.h1 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-4xl md:text-6xl font-light mb-4 text-gray-900"
+            >
+              Publicar <span className="text-primary font-medium">Propiedad</span>
+            </motion.h1>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-xl text-gray-600"
+            >
               Completa la información de tu propiedad
-            </p>
+            </motion.p>
           </div>
 
           {/* Progress */}
@@ -226,13 +242,13 @@ export default function PublishProperty() {
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 transition-all duration-300 ${
                       step.id <= currentStep
-                        ? 'bg-blue-600 text-white'
+                        ? 'bg-primary text-white'
                         : 'border border-gray-300 text-gray-400'
                     }`}
                   >
                     <div className="w-1 h-1 rounded-full bg-current"></div>
                   </div>
-                  <span className="text-xs font-medium" style={{ color: step.id <= currentStep ? '#1e40af' : '#6b7280' }}>
+                  <span className="text-xs font-medium text-gray-700">
                     {step.title}
                   </span>
                 </div>
@@ -242,7 +258,7 @@ export default function PublishProperty() {
             <div className="w-full bg-gray-200 rounded-full h-1">
               <div
                 ref={progressRef}
-                className="bg-blue-600 h-1 rounded-full transition-all duration-500"
+                className="bg-primary h-1 rounded-full transition-all duration-500"
                 style={{ width: `${(currentStep / steps.length) * 100}%` }}
               />
             </div>
@@ -252,7 +268,7 @@ export default function PublishProperty() {
           <div className="max-w-2xl mx-auto">
             <motion.div 
               ref={stepRef} 
-              className="glass-card p-8"
+              className="glass-icon-container rounded-2xl p-8 shadow-lg"
               key={currentStep}
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -262,34 +278,21 @@ export default function PublishProperty() {
               {currentStep === 1 && (
                 <div className="space-y-8">
                   <div>
-                    <label className="block text-sm font-medium mb-3" style={{ color: '#ffffff' }}>
+                    <label className="block text-sm font-medium mb-3 text-gray-700">
                       Título
                     </label>
                     <input
                       type="text"
                       value={formData.title}
                       onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                      className="w-full px-4 py-3 rounded-lg font-light transition-all duration-300"
-                      style={{ 
-                        background: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        color: '#ffffff'
-                      }}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = '#ffffff'
-                        e.target.style.background = 'rgba(255, 255, 255, 0.1)'
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'
-                        e.target.style.background = 'rgba(255, 255, 255, 0.05)'
-                      }}
+                      className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                       placeholder="Casa moderna en zona residencial"
                     />
                     {errors.title && <p className="text-red-400 text-sm mt-2">{errors.title}</p>}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-3" style={{ color: '#ffffff' }}>
+                    <label className="block text-sm font-medium mb-3 text-gray-700">
                       Tipo de propiedad
                     </label>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -298,10 +301,10 @@ export default function PublishProperty() {
                           key={type.value}
                           type="button"
                           onClick={() => setFormData(prev => ({ ...prev, propertyType: type.value }))}
-                          className={`p-4 rounded-lg text-center transition-all duration-300 ${
+                          className={`p-4 rounded-xl text-center transition-all duration-300 ${
                             formData.propertyType === type.value
-                              ? 'bg-white text-black'
-                              : 'bg-gray-800/50 text-gray-400 hover:bg-gray-800'
+                              ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                              : 'bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-700 hover:bg-white hover:shadow-md'
                           }`}
                         >
                           <div className="text-sm font-medium">{type.label}</div>
@@ -316,7 +319,7 @@ export default function PublishProperty() {
               {currentStep === 2 && (
                 <div className="space-y-8">
                   <div>
-                    <label className="block text-sm font-medium mb-3" style={{ color: '#ffffff' }}>
+                    <label className="block text-sm font-medium mb-3 text-gray-700">
                       Dirección
                     </label>
                     <LocationAutocomplete
@@ -335,18 +338,17 @@ export default function PublishProperty() {
                   </div>
 
                   {formData.address.street && (
-                    <div className="p-4 rounded-lg" style={{ background: 'rgba(255, 255, 255, 0.05)' }}>
-                      <div className="text-sm font-medium mb-2" style={{ color: '#ffffff' }}>
+                    <div className="p-4 rounded-xl bg-gray-50 border border-gray-200">
+                      <div className="text-sm font-medium mb-2 text-gray-700">
                         Dirección seleccionada
                       </div>
-                      <div className="text-sm" style={{ color: '#a3a3a3' }}>
+                      <div className="text-sm text-gray-600">
                         {formData.address.street}, {formData.address.city}, {formData.address.state}
                       </div>
                     </div>
                   )}
 
                   <div className="flex items-center gap-3">
-                    <div className="w-1 h-1 rounded-full bg-white opacity-60"></div>
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="checkbox"
@@ -358,16 +360,9 @@ export default function PublishProperty() {
                             displayPrivacy: e.target.checked
                           }
                         }))}
-                        className="sr-only"
+                        className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
                       />
-                      <div className={`w-4 h-4 rounded border transition-all duration-300 ${
-                        formData.address.displayPrivacy ? 'bg-white border-white' : 'border-gray-600'
-                      }`}>
-                        {formData.address.displayPrivacy && (
-                          <div className="w-full h-full bg-black rounded-sm"></div>
-                        )}
-                      </div>
-                      <span className="text-sm" style={{ color: '#a3a3a3' }}>
+                      <span className="text-sm text-gray-700">
                         Mantener ubicación privada
                       </span>
                     </label>
@@ -378,7 +373,7 @@ export default function PublishProperty() {
               {currentStep === 3 && (
                 <div className="space-y-8">
                   <div>
-                    <label className="block text-sm font-medium mb-3" style={{ color: '#ffffff' }}>
+                    <label className="block text-sm font-medium mb-3 text-gray-700">
                       Precio
                     </label>
                     
@@ -389,10 +384,10 @@ export default function PublishProperty() {
                           ...prev,
                           price: { ...prev.price, currency: 'USD' }
                         }))}
-                        className={`p-3 rounded-lg text-center transition-all duration-300 ${
+                        className={`p-3 rounded-xl text-center transition-all duration-300 ${
                           formData.price.currency === 'USD'
-                            ? 'bg-white text-black'
-                            : 'bg-gray-800/50 text-gray-400 hover:bg-gray-800'
+                            ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                            : 'bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-700 hover:bg-white hover:shadow-md'
                         }`}
                       >
                         USD
@@ -404,10 +399,10 @@ export default function PublishProperty() {
                           ...prev,
                           price: { ...prev.price, currency: 'MXN' }
                         }))}
-                        className={`p-3 rounded-lg text-center transition-all duration-300 ${
+                        className={`p-3 rounded-xl text-center transition-all duration-300 ${
                           formData.price.currency === 'MXN'
-                            ? 'bg-white text-black'
-                            : 'bg-gray-800/50 text-gray-400 hover:bg-gray-800'
+                            ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                            : 'bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-700 hover:bg-white hover:shadow-md'
                         }`}
                       >
                         MXN
@@ -425,20 +420,7 @@ export default function PublishProperty() {
                           ...prev,
                           price: { ...prev.price, amount: Number(e.target.value) }
                         }))}
-                        className="w-full pl-12 pr-4 py-3 rounded-lg font-light transition-all duration-300"
-                        style={{ 
-                          background: 'rgba(255, 255, 255, 0.05)',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                          color: '#ffffff'
-                        }}
-                        onFocus={(e) => {
-                          e.target.style.borderColor = '#ffffff'
-                          e.target.style.background = 'rgba(255, 255, 255, 0.1)'
-                        }}
-                        onBlur={(e) => {
-                          e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'
-                          e.target.style.background = 'rgba(255, 255, 255, 0.05)'
-                        }}
+                        className="w-full pl-12 pr-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                         placeholder="0"
                       />
                     </div>
@@ -447,7 +429,7 @@ export default function PublishProperty() {
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div>
-                      <label className="block text-sm font-medium mb-2" style={{ color: '#ffffff' }}>
+                      <label className="block text-sm font-medium mb-2 text-gray-700">
                         Habitaciones
                       </label>
                       <input
@@ -458,25 +440,12 @@ export default function PublishProperty() {
                           ...prev,
                           features: { ...prev.features, bedrooms: Number(e.target.value) }
                         }))}
-                        className="w-full px-4 py-3 rounded-lg font-light transition-all duration-300"
-                        style={{ 
-                          background: 'rgba(255, 255, 255, 0.05)',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                          color: '#ffffff'
-                        }}
-                        onFocus={(e) => {
-                          e.target.style.borderColor = '#ffffff'
-                          e.target.style.background = 'rgba(255, 255, 255, 0.1)'
-                        }}
-                        onBlur={(e) => {
-                          e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'
-                          e.target.style.background = 'rgba(255, 255, 255, 0.05)'
-                        }}
+                        className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-2" style={{ color: '#ffffff' }}>
+                      <label className="block text-sm font-medium mb-2 text-gray-700">
                         Baños
                       </label>
                       <input
@@ -487,25 +456,12 @@ export default function PublishProperty() {
                           ...prev,
                           features: { ...prev.features, bathrooms: Number(e.target.value) }
                         }))}
-                        className="w-full px-4 py-3 rounded-lg font-light transition-all duration-300"
-                        style={{ 
-                          background: 'rgba(255, 255, 255, 0.05)',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                          color: '#ffffff'
-                        }}
-                        onFocus={(e) => {
-                          e.target.style.borderColor = '#ffffff'
-                          e.target.style.background = 'rgba(255, 255, 255, 0.1)'
-                        }}
-                        onBlur={(e) => {
-                          e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'
-                          e.target.style.background = 'rgba(255, 255, 255, 0.05)'
-                        }}
+                        className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-2" style={{ color: '#ffffff' }}>
+                      <label className="block text-sm font-medium mb-2 text-gray-700">
                         M²
                       </label>
                       <input
@@ -516,26 +472,13 @@ export default function PublishProperty() {
                           ...prev,
                           features: { ...prev.features, squareMeters: Number(e.target.value) }
                         }))}
-                        className="w-full px-4 py-3 rounded-lg font-light transition-all duration-300"
-                        style={{ 
-                          background: 'rgba(255, 255, 255, 0.05)',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                          color: '#ffffff'
-                        }}
-                        onFocus={(e) => {
-                          e.target.style.borderColor = '#ffffff'
-                          e.target.style.background = 'rgba(255, 255, 255, 0.1)'
-                        }}
-                        onBlur={(e) => {
-                          e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'
-                          e.target.style.background = 'rgba(255, 255, 255, 0.05)'
-                        }}
+                        className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                       />
                       {errors.squareMeters && <p className="text-red-400 text-sm mt-2">{errors.squareMeters}</p>}
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-2" style={{ color: '#ffffff' }}>
+                      <label className="block text-sm font-medium mb-2 text-gray-700">
                         Parking
                       </label>
                       <input
@@ -546,26 +489,13 @@ export default function PublishProperty() {
                           ...prev,
                           features: { ...prev.features, parking: Number(e.target.value) || 0 }
                         }))}
-                        className="w-full px-4 py-3 rounded-lg font-light transition-all duration-300"
-                        style={{ 
-                          background: 'rgba(255, 255, 255, 0.05)',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                          color: '#ffffff'
-                        }}
-                        onFocus={(e) => {
-                          e.target.style.borderColor = '#ffffff'
-                          e.target.style.background = 'rgba(255, 255, 255, 0.1)'
-                        }}
-                        onBlur={(e) => {
-                          e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'
-                          e.target.style.background = 'rgba(255, 255, 255, 0.05)'
-                        }}
+                        className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-3" style={{ color: '#ffffff' }}>
+                    <label className="block text-sm font-medium mb-3 text-gray-700">
                       Características
                     </label>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -574,10 +504,10 @@ export default function PublishProperty() {
                           key={amenity}
                           type="button"
                           onClick={() => toggleAmenity(amenity)}
-                          className={`p-3 rounded-lg text-sm transition-all duration-300 ${
+                          className={`p-3 rounded-xl text-sm transition-all duration-300 ${
                             formData.features.amenities.includes(amenity)
-                              ? 'bg-white text-black'
-                              : 'bg-gray-800/50 text-gray-400 hover:bg-gray-800'
+                              ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                              : 'bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-700 hover:bg-white hover:shadow-md'
                           }`}
                         >
                           {amenity}
@@ -591,7 +521,7 @@ export default function PublishProperty() {
               {currentStep === 4 && (
                 <div className="space-y-8">
                   <div>
-                    <label className="block text-sm font-medium mb-3" style={{ color: '#ffffff' }}>
+                    <label className="block text-sm font-medium mb-3 text-gray-700">
                       Fotos
                     </label>
                     <ImageUpload
@@ -607,32 +537,19 @@ export default function PublishProperty() {
               {currentStep === 5 && (
                 <div className="space-y-8">
                   <div>
-                    <label className="block text-sm font-medium mb-3" style={{ color: '#ffffff' }}>
+                    <label className="block text-sm font-medium mb-3 text-gray-700">
                       Descripción
                     </label>
                     <textarea
                       rows={6}
                       value={formData.description}
                       onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                      className="w-full px-4 py-3 rounded-lg font-light transition-all duration-300 resize-none"
-                      style={{ 
-                        background: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        color: '#ffffff'
-                      }}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = '#ffffff'
-                        e.target.style.background = 'rgba(255, 255, 255, 0.1)'
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'
-                        e.target.style.background = 'rgba(255, 255, 255, 0.05)'
-                      }}
+                      className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 resize-none"
                       placeholder="Describe tu propiedad..."
                     />
                     <div className="flex justify-between items-center mt-2">
                       {errors.description && <p className="text-red-400 text-sm">{errors.description}</p>}
-                      <p className="text-sm ml-auto" style={{ color: '#666666' }}>
+                      <p className="text-sm ml-auto text-gray-500">
                         {formData.description.length} caracteres
                       </p>
                     </div>
@@ -642,14 +559,14 @@ export default function PublishProperty() {
 
               {currentStep === 6 && (
                 <div className="text-center space-y-6">
-                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto">
-                    <div className="w-3 h-3 rounded-full bg-black"></div>
+                  <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto">
+                    <div className="w-3 h-3 rounded-full bg-white"></div>
                   </div>
                   
-                  <h2 className="text-2xl font-light" style={{ color: '#ffffff' }}>
+                  <h2 className="text-2xl font-light text-gray-900">
                     Propiedad Publicada
                   </h2>
-                  <p style={{ color: '#666666' }}>
+                  <p className="text-gray-600">
                     Redirigiendo a tu propiedad...
                   </p>
                   
@@ -659,24 +576,12 @@ export default function PublishProperty() {
 
               {/* Navigation */}
               {currentStep < 6 && (
-                <div className="flex justify-between pt-8 mt-8 border-t" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+                <div className="flex justify-between pt-8 mt-8 border-t border-gray-200">
                   <button
                     type="button"
                     onClick={prevStep}
                     disabled={currentStep === 1}
-                    className="px-6 py-3 rounded-lg transition-all duration-300 disabled:opacity-50"
-                    style={{ 
-                      background: 'rgba(255, 255, 255, 0.1)',
-                      color: '#ffffff'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (currentStep > 1) {
-                        (e.target as HTMLElement).style.background = 'rgba(255, 255, 255, 0.2)'
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.target as HTMLElement).style.background = 'rgba(255, 255, 255, 0.1)'
-                    }}
+                    className="px-6 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-700 hover:bg-white hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Anterior
                   </button>
@@ -685,7 +590,7 @@ export default function PublishProperty() {
                     <button
                       type="button"
                       onClick={nextStep}
-                      className="btn-primary px-6 py-3"
+                      className="px-6 py-3 rounded-xl bg-primary text-white font-medium hover:bg-primary-hover shadow-lg shadow-primary/20 transition-all duration-200"
                     >
                       Siguiente
                     </button>
@@ -694,7 +599,7 @@ export default function PublishProperty() {
                       type="button"
                       onClick={handleSubmit}
                       disabled={isSubmitting}
-                      className="btn-primary px-6 py-3 disabled:opacity-50"
+                      className="px-6 py-3 rounded-xl bg-primary text-white font-medium hover:bg-primary-hover shadow-lg shadow-primary/20 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isSubmitting ? (
                         <>
