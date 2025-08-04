@@ -183,8 +183,7 @@ export default function LocationAutocomplete({
       {showSuggestions && suggestions.length > 0 && (
         <div 
           ref={suggestionsRef}
-          className="absolute z-50 w-full mt-2 rounded-lg shadow-lg overflow-hidden"
-          className="card"
+          className="absolute z-50 w-full mt-2 rounded-lg shadow-lg overflow-hidden card"
           style={{ 
             backdropFilter: 'blur(12px)'
           }}
@@ -229,8 +228,7 @@ export default function LocationAutocomplete({
       {showSuggestions && suggestions.length === 0 && query.length >= 3 && !loading && (
         <div 
           ref={suggestionsRef}
-          className="absolute z-50 w-full mt-2 rounded-lg shadow-lg p-4 text-center"
-          className="card"
+          className="absolute z-50 w-full mt-2 rounded-lg shadow-lg p-4 text-center card"
           style={{ 
             backdropFilter: 'blur(12px)',
             color: 'var(--color-text-muted)'

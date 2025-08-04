@@ -59,12 +59,12 @@ export async function GET(request: NextRequest) {
         propertyType: property.propertyType.value,
         status: property.status,
         address: {
-          street: property.address.street,
-          city: property.address.city,
-          state: property.address.state,
-          country: property.address.country,
-          postalCode: property.address.postalCode,
-          coordinates: property.address.coordinates ? {
+          street: property.address?.street || '',
+          city: property.address?.city || '',
+          state: property.address?.state || '',
+          country: property.address?.country || '',
+          postalCode: property.address?.postalCode || '',
+          coordinates: property.address?.coordinates ? {
             latitude: property.address.coordinates.latitude,
             longitude: property.address.coordinates.longitude
           } : undefined

@@ -84,7 +84,7 @@ const PropertySchema = new Schema({
   features: { type: FeaturesSchema, required: true },
   images: [{ type: String, required: true }],
   ownerId: { type: String, required: true },
-  organizationId: { type: String, required: true, index: true },
+  organizationId: { type: String, required: true },
   status: { 
     type: String, 
     required: true, 

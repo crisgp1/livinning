@@ -132,12 +132,26 @@ export class MongoPropertyRepository implements PropertyRepository {
         query.propertyType = filters.propertyType
       }
 
-      if (filters.city) {
-        query['address.city'] = new RegExp(filters.city, 'i')
+      if (filters.city !== undefined && filters.city !== null) {
+        try {
+          const cityStr = String(filters.city);
+          if (cityStr && cityStr.trim()) {
+            query['address.city'] = new RegExp(cityStr.trim(), 'i')
+          }
+        } catch (e) {
+          console.error('Error processing city filter:', e, 'Value:', filters.city, 'Type:', typeof filters.city)
+        }
       }
 
-      if (filters.state) {
-        query['address.state'] = new RegExp(filters.state, 'i')
+      if (filters.state !== undefined && filters.state !== null) {
+        try {
+          const stateStr = String(filters.state);
+          if (stateStr && stateStr.trim()) {
+            query['address.state'] = new RegExp(stateStr.trim(), 'i')
+          }
+        } catch (e) {
+          console.error('Error processing state filter:', e, 'Value:', filters.state, 'Type:', typeof filters.state)
+        }
       }
 
       if (filters.bedrooms) {
@@ -165,9 +179,9 @@ export class MongoPropertyRepository implements PropertyRepository {
       }
     }
 
-    // Only show published properties for public queries (unless owner or organization is specified)
+    // Show published and draft properties for public queries (unless owner or organization is specified)
     if (!filters?.ownerId && !filters?.organizationId) {
-      query.status = PropertyStatus.PUBLISHED
+      query.status = { $in: [PropertyStatus.PUBLISHED, PropertyStatus.DRAFT] }
     }
 
     const docs = await PropertyModel
@@ -224,12 +238,26 @@ export class MongoPropertyRepository implements PropertyRepository {
         query.propertyType = filters.propertyType
       }
 
-      if (filters.city) {
-        query['address.city'] = new RegExp(filters.city, 'i')
+      if (filters.city !== undefined && filters.city !== null) {
+        try {
+          const cityStr = String(filters.city);
+          if (cityStr && cityStr.trim()) {
+            query['address.city'] = new RegExp(cityStr.trim(), 'i')
+          }
+        } catch (e) {
+          console.error('Error processing city filter:', e, 'Value:', filters.city, 'Type:', typeof filters.city)
+        }
       }
 
-      if (filters.state) {
-        query['address.state'] = new RegExp(filters.state, 'i')
+      if (filters.state !== undefined && filters.state !== null) {
+        try {
+          const stateStr = String(filters.state);
+          if (stateStr && stateStr.trim()) {
+            query['address.state'] = new RegExp(stateStr.trim(), 'i')
+          }
+        } catch (e) {
+          console.error('Error processing state filter:', e, 'Value:', filters.state, 'Type:', typeof filters.state)
+        }
       }
 
       if (filters.bedrooms) {
@@ -257,9 +285,9 @@ export class MongoPropertyRepository implements PropertyRepository {
       }
     }
 
-    // Only show published properties for public queries (unless owner or organization is specified)
+    // Show published and draft properties for public queries (unless owner or organization is specified)
     if (!filters?.ownerId && !filters?.organizationId) {
-      query.status = PropertyStatus.PUBLISHED
+      query.status = { $in: [PropertyStatus.PUBLISHED, PropertyStatus.DRAFT] }
     }
 
     return await PropertyModel.countDocuments(query)

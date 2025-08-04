@@ -73,7 +73,7 @@ const OrganizationSchema = new Schema<OrganizationDocument>({
     match: /^[a-z0-9]+(?:-[a-z0-9]+)*$/
   },
   description: { type: String, required: true, trim: true },
-  ownerId: { type: String, required: true, index: true },
+  ownerId: { type: String, required: true },
   status: { 
     type: String, 
     enum: Object.values(OrganizationStatus), 

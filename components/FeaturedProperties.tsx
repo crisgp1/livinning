@@ -1,87 +1,98 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import PropertyCard from './PropertyCard'
 import { motion } from 'framer-motion'
-import { ArrowRight, Sparkles } from 'lucide-react'
+import { ArrowRight, Sparkles, Home } from 'lucide-react'
 import Link from 'next/link'
 
 gsap.registerPlugin(ScrollTrigger)
 
-const properties = [
-  {
-    id: '1',
-    title: 'Villa Moderna Costera',
-    location: 'Barcelona, España',
-    price: '2,500,000',
-    beds: 4,
-    baths: 3,
-    sqft: 2500,
-    image: 'https://images.unsplash.com/photo-1613977257592-4871e5fcd7c4?w=800',
-    badge: 'Destacado'
-  },
-  {
-    id: '2',
-    title: 'Penthouse en el Centro',
-    location: 'Madrid, España',
-    price: '1,750,000',
-    beds: 3,
-    baths: 2,
-    sqft: 1800,
-    image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800',
-    badge: 'Nuevo'
-  },
-  {
-    id: '3',
-    title: 'Casa Mediterránea',
-    location: 'Valencia, España',
-    price: '980,000',
-    beds: 5,
-    baths: 4,
-    sqft: 3200,
-    image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800',
-    badge: 'Exclusivo'
-  },
-  {
-    id: '4',
-    title: 'Apartamento Frente al Mar',
-    location: 'San Sebastián, España',
-    price: '1,200,000',
-    beds: 3,
-    baths: 2,
-    sqft: 1500,
-    image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800',
-    badge: 'Popular'
-  },
-  {
-    id: '5',
-    title: 'Casa Histórica',
-    location: 'Sevilla, España',
-    price: '850,000',
-    beds: 4,
-    baths: 3,
-    sqft: 2800,
-    image: 'https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800',
-    badge: null
-  },
-  {
-    id: '6',
-    title: 'Loft Contemporáneo',
-    location: 'Bilbao, España',
-    price: '675,000',
-    beds: 2,
-    baths: 2,
-    sqft: 1200,
-    image: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800',
-    badge: 'Diseño'
+interface Property {
+  id: string
+  title: string
+  description?: string
+  price: {
+    amount: number
+    currency: string
   }
-]
+  propertyType: string
+  status: string
+  address: {
+    street: string
+    city: string
+    state: string
+    country: string
+    postalCode: string
+    coordinates?: {
+      latitude: number
+      longitude: number
+    }
+  }
+  features: {
+    bedrooms: number
+    bathrooms: number
+    squareMeters: number
+    parking: number
+    amenities: string[]
+  }
+  images: string[]
+  ownerId: string
+  organizationId: string
+  createdAt: string
+  updatedAt: string
+}
+
 
 export default function FeaturedProperties() {
   const sectionRef = useRef<HTMLElement>(null)
   const titleRef = useRef<HTMLHeadingElement>(null)
+  const [properties, setProperties] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchFeaturedProperties = async () => {
+      try {
+        setLoading(true)
+        const response = await fetch('/api/properties/featured')
+        const data = await response.json()
+        
+        console.log('Featured Properties API Response:', data)
+        
+        if (data.success && data.data?.properties?.length > 0) {
+          // Map the domain objects to PropertyCard format
+          const mappedProperties = data.data.properties.map((prop: Property) => ({
+            id: prop.id,
+            title: prop.title,
+            location: `${prop.address.city}, ${prop.address.state}`,
+            price: prop.price.currency === 'EUR' 
+              ? `€${prop.price.amount.toLocaleString()}` 
+              : `$${prop.price.amount.toLocaleString()} ${prop.price.currency}`,
+            beds: prop.features.bedrooms,
+            baths: prop.features.bathrooms,
+            sqft: prop.features.squareMeters,
+            image: prop.images[0] || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800',
+            badge: prop.status === 'published' ? 'Destacado' : 'Nuevo'
+          }))
+          setProperties(mappedProperties)
+        } else {
+          console.log('No featured properties found')
+          setProperties([])
+        }
+      } catch (err) {
+        console.error('Error fetching featured properties:', err)
+        setError('Error loading featured properties')
+        setProperties([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchFeaturedProperties()
+  }, [])
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -143,15 +154,53 @@ export default function FeaturedProperties() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {properties.map((property, index) => (
-            <PropertyCard
-              key={property.id}
-              {...property}
-              index={index}
-            />
-          ))}
-        </div>
+        {/* Loading State */}
+        {loading ? (
+          <div className="flex justify-center items-center py-20">
+            <div className="text-center">
+              <div className="w-16 h-16 border-4 border-gray-200 border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-gray-600">Cargando propiedades destacadas...</p>
+            </div>
+          </div>
+        ) : error ? (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-20"
+          >
+            <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 bg-red-50 border border-red-200">
+              <Home className="w-8 h-8 text-red-500" />
+            </div>
+            <h3 className="text-xl font-light mb-2 text-gray-900">
+              Error al cargar propiedades
+            </h3>
+            <p className="text-gray-600">{error}</p>
+          </motion.div>
+        ) : properties.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {properties.slice(0, 6).map((property, index) => (
+              <PropertyCard
+                key={property.id}
+                {...property}
+                index={index}
+              />
+            ))}
+          </div>
+        ) : (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-20"
+          >
+            <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 bg-gray-50 border border-gray-200">
+              <Home className="w-8 h-8 text-gray-400" />
+            </div>
+            <h3 className="text-xl font-light mb-2 text-gray-900">
+              No hay propiedades destacadas
+            </h3>
+            <p className="text-gray-600">Las propiedades aparecerán aquí cuando estén disponibles</p>
+          </motion.div>
+        )}
       </div>
     </section>
   )

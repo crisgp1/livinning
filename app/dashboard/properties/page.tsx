@@ -119,9 +119,9 @@ export default function DashboardProperties() {
 
     if (searchTerm) {
       filtered = filtered.filter(property => 
-        property.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        property.address.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        property.address.state.toLowerCase().includes(searchTerm.toLowerCase())
+        (property.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (property.address?.city || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (property.address?.state || '').toLowerCase().includes(searchTerm.toLowerCase())
       )
     }
 
@@ -384,7 +384,7 @@ export default function DashboardProperties() {
                                   {property.title}
                                 </div>
                                 <div className="text-sm text-gray-500">
-                                  {property.propertyType?.value || property.propertyType}
+                                  {property.propertyType}
                                 </div>
                               </div>
                             </div>

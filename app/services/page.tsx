@@ -292,7 +292,7 @@ export default function Services() {
                     
                     <div className="space-y-3 mb-8">
                       {service.features.map((feature, idx) => (
-                        <div key={idx} className="flex items-start gap-3">
+                        <div key={`${service.id}-feature-${idx}`} className="flex items-start gap-3">
                           <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
                           <span className="text-sm text-gray-600">{feature}</span>
                         </div>
@@ -413,7 +413,7 @@ export default function Services() {
                   </h4>
                   <div className="space-y-3">
                     {selectedService.features.map((feature, idx) => (
-                      <div key={idx} className="flex items-start gap-3">
+                      <div key={`modal-feature-${idx}`} className="flex items-start gap-3">
                         <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
                         <span className="text-gray-600">{feature}</span>
                       </div>
