@@ -44,7 +44,7 @@ export default function ImpersonationBanner() {
   }, [])
 
   const stopImpersonation = async () => {
-    startTransition(async () => {
+    startTransition('end', async () => {
       try {
         const response = await fetch('/api/admin/impersonate', {
           method: 'DELETE'

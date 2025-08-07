@@ -161,66 +161,70 @@ export default function DeveloperRoleChanger() {
     }
 
     setImpersonateLoading(true)
-    try {
-      const response = await fetch('/api/admin/impersonate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ targetEmail: targetEmail.trim() })
-      })
+    startTransition('start', async () => {
+      try {
+        const response = await fetch('/api/admin/impersonate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ targetEmail: targetEmail.trim() })
+        })
 
-      if (response.ok) {
-        const data = await response.json()
-        setImpersonationData(data.impersonationData)
-        showMessage('success', data.message)
-        setTargetEmail('')
-        // Refresh the page to apply impersonation
-        setTimeout(() => window.location.reload(), 1500)
-      } else {
-        const data = await response.json()
-        showMessage('error', data.error || 'Error al iniciar impersonación')
+        if (response.ok) {
+          const data = await response.json()
+          setImpersonationData(data.impersonationData)
+          showMessage('success', data.message)
+          setTargetEmail('')
+          // Refresh the page to apply impersonation
+          setTimeout(() => window.location.reload(), 100)
+        } else {
+          const data = await response.json()
+          showMessage('error', data.error || 'Error al iniciar impersonación')
+        }
+      } catch (error) {
+        console.error('Error starting impersonation:', error)
+        showMessage('error', 'Error al iniciar impersonación')
+      } finally {
+        setImpersonateLoading(false)
       }
-    } catch (error) {
-      console.error('Error starting impersonation:', error)
-      showMessage('error', 'Error al iniciar impersonación')
-    } finally {
-      setImpersonateLoading(false)
-    }
+    })
   }
 
   const startImpersonationByEmailByUser = async (userEmail: string) => {
     setImpersonateLoading(true)
-    try {
-      const response = await fetch('/api/admin/impersonate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ targetEmail: userEmail })
-      })
+    startTransition('start', async () => {
+      try {
+        const response = await fetch('/api/admin/impersonate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ targetEmail: userEmail })
+        })
 
-      if (response.ok) {
-        const data = await response.json()
-        setImpersonationData(data.impersonationData)
-        showMessage('success', data.message)
-        // Refresh the page to apply impersonation
-        setTimeout(() => window.location.reload(), 1500)
-      } else {
-        const data = await response.json()
-        showMessage('error', data.error || 'Error al iniciar impersonación')
+        if (response.ok) {
+          const data = await response.json()
+          setImpersonationData(data.impersonationData)
+          showMessage('success', data.message)
+          // Refresh the page to apply impersonation
+          setTimeout(() => window.location.reload(), 100)
+        } else {
+          const data = await response.json()
+          showMessage('error', data.error || 'Error al iniciar impersonación')
+        }
+      } catch (error) {
+        console.error('Error starting impersonation:', error)
+        showMessage('error', 'Error al iniciar impersonación')
+      } finally {
+        setImpersonateLoading(false)
       }
-    } catch (error) {
-      console.error('Error starting impersonation:', error)
-      showMessage('error', 'Error al iniciar impersonación')
-    } finally {
-      setImpersonateLoading(false)
-    }
+    })
   }
 
   const stopImpersonation = async () => {
     setImpersonateLoading(true)
-    startTransition(async () => {
+    startTransition('end', async () => {
       try {
         const response = await fetch('/api/admin/impersonate', {
           method: 'DELETE'

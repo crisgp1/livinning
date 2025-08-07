@@ -5,10 +5,11 @@ import gsap from 'gsap'
 
 interface ImpersonationTransitionProps {
   isActive: boolean
+  type: 'start' | 'end'
   onComplete?: () => void
 }
 
-export default function ImpersonationTransition({ isActive, onComplete }: ImpersonationTransitionProps) {
+export default function ImpersonationTransition({ isActive, type, onComplete }: ImpersonationTransitionProps) {
   const overlayRef = useRef<HTMLDivElement>(null)
   const textRef = useRef<HTMLDivElement>(null)
   const circleRef = useRef<HTMLDivElement>(null)
@@ -54,7 +55,7 @@ export default function ImpersonationTransition({ isActive, onComplete }: Impers
       }, '-=0.2')
       .set(overlayRef.current, { display: 'none' })
     }
-  }, [isActive, onComplete])
+  }, [isActive, type, onComplete])
 
   if (!isActive) return null
 
@@ -66,14 +67,18 @@ export default function ImpersonationTransition({ isActive, onComplete }: Impers
     >
       <div
         ref={circleRef}
-        className="absolute w-20 h-20 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full"
+        className={`absolute w-20 h-20 rounded-full ${
+          type === 'start' 
+            ? 'bg-gradient-to-br from-orange-400 to-red-500' 
+            : 'bg-gradient-to-br from-blue-400 to-purple-500'
+        }`}
         style={{ transformOrigin: 'center' }}
       />
       
       <div ref={textRef} className="relative z-10">
         <div className="text-center">
           <h2 className="text-3xl font-light text-gray-800 tracking-wider">
-            Desimpersonando
+            {type === 'start' ? 'Impersonando' : 'Desimpersonando'}
           </h2>
           <div className="mt-4 flex justify-center space-x-1">
             <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style={{ animationDelay: '0ms' }}></div>

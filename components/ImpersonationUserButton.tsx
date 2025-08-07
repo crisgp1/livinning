@@ -85,7 +85,7 @@ export default function ImpersonationUserButton() {
               <button
                 onClick={() => {
                   setIsOpen(false)
-                  startTransition(async () => {
+                  startTransition('end', async () => {
                     // Stop impersonation
                     const response = await fetch('/api/admin/impersonate', {
                       method: 'DELETE'
