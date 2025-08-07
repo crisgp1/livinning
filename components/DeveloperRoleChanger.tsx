@@ -2,98 +2,159 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Settings, Users, X, Check, AlertCircle } from 'lucide-react'
+import { Settings, X, Check, AlertCircle, User, UserCheck, Eye, EyeOff } from 'lucide-react'
 import { useUser } from '@clerk/nextjs'
 
-interface UserData {
-  id: string
-  firstName?: string
-  lastName?: string
-  emailAddress: string
-  role?: string
-  isVerified?: boolean
-  isAgency?: boolean
-  isSuperAdmin?: boolean
-}
-
-interface ApiResponse {
-  success: boolean
-  users: UserData[]
-  total: number
-  currentUserRole: string
-  currentUserLevel: number
+interface ImpersonationData {
+  originalUserId: string
+  originalUserName: string
+  targetUserId: string
+  targetUserName: string
+  targetUserEmail: string
+  targetUserRole: string
+  impersonatedAt: string
 }
 
 export default function DeveloperRoleChanger() {
   const { user } = useUser()
   const [isOpen, setIsOpen] = useState(false)
-  const [isExpanded, setIsExpanded] = useState(false)
-  const [users, setUsers] = useState<UserData[]>([])
-  const [loading, setLoading] = useState(false)
-  const [updateLoading, setUpdateLoading] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState<'roles' | 'impersonate'>('roles')
+  const [updateLoading, setUpdateLoading] = useState(false)
+  const [impersonateLoading, setImpersonateLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
-  const [currentUserRole, setCurrentUserRole] = useState<string>('user')
-  const [currentUserLevel, setCurrentUserLevel] = useState<number>(0)
-  
+  const [impersonationData, setImpersonationData] = useState<ImpersonationData | null>(null)
+  const [targetEmail, setTargetEmail] = useState('')
+
+  // Check for existing impersonation on mount
+  useEffect(() => {
+    const checkImpersonation = () => {
+      try {
+        const impersonationCookie = document.cookie
+          .split('; ')
+          .find(row => row.startsWith('impersonation='))
+          ?.split('=')[1]
+        
+        if (impersonationCookie) {
+          const data = JSON.parse(decodeURIComponent(impersonationCookie))
+          setImpersonationData(data)
+        }
+      } catch (error) {
+        console.error('Error parsing impersonation data:', error)
+      }
+    }
+
+    checkImpersonation()
+  }, [])
+
   // Show to all authenticated users for development purposes
   if (!user) {
     return null
   }
 
-  const fetchUsers = async () => {
-    setLoading(true)
-    try {
-      const response = await fetch('/api/admin/users')
-      if (response.ok) {
-        const data: ApiResponse = await response.json()
-        setUsers(data.users || [])
-        setCurrentUserRole(data.currentUserRole || 'user')
-        setCurrentUserLevel(data.currentUserLevel || 0)
-      } else if (response.status === 403) {
-        showMessage('error', 'Insufficient permissions to view user list')
-      } else {
-        showMessage('error', 'Failed to fetch users')
-      }
-    } catch (error) {
-      console.error('Error fetching users:', error)
-      showMessage('error', 'Failed to fetch users')
-    } finally {
-      setLoading(false)
-    }
+  // Get current user's role from metadata or impersonation
+  const currentUserRole = impersonationData?.targetUserRole || (user.publicMetadata?.role as string) || 'user'
+  const displayUser = impersonationData ? {
+    firstName: impersonationData.targetUserName.split(' ')[0],
+    lastName: impersonationData.targetUserName.split(' ').slice(1).join(' '),
+    emailAddress: impersonationData.targetUserEmail
+  } : {
+    firstName: user.firstName,
+    lastName: user.lastName,
+    emailAddress: user.emailAddresses[0]?.emailAddress
   }
+  
+  // Available roles
+  const availableRoles = [
+    { value: 'user', label: 'Usuario', color: 'bg-blue-100 text-blue-800 hover:bg-blue-200' },
+    { value: 'agent', label: 'Agente', color: 'bg-purple-100 text-purple-800 hover:bg-purple-200' },
+    { value: 'agency', label: 'Agencia', color: 'bg-green-100 text-green-800 hover:bg-green-200' },
+    { value: 'supplier', label: 'Proveedor', color: 'bg-orange-100 text-orange-800 hover:bg-orange-200' },
+    { value: 'superadmin', label: 'Super Administrador', color: 'bg-red-100 text-red-800 hover:bg-red-200' }
+  ]
 
-  const updateUserRole = async (userId: string, newRole: 'user' | 'agent' | 'agency' | 'supplier' | 'superadmin') => {
-    setUpdateLoading(userId)
+  const updateUserRole = async (newRole: string) => {
+    setUpdateLoading(true)
     try {
       const response = await fetch('/api/admin/update-user-role', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ userId, role: newRole })
+        body: JSON.stringify({ userId: user.id, role: newRole })
       })
 
       if (response.ok) {
-        showMessage('success', `Role updated to ${newRole}`)
-        // Update local state
-        setUsers(prevUsers => 
-          prevUsers.map(u => 
-            u.id === userId ? { ...u, role: newRole } : u
-          )
-        )
+        showMessage('success', `Rol actualizado a ${availableRoles.find(r => r.value === newRole)?.label || newRole}`)
+        // Reload the page to update the user context
+        setTimeout(() => window.location.reload(), 1500)
       } else {
         const data = await response.json()
-        if (response.status === 403) {
-          showMessage('error', data.error || 'Insufficient permissions')
-        } else {
-          showMessage('error', data.error || 'Failed to update role')
-        }
+        showMessage('error', data.error || 'Error al actualizar rol')
       }
     } catch (error) {
       console.error('Error updating role:', error)
-      showMessage('error', 'Failed to update role')
+      showMessage('error', 'Error al actualizar rol')
     } finally {
-      setUpdateLoading(null)
+      setUpdateLoading(false)
+    }
+  }
+
+  const startImpersonation = async () => {
+    if (!targetEmail.trim()) {
+      showMessage('error', 'Por favor ingresa una dirección de correo')
+      return
+    }
+
+    setImpersonateLoading(true)
+    try {
+      const response = await fetch('/api/admin/impersonate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ targetEmail: targetEmail.trim() })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setImpersonationData(data.impersonationData)
+        showMessage('success', data.message)
+        setTargetEmail('')
+        // Refresh the page to apply impersonation
+        setTimeout(() => window.location.reload(), 1500)
+      } else {
+        const data = await response.json()
+        showMessage('error', data.error || 'Error al iniciar impersonación')
+      }
+    } catch (error) {
+      console.error('Error starting impersonation:', error)
+      showMessage('error', 'Error al iniciar impersonación')
+    } finally {
+      setImpersonateLoading(false)
+    }
+  }
+
+  const stopImpersonation = async () => {
+    setImpersonateLoading(true)
+    try {
+      const response = await fetch('/api/admin/impersonate', {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        setImpersonationData(null)
+        showMessage('success', 'Impersonación finalizada')
+        // Refresh the page to remove impersonation
+        setTimeout(() => window.location.reload(), 1500)
+      } else {
+        const data = await response.json()
+        showMessage('error', data.error || 'Error al finalizar impersonación')
+      }
+    } catch (error) {
+      console.error('Error stopping impersonation:', error)
+      showMessage('error', 'Error al finalizar impersonación')
+    } finally {
+      setImpersonateLoading(false)
     }
   }
 
@@ -102,27 +163,8 @@ export default function DeveloperRoleChanger() {
     setTimeout(() => setMessage(null), 3000)
   }
 
-  // Role hierarchy for UI logic
-  const roleHierarchy = {
-    user: 0,
-    agent: 1,
-    agency: 2,
-    supplier: 2,
-    superadmin: 3
-  }
-
-  // Show all roles for development/testing purposes
-  // In production, you might want to implement proper role-based restrictions
-  const availableRoles = ['user', 'agent', 'agency', 'supplier', 'superadmin']
-
   const handleToggle = () => {
-    if (!isOpen) {
-      setIsOpen(true)
-      fetchUsers()
-    } else {
-      setIsOpen(false)
-      setIsExpanded(false)
-    }
+    setIsOpen(!isOpen)
   }
 
   return (
@@ -157,165 +199,189 @@ export default function DeveloperRoleChanger() {
             initial={{ opacity: 0, scale: 0.8, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
-            className="absolute bottom-16 right-0 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden"
-            style={{ width: isExpanded ? '400px' : '300px', maxHeight: '500px' }}
+            className="absolute bottom-16 right-0 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden w-96"
           >
             {/* Header */}
             <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <Users size={20} />
-                  <h3 className="font-semibold">Role Manager</h3>
+                  {impersonationData ? <Eye size={20} /> : <User size={20} />}
+                  <h3 className="font-semibold">
+                    {impersonationData ? 'Impersonando Usuario' : 'Herramientas de Desarrollador'}
+                  </h3>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
-                    {currentUserRole}
+                <span className="text-xs bg-white/20 px-2 py-1 rounded-full capitalize">
+                  {currentUserRole}
+                </span>
+              </div>
+              
+              {/* Tabs */}
+              <div className="flex mt-3 bg-white/10 rounded-lg p-1">
+                <button
+                  onClick={() => setActiveTab('roles')}
+                  className={`flex-1 px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                    activeTab === 'roles' ? 'bg-white/20 text-white' : 'text-white/70 hover:text-white'
+                  }`}
+                >
+                  Roles
+                </button>
+                <button
+                  onClick={() => setActiveTab('impersonate')}
+                  className={`flex-1 px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                    activeTab === 'impersonate' ? 'bg-white/20 text-white' : 'text-white/70 hover:text-white'
+                  }`}
+                >
+                  Impersonar
+                </button>
+              </div>
+            </div>
+
+            {/* Current User Info */}
+            <div className="p-4 border-b border-gray-100">
+              <div className="flex items-center space-x-3">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                  impersonationData
+                    ? 'bg-gradient-to-r from-orange-400 to-red-500'
+                    : 'bg-gradient-to-r from-blue-400 to-purple-500'
+                }`}>
+                  <span className="text-white font-semibold text-sm">
+                    {displayUser.firstName?.[0]}{displayUser.lastName?.[0]}
                   </span>
-                  <button
-                    onClick={() => setIsExpanded(!isExpanded)}
-                    className="text-white/80 hover:text-white text-sm"
-                  >
-                    {isExpanded ? 'Collapse' : 'Expand'}
-                  </button>
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium text-gray-900">
+                    {displayUser.firstName} {displayUser.lastName}
+                    {impersonationData && (
+                      <span className="ml-2 text-xs bg-orange-100 text-orange-800 px-2 py-0.5 rounded-full">
+                        Impersonando
+                      </span>
+                    )}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {displayUser.emailAddress}
+                  </p>
                 </div>
               </div>
             </div>
 
-            {/* Content */}
-            <div className="max-h-96 overflow-y-auto">
-              {loading ? (
-                <div className="p-4 text-center">
-                  <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full mx-auto"></div>
-                  <p className="text-sm text-gray-600 mt-2">Loading users...</p>
-                </div>
-              ) : users.length === 0 ? (
-                <div className="p-4 text-center text-gray-500">
-                  <p>No users found</p>
-                </div>
-              ) : (
-                <div className="divide-y divide-gray-100">
-                  {users.map((userData) => (
-                    <div key={userData.id} className="p-4">
-                      <div className="flex flex-col space-y-2">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-gray-900 truncate">
-                              {userData.firstName} {userData.lastName}
-                            </p>
-                            <p className="text-sm text-gray-500 truncate">
-                              {userData.emailAddress}
-                            </p>
-                          </div>
-                          {userData.isVerified && (
-                            <div className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                              Verified
-                            </div>
+            {/* Tab Content */}
+            {activeTab === 'roles' && (
+              <div className="p-4">
+                <p className="text-sm text-gray-600 mb-3">
+                  {impersonationData ? 'Cambiar rol del usuario impersonado:' : 'Selecciona tu rol:'}
+                </p>
+                <div className="space-y-2">
+                  {availableRoles.map((role) => (
+                    <button
+                      key={role.value}
+                      onClick={() => updateUserRole(role.value)}
+                      disabled={updateLoading || currentUserRole === role.value}
+                      className={`w-full px-3 py-2 text-sm rounded-lg font-medium transition-colors ${
+                        currentUserRole === role.value
+                          ? role.color
+                          : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                      } disabled:opacity-50 disabled:cursor-not-allowed`}
+                    >
+                      {updateLoading && currentUserRole !== role.value ? (
+                        <div className="flex items-center justify-center">
+                          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between">
+                          <span>{role.label}</span>
+                          {currentUserRole === role.value && (
+                            <Check size={16} />
                           )}
                         </div>
-                        
-                        <div className="flex flex-col space-y-2">
-                          <span className="text-sm text-gray-600">
-                            Current: <span className="font-medium capitalize">{userData.role || 'user'}</span>
-                          </span>
-                          
-                          <div className="grid grid-cols-3 gap-1">
-                            {availableRoles.includes('user') && (
-                              <button
-                                onClick={() => updateUserRole(userData.id, 'user')}
-                                disabled={updateLoading === userData.id || userData.role === 'user'}
-                                className={`px-2 py-1 text-xs rounded-full font-medium transition-colors ${
-                                  userData.role === 'user'
-                                    ? 'bg-blue-100 text-blue-800'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-800'
-                                } disabled:opacity-50`}
-                              >
-                                {updateLoading === userData.id ? (
-                                  <div className="w-4 h-4 border border-current border-t-transparent rounded-full animate-spin mx-auto"></div>
-                                ) : (
-                                  'User'
-                                )}
-                              </button>
-                            )}
-                            
-                            {availableRoles.includes('agent') && (
-                              <button
-                                onClick={() => updateUserRole(userData.id, 'agent')}
-                                disabled={updateLoading === userData.id || userData.role === 'agent'}
-                                className={`px-2 py-1 text-xs rounded-full font-medium transition-colors ${
-                                  userData.role === 'agent'
-                                    ? 'bg-purple-100 text-purple-800'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-purple-100 hover:text-purple-800'
-                                } disabled:opacity-50`}
-                              >
-                                {updateLoading === userData.id ? (
-                                  <div className="w-4 h-4 border border-current border-t-transparent rounded-full animate-spin mx-auto"></div>
-                                ) : (
-                                  'Agent'
-                                )}
-                              </button>
-                            )}
-                            
-                            {availableRoles.includes('agency') && (
-                              <button
-                                onClick={() => updateUserRole(userData.id, 'agency')}
-                                disabled={updateLoading === userData.id || userData.role === 'agency'}
-                                className={`px-2 py-1 text-xs rounded-full font-medium transition-colors ${
-                                  userData.role === 'agency'
-                                    ? 'bg-green-100 text-green-800'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-green-100 hover:text-green-800'
-                                } disabled:opacity-50`}
-                              >
-                                {updateLoading === userData.id ? (
-                                  <div className="w-4 h-4 border border-current border-t-transparent rounded-full animate-spin mx-auto"></div>
-                                ) : (
-                                  'Agency'
-                                )}
-                              </button>
-                            )}
-                            
-                            {availableRoles.includes('supplier') && (
-                              <button
-                                onClick={() => updateUserRole(userData.id, 'supplier')}
-                                disabled={updateLoading === userData.id || userData.role === 'supplier'}
-                                className={`px-2 py-1 text-xs rounded-full font-medium transition-colors ${
-                                  userData.role === 'supplier'
-                                    ? 'bg-orange-100 text-orange-800'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-orange-100 hover:text-orange-800'
-                                } disabled:opacity-50`}
-                              >
-                                {updateLoading === userData.id ? (
-                                  <div className="w-4 h-4 border border-current border-t-transparent rounded-full animate-spin mx-auto"></div>
-                                ) : (
-                                  'Supplier'
-                                )}
-                              </button>
-                            )}
-                            
-                            {availableRoles.includes('superadmin') && (
-                              <button
-                                onClick={() => updateUserRole(userData.id, 'superadmin')}
-                                disabled={updateLoading === userData.id || userData.role === 'superadmin'}
-                                className={`px-2 py-1 text-xs rounded-full font-medium transition-colors ${
-                                  userData.role === 'superadmin'
-                                    ? 'bg-red-100 text-red-800'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-red-100 hover:text-red-800'
-                                } disabled:opacity-50`}
-                              >
-                                {updateLoading === userData.id ? (
-                                  <div className="w-4 h-4 border border-current border-t-transparent rounded-full animate-spin mx-auto"></div>
-                                ) : (
-                                  'Super Admin'
-                                )}
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                      )}
+                    </button>
                   ))}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
+
+            {/* Impersonation Tab */}
+            {activeTab === 'impersonate' && (
+              <div className="p-4">
+                {impersonationData ? (
+                  <div className="space-y-4">
+                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <Eye size={16} className="text-orange-600" />
+                        <span className="text-sm font-medium text-orange-800">
+                          Impersonando Usuario
+                        </span>
+                      </div>
+                      <p className="text-sm text-orange-700">
+                        Usuario original: {impersonationData.originalUserName}
+                      </p>
+                      <p className="text-xs text-orange-600 mt-1">
+                        Iniciado: {new Date(impersonationData.impersonatedAt).toLocaleString()}
+                      </p>
+                    </div>
+                    
+                    <button
+                      onClick={stopImpersonation}
+                      disabled={impersonateLoading}
+                      className="w-full px-4 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors disabled:opacity-50"
+                    >
+                      {impersonateLoading ? (
+                        <div className="flex items-center justify-center">
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center space-x-2">
+                          <EyeOff size={16} />
+                          <span>Finalizar Impersonación</span>
+                        </div>
+                      )}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Correo del Usuario a Impersonar
+                      </label>
+                      <input
+                        type="email"
+                        value={targetEmail}
+                        onChange={(e) => setTargetEmail(e.target.value)}
+                        placeholder="Ingresa el correo del usuario..."
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                        disabled={impersonateLoading}
+                      />
+                    </div>
+                    
+                    <button
+                      onClick={startImpersonation}
+                      disabled={impersonateLoading || !targetEmail.trim()}
+                      className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {impersonateLoading ? (
+                        <div className="flex items-center justify-center">
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center space-x-2">
+                          <UserCheck size={16} />
+                          <span>Iniciar Impersonación</span>
+                        </div>
+                      )}
+                    </button>
+                    
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      <p className="text-xs text-blue-700">
+                        <strong>Nota:</strong> La impersonación te permite acceder al sistema como otro usuario.
+                        <br />
+                        <strong>Ejemplo:</strong> Si impersonas a "juan@empresa.com", verás el dashboard y datos como si fueras Juan,
+                        permitiéndote probar funciones específicas de su rol sin cambiar tu cuenta.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -326,7 +392,7 @@ export default function DeveloperRoleChanger() {
         whileTap={{ scale: 0.95 }}
         onClick={handleToggle}
         className="w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center group"
-        title={`Role Manager - Current: ${currentUserRole}`}
+        title={`Cambiar Rol - Actual: ${availableRoles.find(r => r.value === currentUserRole)?.label || currentUserRole}`}
       >
         <motion.div
           animate={{ rotate: isOpen ? 180 : 0 }}
