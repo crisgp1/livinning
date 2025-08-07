@@ -146,8 +146,23 @@ export default function ImpersonationBanner() {
               
               <button
                 onClick={stopImpersonation}
-                className="flex items-center space-x-1 px-3 py-1 bg-white/20 hover:bg-white/30 rounded-full text-xs font-medium transition-colors"
+                className="flex items-center space-x-2 px-2 py-1 bg-white/20 hover:bg-white/30 rounded-full text-xs font-medium transition-colors"
               >
+                {impersonationData.originalUserImageUrl ? (
+                  <Image
+                    src={impersonationData.originalUserImageUrl}
+                    alt={impersonationData.originalUserName || 'Admin'}
+                    width={20}
+                    height={20}
+                    className="rounded-full border border-white/50"
+                  />
+                ) : (
+                  <div className="w-5 h-5 bg-white/30 rounded-full flex items-center justify-center text-[10px] font-bold">
+                    {impersonationData.originalUserName && impersonationData.originalUserName !== 'null null'
+                      ? impersonationData.originalUserName.split(' ').filter(n => n && n !== 'null').map(n => n[0]).join('').toUpperCase()
+                      : 'A'}
+                  </div>
+                )}
                 <X className="w-3 h-3" />
                 <span>Finalizar</span>
               </button>

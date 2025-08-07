@@ -6,6 +6,7 @@ import { motion } from 'framer-motion'
 import { Menu, X, Home, Building2, Phone, User2, Shield, Package, Wrench } from 'lucide-react'
 import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
 import { useEffectiveUser } from '@/hooks/useEffectiveUser'
+import ImpersonationUserButton from '@/components/ImpersonationUserButton'
 
 export default function Navigation() {
   const { user, isImpersonating } = useEffectiveUser()
@@ -143,13 +144,7 @@ export default function Navigation() {
                   Publicar Propiedad
                 </Link>
               )}
-              <UserButton 
-                appearance={{
-                  elements: {
-                    avatarBox: "w-10 h-10 border-2 border-gray-200"
-                  }
-                }}
-              />
+              <ImpersonationUserButton />
             </SignedIn>
           </div>
 
@@ -246,13 +241,7 @@ export default function Navigation() {
                 </Link>
               )}
               <div className="flex justify-center pt-2">
-                <UserButton 
-                  appearance={{
-                    elements: {
-                      avatarBox: "w-10 h-10 border-2 border-gray-200"
-                    }
-                  }}
-                />
+                <ImpersonationUserButton />
               </div>
             </SignedIn>
           </div>
