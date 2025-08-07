@@ -13,9 +13,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Allow all authenticated users for development purposes
-    // In production, you might want to add proper role-based access control
-
+    // Get current user's role for permission checking
+    const currentUserMetadata = user.publicMetadata as any
+    const currentUserRole = currentUserMetadata?.role || 'user'
+    
     const { userId, role } = await request.json()
 
     if (!userId || !role) {
@@ -25,11 +26,23 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!['agent', 'user'].includes(role)) {
+    if (!['user', 'agent', 'agency', 'supplier', 'superadmin'].includes(role)) {
       return NextResponse.json(
-        { error: 'Invalid role. Must be either "agent" or "user"' },
+        { error: 'Invalid role. Must be one of: user, agent, agency, supplier, superadmin' },
         { status: 400 }
       )
+    }
+
+    // Allow all role changes for development/testing purposes
+    // In production, you might want to implement proper role-based restrictions
+    
+    // Role hierarchy for reference (can be used later for production restrictions)
+    const roleHierarchy = {
+      user: 0,
+      agent: 1,
+      agency: 2,
+      supplier: 2,
+      superadmin: 3
     }
 
     // Update user metadata in Clerk
@@ -47,7 +60,9 @@ export async function POST(request: NextRequest) {
         // Keep existing values for other metadata
         onboardingCompleted: existingMetadata.onboardingCompleted || false,
         isVerified: existingMetadata.isVerified || false,
-        isAgency: existingMetadata.isAgency || false,
+        isAgency: role === 'agency' || existingMetadata.isAgency || false,
+        isSupplier: role === 'supplier',
+        isSuperAdmin: role === 'superadmin',
         lastRoleUpdate: new Date().toISOString(),
         updatedBy: currentUserId
       }

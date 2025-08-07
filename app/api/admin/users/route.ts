@@ -13,7 +13,22 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Allow all authenticated users for development purposes
+    // Get current user's role for permission checking
+    const currentUserMetadata = user.publicMetadata as any
+    const currentUserRole = currentUserMetadata?.role || 'user'
+
+    // Role hierarchy for permissions
+    const roleHierarchy = {
+      user: 0,
+      agent: 1,
+      agency: 2,
+      supplier: 2,
+      superadmin: 3
+    }
+
+    const currentUserLevel = roleHierarchy[currentUserRole as keyof typeof roleHierarchy] || 0
+
+    // Allow all authenticated users for development/testing purposes
     // In production, you might want to add proper role-based access control
 
     // Get all users from Clerk
@@ -33,13 +48,17 @@ export async function GET(request: NextRequest) {
       emailAddress: user.emailAddresses[0]?.emailAddress || '',
       role: user.publicMetadata?.role || 'user',
       isVerified: user.publicMetadata?.isVerified || false,
+      isAgency: user.publicMetadata?.isAgency || false,
+      isSuperAdmin: user.publicMetadata?.isSuperAdmin || false,
       createdAt: user.createdAt
     }))
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
       users,
-      total: usersList.totalCount
+      total: usersList.totalCount,
+      currentUserRole,
+      currentUserLevel
     })
   } catch (error) {
     console.error('Error fetching users:', error)
