@@ -70,9 +70,11 @@ export async function POST(request: NextRequest) {
     const impersonationData = {
       originalUserId: userId,
       originalUserName: `${user.firstName} ${user.lastName}`,
+      originalUserImageUrl: user.imageUrl,
       targetUserId: targetUser.id,
       targetUserName: `${targetUser.firstName} ${targetUser.lastName}`,
       targetUserEmail: targetUser.emailAddresses[0]?.emailAddress || '',
+      targetUserImageUrl: targetUser.imageUrl,
       targetUserRole: targetUser.publicMetadata?.role || 'user',
       impersonatedAt: new Date().toISOString()
     }

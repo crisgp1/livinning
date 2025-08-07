@@ -4,13 +4,16 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Settings, X, Check, AlertCircle, User, UserCheck, Eye, EyeOff } from 'lucide-react'
 import { useUser } from '@clerk/nextjs'
+import Image from 'next/image'
 
 interface ImpersonationData {
   originalUserId: string
   originalUserName: string
+  originalUserImageUrl?: string
   targetUserId: string
   targetUserName: string
   targetUserEmail: string
+  targetUserImageUrl?: string
   targetUserRole: string
   impersonatedAt: string
 }
@@ -20,6 +23,7 @@ interface UserListItem {
   firstName: string | null
   lastName: string | null
   emailAddress: string
+  imageUrl?: string
   role: string
 }
 
@@ -133,6 +137,7 @@ export default function DeveloperRoleChanger() {
           firstName: u.firstName,
           lastName: u.lastName,
           emailAddress: u.emailAddress,
+          imageUrl: u.imageUrl,
           role: u.role || 'user'
         })) || []
         setUsersList(users)
@@ -323,15 +328,32 @@ export default function DeveloperRoleChanger() {
             {/* Current User Info */}
             <div className="p-4 border-b border-gray-100">
               <div className="flex items-center space-x-3">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                  impersonationData
-                    ? 'bg-gradient-to-r from-orange-400 to-red-500'
-                    : 'bg-gradient-to-r from-blue-400 to-purple-500'
-                }`}>
-                  <span className="text-white font-semibold text-sm">
-                    {displayUser.firstName?.[0]}{displayUser.lastName?.[0]}
-                  </span>
-                </div>
+                {impersonationData?.targetUserImageUrl || (!impersonationData && user.imageUrl) ? (
+                  <div className="relative">
+                    <Image
+                      src={impersonationData?.targetUserImageUrl || user.imageUrl}
+                      alt={displayUser.firstName + ' ' + displayUser.lastName}
+                      width={40}
+                      height={40}
+                      className="rounded-full"
+                    />
+                    {impersonationData && (
+                      <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center">
+                        <Eye size={10} className="text-white" />
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                    impersonationData
+                      ? 'bg-gradient-to-r from-orange-400 to-red-500'
+                      : 'bg-gradient-to-r from-blue-400 to-purple-500'
+                  }`}>
+                    <span className="text-white font-semibold text-sm">
+                      {displayUser.firstName?.[0]}{displayUser.lastName?.[0]}
+                    </span>
+                  </div>
+                )}
                 <div className="flex-1">
                   <p className="font-medium text-gray-900">
                     {displayUser.firstName} {displayUser.lastName}
@@ -474,11 +496,26 @@ export default function DeveloperRoleChanger() {
                               className="w-full px-3 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 disabled:opacity-50 transition-colors"
                             >
                               <div className="flex items-center justify-between">
-                                <div>
-                                  <p className="text-sm font-medium text-gray-900">
-                                    {userData.firstName} {userData.lastName}
-                                  </p>
-                                  <p className="text-xs text-gray-500">{userData.emailAddress}</p>
+                                <div className="flex items-center space-x-3">
+                                  {userData.imageUrl ? (
+                                    <Image
+                                      src={userData.imageUrl}
+                                      alt={`${userData.firstName} ${userData.lastName}`}
+                                      width={32}
+                                      height={32}
+                                      className="rounded-full"
+                                    />
+                                  ) : (
+                                    <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-xs font-medium text-gray-600">
+                                      {userData.firstName?.[0]}{userData.lastName?.[0]}
+                                    </div>
+                                  )}
+                                  <div>
+                                    <p className="text-sm font-medium text-gray-900">
+                                      {userData.firstName} {userData.lastName}
+                                    </p>
+                                    <p className="text-xs text-gray-500">{userData.emailAddress}</p>
+                                  </div>
                                 </div>
                                 <div className="flex items-center space-x-2">
                                   <span className={`px-2 py-1 text-xs rounded-full ${

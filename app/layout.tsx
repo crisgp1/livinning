@@ -4,6 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { ToastProvider } from "@/components/Toast";
 import DeveloperRoleChanger from "@/components/DeveloperRoleChanger";
 import UpgradeNotification from "@/components/UpgradeNotification";
+import ImpersonationBanner from "@/components/ImpersonationBanner";
 import "./globals.css";
 
 const lexend = Lexend({
@@ -25,6 +26,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="es">
         <body className={`${lexend.variable} antialiased`}>
+          <ImpersonationBanner />
           <ToastProvider>
             {children}
             <DeveloperRoleChanger />

@@ -46,6 +46,7 @@ export async function GET(request: NextRequest) {
       firstName: user.firstName,
       lastName: user.lastName,
       emailAddress: user.emailAddresses[0]?.emailAddress || '',
+      imageUrl: user.imageUrl,
       role: user.publicMetadata?.role || 'user',
       isVerified: user.publicMetadata?.isVerified || false,
       isAgency: user.publicMetadata?.isAgency || false,
