@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Lexend } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ToastProvider } from "@/components/Toast";
+import DeveloperRoleChanger from "@/components/DeveloperRoleChanger";
 import "./globals.css";
 
 const lexend = Lexend({
@@ -25,6 +26,7 @@ export default function RootLayout({
         <body className={`${lexend.variable} antialiased`}>
           <ToastProvider>
             {children}
+            <DeveloperRoleChanger />
           </ToastProvider>
         </body>
       </html>
