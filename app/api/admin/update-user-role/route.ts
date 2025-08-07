@@ -13,16 +13,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if current user is developer (super admin)
-    const userEmails = user.emailAddresses?.map(email => email.emailAddress) || []
-    const isDeveloper = userEmails.includes('cristiangp2001@gmail.com')
-
-    if (!isDeveloper) {
-      return NextResponse.json(
-        { error: 'Forbidden - Developer access required' },
-        { status: 403 }
-      )
-    }
+    // Allow all authenticated users for development purposes
+    // In production, you might want to add proper role-based access control
 
     const { userId, role } = await request.json()
 

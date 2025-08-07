@@ -23,13 +23,8 @@ export default function DeveloperRoleChanger() {
   const [updateLoading, setUpdateLoading] = useState<string | null>(null)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   
-  // Check if current user is developer
-  const isDeveloper = user?.emailAddresses?.some(email => 
-    email.emailAddress === 'cristiangp2001@gmail.com'
-  )
-
-  // Don't render if not developer
-  if (!isDeveloper) {
+  // Show to all authenticated users for development purposes
+  if (!user) {
     return null
   }
 

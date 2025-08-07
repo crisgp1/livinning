@@ -13,16 +13,8 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Check if user is developer (super admin)
-    const userEmails = user.emailAddresses?.map(email => email.emailAddress) || []
-    const isDeveloper = userEmails.includes('cristiangp2001@gmail.com')
-
-    if (!isDeveloper) {
-      return NextResponse.json(
-        { error: 'Forbidden - Developer access required' },
-        { status: 403 }
-      )
-    }
+    // Allow all authenticated users for development purposes
+    // In production, you might want to add proper role-based access control
 
     // Get all users from Clerk
     const { clerkClient } = await import('@clerk/nextjs/server')
