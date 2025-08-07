@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffectiveUser } from '@/hooks/useEffectiveUser'
+import { useUser } from '@clerk/nextjs'
 import { useRouter, usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
@@ -71,7 +71,7 @@ interface ServiceOrder {
 }
 
 export default function Dashboard() {
-  const { user, isLoaded, isImpersonating } = useEffectiveUser()
+  const { user, isLoaded } = useUser()
   const router = useRouter()
   const pathname = usePathname()
   const [properties, setProperties] = useState<Property[]>([])

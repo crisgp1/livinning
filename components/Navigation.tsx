@@ -1,15 +1,16 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Menu, X, Home, Building2, Phone, User2, Shield, Package, Wrench } from 'lucide-react'
 import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
-import { useEffectiveUser } from '@/hooks/useEffectiveUser'
+import { useUser } from '@clerk/nextjs'
 import ImpersonationUserButton from '@/components/ImpersonationUserButton'
 
 export default function Navigation() {
-  const { user, isImpersonating } = useEffectiveUser()
+  const { user } = useUser()
+  const [isImpersonating, setIsImpersonating] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isSuperAdmin, setIsSuperAdmin] = useState(false)
@@ -30,6 +31,23 @@ export default function Navigation() {
   }, [])
 
   useEffect(() => {
+    // Check for impersonation
+    const checkImpersonation = () => {
+      try {
+        const impersonationCookie = document.cookie
+          .split('; ')
+          .find(row => row.startsWith('impersonation='))
+          ?.split('=')[1]
+        
+        setIsImpersonating(!!impersonationCookie)
+      } catch (error) {
+        console.error('Error checking impersonation:', error)
+        setIsImpersonating(false)
+      }
+    }
+
+    checkImpersonation()
+
     if (user) {
       const metadata = user.publicMetadata as any
       
