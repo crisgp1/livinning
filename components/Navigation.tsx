@@ -27,10 +27,15 @@ export default function Navigation() {
 
   useEffect(() => {
     if (user) {
-      const userEmails = user.emailAddresses?.map(email => email.emailAddress) || []
-      setIsSuperAdmin(userEmails.includes('cristiangp2001@gmail.com'))
-      
       const metadata = user.publicMetadata as any
+      
+      // Dynamic superadmin check (same logic as utility function)
+      setIsSuperAdmin(
+        metadata?.isSuperAdmin === true ||
+        metadata?.role === 'superadmin' ||
+        user.emailAddresses?.some(email => email.emailAddress === 'cristiangp2001@gmail.com') // fallback
+      )
+      
       setIsAgency(metadata?.isAgency === true)
     }
   }, [user])

@@ -58,9 +58,12 @@ export default function SuperAdminDashboard() {
   // Check superadmin status
   useEffect(() => {
     if (isLoaded && user) {
-      // Check if user is superadmin (you can customize this logic)
-      const userEmails = user.emailAddresses?.map(email => email.emailAddress) || []
-      const isSuperAdminUser = userEmails.includes('cristiangp2001@gmail.com') // Add your email
+      const metadata = user.publicMetadata as any
+      
+      // Dynamic superadmin check (same logic as utility function)
+      const isSuperAdminUser = metadata?.isSuperAdmin === true ||
+        metadata?.role === 'superadmin' ||
+        user.emailAddresses?.some(email => email.emailAddress === 'cristiangp2001@gmail.com') // fallback
       
       if (!isSuperAdminUser) {
         router.push('/dashboard')
