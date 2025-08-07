@@ -67,12 +67,20 @@ export async function POST(request: NextRequest) {
     }
 
     // Store impersonation data in session/response
+    const originalName = user.firstName || user.lastName 
+      ? `${user.firstName || ''} ${user.lastName || ''}`.trim()
+      : user.emailAddresses[0]?.emailAddress || 'User';
+    
+    const targetName = targetUser.firstName || targetUser.lastName
+      ? `${targetUser.firstName || ''} ${targetUser.lastName || ''}`.trim()
+      : targetUser.emailAddresses[0]?.emailAddress || 'User';
+    
     const impersonationData = {
       originalUserId: userId,
-      originalUserName: `${user.firstName} ${user.lastName}`,
+      originalUserName: originalName,
       originalUserImageUrl: user.imageUrl,
       targetUserId: targetUser.id,
-      targetUserName: `${targetUser.firstName} ${targetUser.lastName}`,
+      targetUserName: targetName,
       targetUserEmail: targetUser.emailAddresses[0]?.emailAddress || '',
       targetUserImageUrl: targetUser.imageUrl,
       targetUserRole: targetUser.publicMetadata?.role || 'user',
@@ -81,7 +89,7 @@ export async function POST(request: NextRequest) {
 
     const response = NextResponse.json({ 
       success: true,
-      message: `Now impersonating ${targetUser.firstName} ${targetUser.lastName}`,
+      message: `Now impersonating ${targetName}`,
       impersonationData
     })
 

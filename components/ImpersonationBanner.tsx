@@ -82,21 +82,25 @@ export default function ImpersonationBanner() {
                 {impersonationData.targetUserImageUrl ? (
                   <Image
                     src={impersonationData.targetUserImageUrl}
-                    alt={impersonationData.targetUserName}
+                    alt={impersonationData.targetUserName || impersonationData.targetUserEmail}
                     width={isMinimized ? 24 : 32}
                     height={isMinimized ? 24 : 32}
                     className="rounded-full border-2 border-white/50"
                   />
                 ) : (
                   <div className={`${isMinimized ? 'w-6 h-6 text-xs' : 'w-8 h-8 text-sm'} bg-white/20 rounded-full flex items-center justify-center font-semibold`}>
-                    {impersonationData.targetUserName.split(' ').map(n => n[0]).join('')}
+                    {impersonationData.targetUserName && impersonationData.targetUserName !== 'null null' 
+                      ? impersonationData.targetUserName.split(' ').filter(n => n && n !== 'null').map(n => n[0]).join('').toUpperCase()
+                      : impersonationData.targetUserEmail?.[0]?.toUpperCase() || '?'}
                   </div>
                 )}
                 
                 {!isMinimized && (
                   <div>
                     <p className="font-medium text-sm">
-                      {impersonationData.targetUserName}
+                      {impersonationData.targetUserName && impersonationData.targetUserName !== 'null null' 
+                        ? impersonationData.targetUserName 
+                        : impersonationData.targetUserEmail}
                     </p>
                     <p className="text-xs text-white/80">
                       {impersonationData.targetUserEmail} • Rol: {impersonationData.targetUserRole}
@@ -109,7 +113,9 @@ export default function ImpersonationBanner() {
             <div className="flex items-center space-x-2">
               {!isMinimized && (
                 <p className="text-xs text-white/70 mr-2">
-                  Usuario original: {impersonationData.originalUserName}
+                  Usuario original: {impersonationData.originalUserName && impersonationData.originalUserName !== 'null null' 
+                    ? impersonationData.originalUserName 
+                    : 'Admin'}
                 </p>
               )}
               
