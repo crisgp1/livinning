@@ -59,13 +59,23 @@ export default function DeveloperRoleChanger() {
   // Get current user's role from metadata or impersonation
   const currentUserRole = impersonationData?.targetUserRole || (user.publicMetadata?.role as string) || 'user'
   const displayUser = impersonationData ? {
-    firstName: impersonationData.targetUserName.split(' ')[0],
-    lastName: impersonationData.targetUserName.split(' ').slice(1).join(' '),
-    emailAddress: impersonationData.targetUserEmail
+    firstName: impersonationData.targetUserName && impersonationData.targetUserName !== 'null null' 
+      ? impersonationData.targetUserName.split(' ')[0] 
+      : '',
+    lastName: impersonationData.targetUserName && impersonationData.targetUserName !== 'null null'
+      ? impersonationData.targetUserName.split(' ').slice(1).join(' ')
+      : '',
+    emailAddress: impersonationData.targetUserEmail,
+    fullName: impersonationData.targetUserName && impersonationData.targetUserName !== 'null null'
+      ? impersonationData.targetUserName
+      : impersonationData.targetUserEmail
   } : {
-    firstName: user.firstName,
-    lastName: user.lastName,
-    emailAddress: user.emailAddresses[0]?.emailAddress
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
+    emailAddress: user?.emailAddresses?.[0]?.emailAddress || '',
+    fullName: user?.firstName || user?.lastName 
+      ? `${user?.firstName || ''} ${user?.lastName || ''}`.trim()
+      : user?.emailAddresses?.[0]?.emailAddress || 'User'
   }
   
   // Available roles
@@ -322,7 +332,7 @@ export default function DeveloperRoleChanger() {
                   <div className="relative">
                     <Image
                       src={impersonationData?.targetUserImageUrl || user.imageUrl}
-                      alt={displayUser.firstName + ' ' + displayUser.lastName}
+                      alt={displayUser.fullName}
                       width={40}
                       height={40}
                       className="rounded-full"
@@ -340,13 +350,15 @@ export default function DeveloperRoleChanger() {
                       : 'bg-gradient-to-r from-blue-400 to-purple-500'
                   }`}>
                     <span className="text-white font-semibold text-sm">
-                      {displayUser.firstName?.[0]}{displayUser.lastName?.[0]}
+                      {displayUser.firstName && displayUser.lastName 
+                        ? `${displayUser.firstName[0]}${displayUser.lastName[0]}`
+                        : displayUser.emailAddress?.[0]?.toUpperCase() || '?'}
                     </span>
                   </div>
                 )}
                 <div className="flex-1">
                   <p className="font-medium text-gray-900">
-                    {displayUser.firstName} {displayUser.lastName}
+                    {displayUser.fullName}
                     {impersonationData && (
                       <span className="ml-2 text-xs bg-orange-100 text-orange-800 px-2 py-0.5 rounded-full">
                         Impersonando
@@ -409,7 +421,9 @@ export default function DeveloperRoleChanger() {
                         </span>
                       </div>
                       <p className="text-sm text-orange-700">
-                        Usuario original: {impersonationData.originalUserName}
+                        Usuario original: {impersonationData.originalUserName && impersonationData.originalUserName !== 'null null' 
+                          ? impersonationData.originalUserName 
+                          : 'Admin'}
                       </p>
                       <p className="text-xs text-orange-600 mt-1">
                         Iniciado: {new Date(impersonationData.impersonatedAt).toLocaleString()}
