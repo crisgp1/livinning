@@ -104,6 +104,13 @@ export default function Dashboard() {
     if (user) {
       const metadata = user.publicMetadata as any
       const userRole = metadata?.role || (user as any).privateMetadata?.role
+      
+      // Redirect suppliers to their own dashboard
+      if (userRole === 'supplier') {
+        router.push('/supplier/dashboard')
+        return
+      }
+      
       const isAgency = metadata?.isAgency || metadata?.organizationId
       setIsAgent(userRole === 'agent' || isAgency)
       fetchDashboardData()

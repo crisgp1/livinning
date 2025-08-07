@@ -105,12 +105,14 @@ export default function Navigation() {
               </SignUpButton>
             </SignedOut>
             <SignedIn>
-              <Link 
-                href="/dashboard" 
-                className="font-medium text-gray-700 hover:text-primary transition-colors duration-200"
-              >
-                Dashboard
-              </Link>
+              {!isSupplier && (
+                <Link
+                  href="/dashboard"
+                  className="font-medium text-gray-700 hover:text-primary transition-colors duration-200"
+                >
+                  Dashboard
+                </Link>
+              )}
               {isSuperAdmin && (
                 <Link
                   href="/superadmin"
@@ -196,13 +198,15 @@ export default function Navigation() {
               </SignUpButton>
             </SignedOut>
             <SignedIn>
-              <Link 
-                href="/dashboard" 
-                className="block py-3 px-4 text-center font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Dashboard
-              </Link>
+              {!isSupplier && (
+                <Link
+                  href="/dashboard"
+                  className="block py-3 px-4 text-center font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Dashboard
+                </Link>
+              )}
               {isSuperAdmin && (
                 <Link
                   href="/superadmin"
