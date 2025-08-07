@@ -3,6 +3,7 @@ import { Lexend } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ToastProvider } from "@/components/Toast";
 import DeveloperRoleChanger from "@/components/DeveloperRoleChanger";
+import UpgradeNotification from "@/components/UpgradeNotification";
 import "./globals.css";
 
 const lexend = Lexend({
@@ -27,6 +28,7 @@ export default function RootLayout({
           <ToastProvider>
             {children}
             <DeveloperRoleChanger />
+            <UpgradeNotification />
           </ToastProvider>
         </body>
       </html>

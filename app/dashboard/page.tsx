@@ -104,10 +104,11 @@ export default function Dashboard() {
     if (user) {
       const metadata = user.publicMetadata as any
       const userRole = metadata?.role || (user as any).privateMetadata?.role
+      const providerAccess = metadata?.providerAccess
       
-      // Redirect suppliers to their own dashboard
-      if (userRole === 'supplier') {
-        router.push('/supplier/dashboard')
+      // Redirect both suppliers and providers to the unified provider dashboard
+      if (userRole === 'supplier' || userRole === 'provider' || providerAccess === true) {
+        router.push('/provider-dashboard')
         return
       }
       

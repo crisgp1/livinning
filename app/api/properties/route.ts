@@ -126,9 +126,43 @@ export async function POST(request: NextRequest) {
 
     const property = await propertyService.createProperty(validationResult.data)
 
+    // Auto-upgrade logic: upgrade regular users to agent when they publish their first property
+    try {
+      const { clerkClient, currentUser } = await import('@clerk/nextjs/server')
+      const clerk = await clerkClient()
+      const user = await currentUser()
+      
+      if (user) {
+        const metadata = user.publicMetadata as any
+        const currentRole = metadata?.role
+        
+        // Only upgrade if user is not already an agent, agency, supplier, provider, or superadmin
+        const eligibleForUpgrade = !currentRole || currentRole === 'user'
+        
+        if (eligibleForUpgrade) {
+          console.log(`Auto-upgrading user ${userId} to agent role after publishing first property`)
+          
+          await clerk.users.updateUser(userId, {
+            publicMetadata: {
+              ...metadata,
+              role: 'agent',
+              isAgency: true,
+              autoUpgraded: true,
+              autoUpgradedAt: new Date().toISOString(),
+              autoUpgradeReason: 'first_property_published'
+            }
+          })
+        }
+      }
+    } catch (upgradeError) {
+      // Log the error but don't fail the property creation
+      console.error('Auto-upgrade failed, but property was created successfully:', upgradeError)
+    }
+
     return NextResponse.json({
       success: true,
-      data: property
+      data: property,
+      message: property ? 'Property created successfully! You have been upgraded to agent status.' : 'Property created successfully!'
     }, { status: 201 })
   } catch (error) {
     console.error('Error creating property:', error)

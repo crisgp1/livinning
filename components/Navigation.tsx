@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Menu, X, Home, Building2, Phone, User2, Shield, Package } from 'lucide-react'
+import { Menu, X, Home, Building2, Phone, User2, Shield, Package, Wrench } from 'lucide-react'
 import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton, useUser } from '@clerk/nextjs'
 
 export default function Navigation() {
@@ -13,6 +13,7 @@ export default function Navigation() {
   const [isSuperAdmin, setIsSuperAdmin] = useState(false)
   const [isAgency, setIsAgency] = useState(false)
   const [isSupplier, setIsSupplier] = useState(false)
+  const [isProvider, setIsProvider] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -39,6 +40,7 @@ export default function Navigation() {
       
       setIsAgency(metadata?.isAgency === true)
       setIsSupplier(metadata?.role === 'supplier')
+      setIsProvider(metadata?.role === 'provider' || metadata?.providerAccess === true)
     }
   }, [user])
 
@@ -47,11 +49,15 @@ export default function Navigation() {
   }
 
   const navItems = [
-    { label: 'Comprar', href: '/propiedades', icon: Home },
-    { label: 'Vender', href: '/publish', icon: Building2, requiresAuth: true },
-    { label: 'Servicios', href: '/servicios', icon: User2 },
+    { label: 'Comprar', href: '/propiedades', icon: Home, hideForSupplier: true },
+    { label: 'Vender', href: '/publish', icon: Building2, requiresAuth: true, hideForSupplier: true },
+    { label: 'Servicios', href: '/servicios', icon: User2, hideForSupplier: true },
     { label: 'Contacto', href: '/contacto', icon: Phone }
   ]
+
+  const filteredNavItems = (isSupplier || isProvider)
+    ? navItems.filter(item => !item.hideForSupplier)
+    : navItems
 
   return (
     <nav
@@ -70,7 +76,7 @@ export default function Navigation() {
           </Link>
 
           <div className="hidden md:flex items-center space-x-8">
-            {navItems.map((item) => (
+            {filteredNavItems.map((item) => (
               item.requiresAuth && !user ? (
                 <SignUpButton key={item.label} mode="modal">
                   <button className="flex items-center space-x-2 font-medium text-gray-700 hover:text-primary transition-colors duration-200">
@@ -105,7 +111,7 @@ export default function Navigation() {
               </SignUpButton>
             </SignedOut>
             <SignedIn>
-              {!isSupplier && (
+              {!isSupplier && !isProvider && (
                 <Link
                   href="/dashboard"
                   className="font-medium text-gray-700 hover:text-primary transition-colors duration-200"
@@ -122,18 +128,20 @@ export default function Navigation() {
                   <span>Admin</span>
                 </Link>
               )}
-              {isSupplier && (
+              {(isSupplier || isProvider) && (
                 <Link
-                  href="/supplier/dashboard"
+                  href="/provider-dashboard"
                   className="flex items-center space-x-1 font-medium text-gray-700 hover:text-primary transition-colors duration-200"
                 >
                   <Package size={16} />
                   <span>Proveedor</span>
                 </Link>
               )}
-              <Link href="/publish" className="btn-primary">
-                Publicar Propiedad
-              </Link>
+              {!isSupplier && !isProvider && (
+                <Link href="/publish" className="btn-primary">
+                  Publicar Propiedad
+                </Link>
+              )}
               <UserButton 
                 appearance={{
                   elements: {
@@ -160,7 +168,7 @@ export default function Navigation() {
         className="md:hidden overflow-hidden bg-white border-t border-gray-200"
       >
         <div className="px-4 py-6 space-y-4">
-          {navItems.map((item) => (
+          {filteredNavItems.map((item) => (
             item.requiresAuth && !user ? (
               <SignUpButton key={item.label} mode="modal">
                 <button
@@ -198,7 +206,7 @@ export default function Navigation() {
               </SignUpButton>
             </SignedOut>
             <SignedIn>
-              {!isSupplier && (
+              {!isSupplier && !isProvider && (
                 <Link
                   href="/dashboard"
                   className="block py-3 px-4 text-center font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200"
@@ -217,9 +225,9 @@ export default function Navigation() {
                   <span>Admin</span>
                 </Link>
               )}
-              {isSupplier && (
+              {(isSupplier || isProvider) && (
                 <Link
-                  href="/supplier/dashboard"
+                  href="/provider-dashboard"
                   className="flex items-center justify-center space-x-2 py-3 px-4 font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -227,13 +235,15 @@ export default function Navigation() {
                   <span>Proveedor</span>
                 </Link>
               )}
-              <Link 
-                href="/publish" 
-                className="btn-primary w-full block text-center"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Publicar Propiedad
-              </Link>
+              {!isSupplier && !isProvider && (
+                <Link
+                  href="/publish"
+                  className="btn-primary w-full block text-center"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Publicar Propiedad
+                </Link>
+              )}
               <div className="flex justify-center pt-2">
                 <UserButton 
                   appearance={{
