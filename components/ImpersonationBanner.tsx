@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Eye, X } from 'lucide-react'
 import Image from 'next/image'
+import { useImpersonationTransition } from '@/hooks/useImpersonationTransition'
 
 interface ImpersonationData {
   originalUserId: string
@@ -20,6 +21,7 @@ interface ImpersonationData {
 export default function ImpersonationBanner() {
   const [impersonationData, setImpersonationData] = useState<ImpersonationData | null>(null)
   const [isMinimized, setIsMinimized] = useState(false)
+  const { startTransition } = useImpersonationTransition()
 
   useEffect(() => {
     const checkImpersonation = () => {
@@ -42,18 +44,22 @@ export default function ImpersonationBanner() {
   }, [])
 
   const stopImpersonation = async () => {
-    try {
-      const response = await fetch('/api/admin/impersonate', {
-        method: 'DELETE'
-      })
+    startTransition(async () => {
+      try {
+        const response = await fetch('/api/admin/impersonate', {
+          method: 'DELETE'
+        })
 
-      if (response.ok) {
-        setImpersonationData(null)
-        window.location.reload()
+        if (response.ok) {
+          setImpersonationData(null)
+          setTimeout(() => {
+            window.location.reload()
+          }, 100)
+        }
+      } catch (error) {
+        console.error('Error stopping impersonation:', error)
       }
-    } catch (error) {
-      console.error('Error stopping impersonation:', error)
-    }
+    })
   }
 
   if (!impersonationData) return null

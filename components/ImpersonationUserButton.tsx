@@ -5,10 +5,12 @@ import { useEffectiveUser } from '@/hooks/useEffectiveUser'
 import Image from 'next/image'
 import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
+import { useImpersonationTransition } from '@/hooks/useImpersonationTransition'
 
 export default function ImpersonationUserButton() {
   const { user, isImpersonating, impersonationData } = useEffectiveUser()
   const [isOpen, setIsOpen] = useState(false)
+  const { startTransition } = useImpersonationTransition()
 
   // If not impersonating, use regular UserButton
   if (!isImpersonating || !impersonationData) {
@@ -81,15 +83,19 @@ export default function ImpersonationUserButton() {
                 Usuario original:
               </div>
               <button
-                onClick={async () => {
+                onClick={() => {
                   setIsOpen(false)
-                  // Stop impersonation
-                  const response = await fetch('/api/admin/impersonate', {
-                    method: 'DELETE'
+                  startTransition(async () => {
+                    // Stop impersonation
+                    const response = await fetch('/api/admin/impersonate', {
+                      method: 'DELETE'
+                    })
+                    if (response.ok) {
+                      setTimeout(() => {
+                        window.location.reload()
+                      }, 100)
+                    }
                   })
-                  if (response.ok) {
-                    window.location.reload()
-                  }
                 }}
                 className="w-full flex items-center space-x-3 px-3 py-2 hover:bg-gray-50 rounded-md transition-colors"
               >

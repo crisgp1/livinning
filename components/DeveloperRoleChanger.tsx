@@ -6,6 +6,7 @@ import { Settings, X, Check, AlertCircle, User, UserCheck, Eye, EyeOff } from 'l
 import { useUser } from '@clerk/nextjs'
 import Image from 'next/image'
 import { useEffectiveUser } from '@/hooks/useEffectiveUser'
+import { useImpersonationTransition } from '@/hooks/useImpersonationTransition'
 
 interface ImpersonationData {
   originalUserId: string
@@ -31,6 +32,7 @@ interface UserListItem {
 export default function DeveloperRoleChanger() {
   const { user: clerkUser } = useUser()
   const { user, isImpersonating, impersonationData: hookImpersonationData } = useEffectiveUser()
+  const { startTransition } = useImpersonationTransition()
   const [isOpen, setIsOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<'roles' | 'impersonate'>('roles')
   const [updateLoading, setUpdateLoading] = useState(false)
@@ -218,26 +220,28 @@ export default function DeveloperRoleChanger() {
 
   const stopImpersonation = async () => {
     setImpersonateLoading(true)
-    try {
-      const response = await fetch('/api/admin/impersonate', {
-        method: 'DELETE'
-      })
+    startTransition(async () => {
+      try {
+        const response = await fetch('/api/admin/impersonate', {
+          method: 'DELETE'
+        })
 
-      if (response.ok) {
-        setImpersonationData(null)
-        showMessage('success', 'Impersonación finalizada')
-        // Refresh the page to remove impersonation
-        setTimeout(() => window.location.reload(), 1500)
-      } else {
-        const data = await response.json()
-        showMessage('error', data.error || 'Error al finalizar impersonación')
+        if (response.ok) {
+          setImpersonationData(null)
+          showMessage('success', 'Impersonación finalizada')
+          // Refresh the page to remove impersonation
+          setTimeout(() => window.location.reload(), 100)
+        } else {
+          const data = await response.json()
+          showMessage('error', data.error || 'Error al finalizar impersonación')
+        }
+      } catch (error) {
+        console.error('Error stopping impersonation:', error)
+        showMessage('error', 'Error al finalizar impersonación')
+      } finally {
+        setImpersonateLoading(false)
       }
-    } catch (error) {
-      console.error('Error stopping impersonation:', error)
-      showMessage('error', 'Error al finalizar impersonación')
-    } finally {
-      setImpersonateLoading(false)
-    }
+    })
   }
 
   const showMessage = (type: 'success' | 'error', text: string) => {
