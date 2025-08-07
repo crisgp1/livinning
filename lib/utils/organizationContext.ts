@@ -2,7 +2,7 @@ import { auth } from '@clerk/nextjs/server'
 import { OrganizationService } from '../application/services/OrganizationService'
 import { MongoOrganizationRepository } from '../infrastructure/repositories/MongoOrganizationRepository'
 import { Organization } from '../domain/entities/Organization'
-import { getEffectiveUserId } from '../auth-utils'
+import { cookies } from 'next/headers'
 
 const organizationRepository = new MongoOrganizationRepository()
 const organizationService = new OrganizationService(organizationRepository)
@@ -14,11 +14,23 @@ export interface OrganizationContext {
 }
 
 export async function getOrganizationContext(): Promise<OrganizationContext> {
-  // Check for impersonation first
-  const effectiveUserId = await getEffectiveUserId()
+  const { userId } = await auth()
   
-  if (!effectiveUserId) {
+  if (!userId) {
     throw new Error('User not authenticated')
+  }
+
+  // Check for impersonation and use the impersonated user's ID for organization operations
+  let effectiveUserId = userId
+  try {
+    const cookieStore = await cookies()
+    const impersonationCookie = cookieStore.get('impersonation')
+    if (impersonationCookie) {
+      const impersonationData = JSON.parse(impersonationCookie.value)
+      effectiveUserId = impersonationData.targetUserId
+    }
+  } catch (error) {
+    console.error('Error parsing impersonation cookie in organizationContext:', error)
   }
 
   // Get user info from Clerk
@@ -28,18 +40,30 @@ export async function getOrganizationContext(): Promise<OrganizationContext> {
   const organization = await organizationService.getOrCreateUserDefaultOrganization(effectiveUserId, userEmail)
   
   return {
-    userId: effectiveUserId,
+    userId: effectiveUserId, // Return the effective user ID for property creation
     userEmail,
     organization
   }
 }
 
 export async function requireOrganizationAccess(organizationId: string): Promise<OrganizationContext> {
-  // Check for impersonation first
-  const effectiveUserId = await getEffectiveUserId()
+  const { userId } = await auth()
   
-  if (!effectiveUserId) {
+  if (!userId) {
     throw new Error('User not authenticated')
+  }
+
+  // Check for impersonation and use the impersonated user's ID for organization access
+  let effectiveUserId = userId
+  try {
+    const cookieStore = await cookies()
+    const impersonationCookie = cookieStore.get('impersonation')
+    if (impersonationCookie) {
+      const impersonationData = JSON.parse(impersonationCookie.value)
+      effectiveUserId = impersonationData.targetUserId
+    }
+  } catch (error) {
+    console.error('Error parsing impersonation cookie in requireOrganizationAccess:', error)
   }
 
   const canAccess = await organizationService.canUserAccessOrganization(effectiveUserId, organizationId)

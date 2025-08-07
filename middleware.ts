@@ -8,7 +8,12 @@ const isProtectedRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
-  // Check for impersonation cookie
+  // Always protect routes first with the actual authenticated user
+  if (isProtectedRoute(req)) {
+    await auth.protect();
+  }
+
+  // After auth is confirmed, check for impersonation cookie
   const impersonationCookie = req.cookies.get('impersonation');
   
   if (impersonationCookie) {
@@ -22,16 +27,12 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
       response.headers.set('x-impersonated-user-id', impersonationData.targetUserId);
       response.headers.set('x-impersonated-user-role', impersonationData.targetUserRole);
       response.headers.set('x-original-user-id', impersonationData.originalUserId);
+      response.headers.set('x-is-impersonating', 'true');
       
       return response;
     } catch (error) {
       console.error('Error parsing impersonation cookie:', error);
     }
-  }
-
-  // Protect routes as needed
-  if (isProtectedRoute(req)) {
-    await auth.protect();
   }
   
   return NextResponse.next();
