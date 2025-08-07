@@ -5,6 +5,7 @@ import { MongoPropertyRepository } from '@/lib/infrastructure/repositories/Mongo
 import { CreatePropertyDTOSchema } from '@/lib/application/dtos/CreatePropertyDTO'
 import { PropertyFilters } from '@/lib/domain/repositories/PropertyRepository'
 import { getOrganizationContext } from '@/lib/utils/organizationContext'
+import { getEffectiveUser } from '@/lib/auth-utils'
 
 const propertyRepository = new MongoPropertyRepository()
 const propertyService = new PropertyService(propertyRepository)
@@ -134,9 +135,9 @@ export async function POST(request: NextRequest) {
 
     // Auto-upgrade logic: upgrade regular users to agent when they publish their first property
     try {
-      const { clerkClient, currentUser } = await import('@clerk/nextjs/server')
+      const { clerkClient } = await import('@clerk/nextjs/server')
       const clerk = await clerkClient()
-      const user = await currentUser()
+      const { user } = await getEffectiveUser()
       
       if (user) {
         const metadata = user.publicMetadata as any
