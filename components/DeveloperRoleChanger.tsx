@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Settings, X, Check, AlertCircle, User, UserCheck, Eye, EyeOff } from 'lucide-react'
 import { useUser } from '@clerk/nextjs'
 import Image from 'next/image'
+import { useEffectiveUser } from '@/hooks/useEffectiveUser'
 
 interface ImpersonationData {
   originalUserId: string
@@ -28,7 +29,8 @@ interface UserListItem {
 }
 
 export default function DeveloperRoleChanger() {
-  const { user } = useUser()
+  const { user: clerkUser } = useUser()
+  const { user, isImpersonating, impersonationData: hookImpersonationData } = useEffectiveUser()
   const [isOpen, setIsOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<'roles' | 'impersonate'>('roles')
   const [updateLoading, setUpdateLoading] = useState(false)
@@ -40,26 +42,14 @@ export default function DeveloperRoleChanger() {
   const [usersLoading, setUsersLoading] = useState(false)
   const [showEmailInput, setShowEmailInput] = useState(false)
 
-  // Check for existing impersonation on mount
+  // Use impersonation data from hook
   useEffect(() => {
-    const checkImpersonation = () => {
-      try {
-        const impersonationCookie = document.cookie
-          .split('; ')
-          .find(row => row.startsWith('impersonation='))
-          ?.split('=')[1]
-        
-        if (impersonationCookie) {
-          const data = JSON.parse(decodeURIComponent(impersonationCookie))
-          setImpersonationData(data)
-        }
-      } catch (error) {
-        console.error('Error parsing impersonation data:', error)
-      }
+    if (hookImpersonationData) {
+      setImpersonationData(hookImpersonationData)
+    } else {
+      setImpersonationData(null)
     }
-
-    checkImpersonation()
-  }, [])
+  }, [hookImpersonationData])
 
   // Show to all authenticated users for development purposes
   if (!user) {

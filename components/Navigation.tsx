@@ -4,10 +4,11 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Menu, X, Home, Building2, Phone, User2, Shield, Package, Wrench } from 'lucide-react'
-import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton, useUser } from '@clerk/nextjs'
+import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
+import { useEffectiveUser } from '@/hooks/useEffectiveUser'
 
 export default function Navigation() {
-  const { user } = useUser()
+  const { user, isImpersonating } = useEffectiveUser()
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isSuperAdmin, setIsSuperAdmin] = useState(false)
