@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Menu, X, Home, Building2, Phone, User2, Shield } from 'lucide-react'
+import { Menu, X, Home, Building2, Phone, User2, Shield, Package } from 'lucide-react'
 import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton, useUser } from '@clerk/nextjs'
 
 export default function Navigation() {
@@ -12,6 +12,7 @@ export default function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isSuperAdmin, setIsSuperAdmin] = useState(false)
   const [isAgency, setIsAgency] = useState(false)
+  const [isSupplier, setIsSupplier] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -37,6 +38,7 @@ export default function Navigation() {
       )
       
       setIsAgency(metadata?.isAgency === true)
+      setIsSupplier(metadata?.role === 'supplier')
     }
   }, [user])
 
@@ -110,12 +112,21 @@ export default function Navigation() {
                 Dashboard
               </Link>
               {isSuperAdmin && (
-                <Link 
-                  href="/superadmin" 
+                <Link
+                  href="/superadmin"
                   className="flex items-center space-x-1 font-medium text-gray-700 hover:text-primary transition-colors duration-200"
                 >
                   <Shield size={16} />
                   <span>Admin</span>
+                </Link>
+              )}
+              {isSupplier && (
+                <Link
+                  href="/supplier/dashboard"
+                  className="flex items-center space-x-1 font-medium text-gray-700 hover:text-primary transition-colors duration-200"
+                >
+                  <Package size={16} />
+                  <span>Proveedor</span>
                 </Link>
               )}
               <Link href="/publish" className="btn-primary">
@@ -193,13 +204,23 @@ export default function Navigation() {
                 Dashboard
               </Link>
               {isSuperAdmin && (
-                <Link 
-                  href="/superadmin" 
+                <Link
+                  href="/superadmin"
                   className="flex items-center justify-center space-x-2 py-3 px-4 font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <Shield size={16} />
                   <span>Admin</span>
+                </Link>
+              )}
+              {isSupplier && (
+                <Link
+                  href="/supplier/dashboard"
+                  className="flex items-center justify-center space-x-2 py-3 px-4 font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Package size={16} />
+                  <span>Proveedor</span>
                 </Link>
               )}
               <Link 
