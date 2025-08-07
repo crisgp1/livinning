@@ -91,8 +91,9 @@ export default function ImpersonationUserButton() {
                       method: 'DELETE'
                     })
                     if (response.ok) {
+                      const data = await response.json()
                       setTimeout(() => {
-                        window.location.reload()
+                        window.location.href = data.redirectUrl || '/'
                       }, 100)
                     }
                   })

@@ -1,17 +1,21 @@
-import { auth, currentUser } from '@clerk/nextjs/server'
+import { auth, clerkClient } from '@clerk/nextjs/server'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
   try {
     const { userId } = await auth()
-    const user = await currentUser()
     
-    if (!userId || !user) {
+    if (!userId) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       )
     }
+    
+    // TODO: Add proper permission check like:
+    // if (!has({ permission: 'org:admin:impersonate' })) {
+    //   return NextResponse.json({ error: 'You do not have permission to impersonate users' }, { status: 403 })
+    // }
 
     const { targetUserId, targetEmail } = await request.json()
 
@@ -22,10 +26,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get target user from Clerk
-    const { clerkClient } = await import('@clerk/nextjs/server')
     const clerk = await clerkClient()
-    
     let targetUser
     
     if (targetUserId) {
@@ -66,42 +67,74 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Store impersonation data in session/response
-    const originalName = user.firstName || user.lastName 
-      ? `${user.firstName || ''} ${user.lastName || ''}`.trim()
-      : user.emailAddresses[0]?.emailAddress || 'User';
-    
     const targetName = targetUser.firstName || targetUser.lastName
       ? `${targetUser.firstName || ''} ${targetUser.lastName || ''}`.trim()
       : targetUser.emailAddresses[0]?.emailAddress || 'User';
-    
-    const impersonationData = {
-      originalUserId: userId,
-      originalUserName: originalName,
-      originalUserImageUrl: user.imageUrl,
-      targetUserId: targetUser.id,
-      targetUserName: targetName,
-      targetUserEmail: targetUser.emailAddresses[0]?.emailAddress || '',
-      targetUserImageUrl: targetUser.imageUrl,
-      targetUserRole: targetUser.publicMetadata?.role || 'user',
-      impersonatedAt: new Date().toISOString()
+
+    // Create actor token using Clerk's Backend API
+    try {
+      const actorTokenResponse = await fetch('https://api.clerk.com/v1/actor_tokens', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          user_id: targetUser.id,
+          actor: { sub: userId }, // Current admin user is the actor
+          expires_in_seconds: 60 * 60 * 24 // 24 hours
+        })
+      })
+
+      if (actorTokenResponse.ok) {
+        const actorToken = await actorTokenResponse.json()
+        
+        return NextResponse.json({ 
+          success: true,
+          message: `Now impersonating ${targetName}`,
+          actorTokenUrl: actorToken.url,
+          targetUser: {
+            id: targetUser.id,
+            name: targetName,
+            email: targetUser.emailAddresses[0]?.emailAddress || '',
+            imageUrl: targetUser.imageUrl,
+            role: targetUser.publicMetadata?.role || 'user'
+          }
+        })
+      } else {
+        throw new Error('Failed to create actor token')
+      }
+    } catch (actorError) {
+      console.log('Actor token creation failed, falling back to cookie-based approach:', actorError)
+      
+      // Fallback to cookie-based impersonation if actor tokens fail
+      const impersonationData = {
+        originalUserId: userId,
+        targetUserId: targetUser.id,
+        targetUserName: targetName,
+        targetUserEmail: targetUser.emailAddresses[0]?.emailAddress || '',
+        targetUserImageUrl: targetUser.imageUrl,
+        targetUserRole: targetUser.publicMetadata?.role || 'user',
+        impersonatedAt: new Date().toISOString()
+      }
+
+      const response = NextResponse.json({ 
+        success: true,
+        message: `Now impersonating ${targetName}`,
+        impersonationData,
+        requiresReload: true // Signal that page needs reload
+      })
+
+      // Set impersonation cookie as fallback
+      response.cookies.set('impersonation', JSON.stringify(impersonationData), {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 // 24 hours
+      })
+
+      return response
     }
-
-    const response = NextResponse.json({ 
-      success: true,
-      message: `Now impersonating ${targetName}`,
-      impersonationData
-    })
-
-    // Set impersonation cookie
-    response.cookies.set('impersonation', JSON.stringify(impersonationData), {
-      httpOnly: false, // Allow client-side access
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 // 24 hours
-    })
-
-    return response
   } catch (error) {
     console.error('Error starting impersonation:', error)
     return NextResponse.json(
@@ -111,26 +144,15 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function DELETE(request: NextRequest) {
+export async function DELETE() {
   try {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
-    const response = NextResponse.json({ 
+    // With Clerk's actor tokens, stopping impersonation is simply redirecting 
+    // back to the application without the actor token
+    return NextResponse.json({ 
       success: true,
-      message: 'Impersonation stopped'
+      message: 'Impersonation stopped',
+      redirectUrl: '/' // Redirect to home page as the original user
     })
-
-    // Remove impersonation cookie
-    response.cookies.delete('impersonation')
-
-    return response
   } catch (error) {
     console.error('Error stopping impersonation:', error)
     return NextResponse.json(

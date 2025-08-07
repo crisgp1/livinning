@@ -173,11 +173,22 @@ export default function DeveloperRoleChanger() {
 
         if (response.ok) {
           const data = await response.json()
-          setImpersonationData(data.impersonationData)
           showMessage('success', data.message)
           setTargetEmail('')
-          // Refresh the page to apply impersonation
-          setTimeout(() => window.location.reload(), 100)
+          
+          // Check if we got an actor token URL (Clerk's official method)
+          if (data.actorTokenUrl) {
+            // Redirect to the actor token URL to start impersonation
+            setTimeout(() => {
+              window.location.href = data.actorTokenUrl
+            }, 100)
+          } else if (data.requiresReload) {
+            // Fallback to cookie-based approach - reload page
+            setImpersonationData(data.impersonationData)
+            setTimeout(() => {
+              window.location.reload()
+            }, 100)
+          }
         } else {
           const data = await response.json()
           showMessage('error', data.error || 'Error al iniciar impersonación')
@@ -205,10 +216,21 @@ export default function DeveloperRoleChanger() {
 
         if (response.ok) {
           const data = await response.json()
-          setImpersonationData(data.impersonationData)
           showMessage('success', data.message)
-          // Refresh the page to apply impersonation
-          setTimeout(() => window.location.reload(), 100)
+          
+          // Check if we got an actor token URL (Clerk's official method)
+          if (data.actorTokenUrl) {
+            // Redirect to the actor token URL to start impersonation
+            setTimeout(() => {
+              window.location.href = data.actorTokenUrl
+            }, 100)
+          } else if (data.requiresReload) {
+            // Fallback to cookie-based approach - reload page
+            setImpersonationData(data.impersonationData)
+            setTimeout(() => {
+              window.location.reload()
+            }, 100)
+          }
         } else {
           const data = await response.json()
           showMessage('error', data.error || 'Error al iniciar impersonación')
@@ -231,10 +253,13 @@ export default function DeveloperRoleChanger() {
         })
 
         if (response.ok) {
+          const data = await response.json()
           setImpersonationData(null)
           showMessage('success', 'Impersonación finalizada')
-          // Refresh the page to remove impersonation
-          setTimeout(() => window.location.reload(), 100)
+          // Redirect to remove impersonation
+          setTimeout(() => {
+            window.location.href = data.redirectUrl || '/'
+          }, 100)
         } else {
           const data = await response.json()
           showMessage('error', data.error || 'Error al finalizar impersonación')

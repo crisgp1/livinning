@@ -51,9 +51,10 @@ export default function ImpersonationBanner() {
         })
 
         if (response.ok) {
+          const data = await response.json()
           setImpersonationData(null)
           setTimeout(() => {
-            window.location.reload()
+            window.location.href = data.redirectUrl || '/'
           }, 100)
         }
       } catch (error) {
