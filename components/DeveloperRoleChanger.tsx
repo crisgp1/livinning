@@ -15,6 +15,14 @@ interface ImpersonationData {
   impersonatedAt: string
 }
 
+interface UserListItem {
+  id: string
+  firstName: string | null
+  lastName: string | null
+  emailAddress: string
+  role: string
+}
+
 export default function DeveloperRoleChanger() {
   const { user } = useUser()
   const [isOpen, setIsOpen] = useState(false)
@@ -24,6 +32,9 @@ export default function DeveloperRoleChanger() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [impersonationData, setImpersonationData] = useState<ImpersonationData | null>(null)
   const [targetEmail, setTargetEmail] = useState('')
+  const [usersList, setUsersList] = useState<UserListItem[]>([])
+  const [usersLoading, setUsersLoading] = useState(false)
+  const [showEmailInput, setShowEmailInput] = useState(false)
 
   // Check for existing impersonation on mount
   useEffect(() => {
@@ -80,13 +91,25 @@ export default function DeveloperRoleChanger() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ userId: user.id, role: newRole })
+        body: JSON.stringify({
+          userId: impersonationData ? impersonationData.targetUserId : user.id,
+          role: newRole
+        })
       })
 
       if (response.ok) {
         showMessage('success', `Rol actualizado a ${availableRoles.find(r => r.value === newRole)?.label || newRole}`)
-        // Reload the page to update the user context
-        setTimeout(() => window.location.reload(), 1500)
+        
+        // Update impersonation data if impersonating
+        if (impersonationData) {
+          setImpersonationData({
+            ...impersonationData,
+            targetUserRole: newRole
+          })
+        } else {
+          // Reload the page to update the user context
+          setTimeout(() => window.location.reload(), 1500)
+        }
       } else {
         const data = await response.json()
         showMessage('error', data.error || 'Error al actualizar rol')
@@ -99,7 +122,32 @@ export default function DeveloperRoleChanger() {
     }
   }
 
-  const startImpersonation = async () => {
+  const fetchUsersList = async () => {
+    setUsersLoading(true)
+    try {
+      const response = await fetch('/api/admin/users')
+      if (response.ok) {
+        const data = await response.json()
+        const users = data.users?.map((u: any) => ({
+          id: u.id,
+          firstName: u.firstName,
+          lastName: u.lastName,
+          emailAddress: u.emailAddress,
+          role: u.role || 'user'
+        })) || []
+        setUsersList(users)
+      } else {
+        showMessage('error', 'Error al cargar lista de usuarios')
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error)
+      showMessage('error', 'Error al cargar lista de usuarios')
+    } finally {
+      setUsersLoading(false)
+    }
+  }
+
+  const startImpersonationByEmailByEmail = async () => {
     if (!targetEmail.trim()) {
       showMessage('error', 'Por favor ingresa una dirección de correo')
       return
@@ -120,6 +168,35 @@ export default function DeveloperRoleChanger() {
         setImpersonationData(data.impersonationData)
         showMessage('success', data.message)
         setTargetEmail('')
+        // Refresh the page to apply impersonation
+        setTimeout(() => window.location.reload(), 1500)
+      } else {
+        const data = await response.json()
+        showMessage('error', data.error || 'Error al iniciar impersonación')
+      }
+    } catch (error) {
+      console.error('Error starting impersonation:', error)
+      showMessage('error', 'Error al iniciar impersonación')
+    } finally {
+      setImpersonateLoading(false)
+    }
+  }
+
+  const startImpersonationByEmailByUser = async (userEmail: string) => {
+    setImpersonateLoading(true)
+    try {
+      const response = await fetch('/api/admin/impersonate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ targetEmail: userEmail })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setImpersonationData(data.impersonationData)
+        showMessage('success', data.message)
         // Refresh the page to apply impersonation
         setTimeout(() => window.location.reload(), 1500)
       } else {
@@ -165,6 +242,13 @@ export default function DeveloperRoleChanger() {
 
   const handleToggle = () => {
     setIsOpen(!isOpen)
+  }
+
+  const handleImpersonateTabClick = () => {
+    setActiveTab('impersonate')
+    if (usersList.length === 0) {
+      fetchUsersList()
+    }
   }
 
   return (
@@ -226,7 +310,7 @@ export default function DeveloperRoleChanger() {
                   Roles
                 </button>
                 <button
-                  onClick={() => setActiveTab('impersonate')}
+                  onClick={handleImpersonateTabClick}
                   className={`flex-1 px-3 py-1 text-xs font-medium rounded-md transition-colors ${
                     activeTab === 'impersonate' ? 'bg-white/20 text-white' : 'text-white/70 hover:text-white'
                   }`}
@@ -339,36 +423,79 @@ export default function DeveloperRoleChanger() {
                   </div>
                 ) : (
                   <div className="space-y-4">
+                    {/* Lista de Usuarios */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Correo del Usuario a Impersonar
-                      </label>
-                      <input
-                        type="email"
-                        value={targetEmail}
-                        onChange={(e) => setTargetEmail(e.target.value)}
-                        placeholder="Ingresa el correo del usuario..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                        disabled={impersonateLoading}
-                      />
-                    </div>
-                    
-                    <button
-                      onClick={startImpersonation}
-                      disabled={impersonateLoading || !targetEmail.trim()}
-                      className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {impersonateLoading ? (
-                        <div className="flex items-center justify-center">
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="block text-sm font-medium text-gray-700">
+                          Selecciona un Usuario
+                        </label>
+                        <button
+                          onClick={() => setShowEmailInput(!showEmailInput)}
+                          className="text-xs text-blue-600 hover:text-blue-800"
+                        >
+                          {showEmailInput ? 'Ver lista' : 'Buscar por correo'}
+                        </button>
+                      </div>
+                      
+                      {showEmailInput ? (
+                        <div className="space-y-2">
+                          <input
+                            type="email"
+                            value={targetEmail}
+                            onChange={(e) => setTargetEmail(e.target.value)}
+                            placeholder="Ingresa el correo del usuario..."
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                            disabled={impersonateLoading}
+                          />
+                          <button
+                            onClick={startImpersonationByEmailByEmail}
+                            disabled={impersonateLoading || !targetEmail.trim()}
+                            className="w-full px-3 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors disabled:opacity-50"
+                          >
+                            {impersonateLoading ? (
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>
+                            ) : (
+                              'Iniciar Impersonación'
+                            )}
+                          </button>
+                        </div>
+                      ) : usersLoading ? (
+                        <div className="flex items-center justify-center py-4">
+                          <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                          <span className="ml-2 text-sm text-gray-600">Cargando usuarios...</span>
                         </div>
                       ) : (
-                        <div className="flex items-center justify-center space-x-2">
-                          <UserCheck size={16} />
-                          <span>Iniciar Impersonación</span>
+                        <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-lg">
+                          {usersList.map((userData) => (
+                            <button
+                              key={userData.id}
+                              onClick={() => startImpersonationByEmailByUser(userData.emailAddress)}
+                              disabled={impersonateLoading}
+                              className="w-full px-3 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 disabled:opacity-50 transition-colors"
+                            >
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <p className="text-sm font-medium text-gray-900">
+                                    {userData.firstName} {userData.lastName}
+                                  </p>
+                                  <p className="text-xs text-gray-500">{userData.emailAddress}</p>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <span className={`px-2 py-1 text-xs rounded-full ${
+                                    availableRoles.find(r => r.value === userData.role)?.color || 'bg-gray-100 text-gray-800'
+                                  }`}>
+                                    {availableRoles.find(r => r.value === userData.role)?.label || userData.role}
+                                  </span>
+                                  {impersonateLoading && (
+                                    <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                                  )}
+                                </div>
+                              </div>
+                            </button>
+                          ))}
                         </div>
                       )}
-                    </button>
+                    </div>
                     
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                       <p className="text-xs text-blue-700">
