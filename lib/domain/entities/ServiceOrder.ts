@@ -14,7 +14,8 @@ export enum ServiceType {
   VIRTUAL_TOUR = 'virtual-tour',
   HOME_STAGING = 'home-staging',
   MARKET_ANALYSIS = 'market-analysis',
-  DOCUMENTATION = 'documentation'
+  DOCUMENTATION = 'documentation',
+  HIGHLIGHT = 'highlight'
 }
 
 export class ServiceOrder {

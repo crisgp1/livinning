@@ -16,6 +16,10 @@ export class PublishPropertyUseCase {
         throw new Error('You are not authorized to publish this property')
       }
 
+      if (property.isPublished()) {
+        throw new Error('Property is already published')
+      }
+
       const publishedProperty = property.publish()
       
       return await this.propertyRepository.update(publishedProperty)

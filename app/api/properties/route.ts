@@ -42,6 +42,9 @@ export async function GET(request: NextRequest) {
     if (searchParams.get('amenities')) {
       filters.amenities = searchParams.get('amenities')!.split(',')
     }
+    if (searchParams.get('isHighlighted')) {
+      filters.isHighlighted = searchParams.get('isHighlighted') === 'true'
+    }
 
     const result = await propertyService.getProperties({ filters, page, limit })
 
@@ -79,6 +82,9 @@ export async function GET(request: NextRequest) {
         images: property.images,
         ownerId: property.ownerId,
         organizationId: property.organizationId,
+        isHighlighted: property.isHighlighted,
+        highlightExpiresAt: property.highlightExpiresAt,
+        isHighlightActive: property.isHighlightActive(),
         createdAt: property.createdAt,
         updatedAt: property.updatedAt
       }))

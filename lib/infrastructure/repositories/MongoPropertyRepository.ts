@@ -50,6 +50,8 @@ export class MongoPropertyRepository implements PropertyRepository {
       doc.ownerId,
       doc.organizationId,
       doc.status as PropertyStatus,
+      doc.isHighlighted || false,
+      doc.highlightExpiresAt,
       doc.createdAt,
       doc.updatedAt
     )
@@ -89,7 +91,9 @@ export class MongoPropertyRepository implements PropertyRepository {
       images: property.images,
       ownerId: property.ownerId,
       organizationId: property.organizationId,
-      status: property.status
+      status: property.status,
+      isHighlighted: property.isHighlighted,
+      highlightExpiresAt: property.highlightExpiresAt
     }
   }
 
@@ -177,16 +181,48 @@ export class MongoPropertyRepository implements PropertyRepository {
       if (filters.status) {
         query.status = filters.status
       }
+
+      if (filters.isHighlighted !== undefined) {
+        query.isHighlighted = filters.isHighlighted
+        if (filters.isHighlighted) {
+          // Only show active highlights
+          query.highlightExpiresAt = { $gte: new Date() }
+        }
+      }
     }
 
-    // Show published and draft properties for public queries (unless owner or organization is specified)
+    // Show only published properties for public queries (unless owner or organization is specified)
     if (!filters?.ownerId && !filters?.organizationId) {
-      query.status = { $in: [PropertyStatus.PUBLISHED, PropertyStatus.DRAFT] }
+      query.status = PropertyStatus.PUBLISHED
     }
 
     const docs = await PropertyModel
       .find(query)
-      .sort({ createdAt: -1 })
+      .sort({ 
+        isHighlighted: -1,  // Show highlighted properties first
+        createdAt: -1 
+      })
+      .skip(offset)
+      .limit(limit)
+
+    return docs.map(doc => this.toDomain(doc))
+  }
+
+  async findHighlighted(limit = 20, offset = 0): Promise<Property[]> {
+    await this.ensureConnection()
+    
+    const query: any = {
+      status: PropertyStatus.PUBLISHED,
+      isHighlighted: true,
+      highlightExpiresAt: { $gte: new Date() }
+    }
+
+    const docs = await PropertyModel
+      .find(query)
+      .sort({ 
+        highlightExpiresAt: 1, // Show expiring highlights first
+        createdAt: -1 
+      })
       .skip(offset)
       .limit(limit)
 
@@ -283,11 +319,19 @@ export class MongoPropertyRepository implements PropertyRepository {
       if (filters.status) {
         query.status = filters.status
       }
+
+      if (filters.isHighlighted !== undefined) {
+        query.isHighlighted = filters.isHighlighted
+        if (filters.isHighlighted) {
+          // Only show active highlights
+          query.highlightExpiresAt = { $gte: new Date() }
+        }
+      }
     }
 
-    // Show published and draft properties for public queries (unless owner or organization is specified)
+    // Show only published properties for public queries (unless owner or organization is specified)
     if (!filters?.ownerId && !filters?.organizationId) {
-      query.status = { $in: [PropertyStatus.PUBLISHED, PropertyStatus.DRAFT] }
+      query.status = PropertyStatus.PUBLISHED
     }
 
     return await PropertyModel.countDocuments(query)

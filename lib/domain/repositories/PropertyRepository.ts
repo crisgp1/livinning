@@ -12,6 +12,7 @@ export interface PropertyFilters {
   ownerId?: string
   organizationId?: string
   status?: string
+  isHighlighted?: boolean
 }
 
 export interface PropertyRepository {
@@ -19,6 +20,7 @@ export interface PropertyRepository {
   findById(id: string): Promise<Property | null>
   findByOwnerId(ownerId: string): Promise<Property[]>
   findAll(filters?: PropertyFilters, limit?: number, offset?: number): Promise<Property[]>
+  findHighlighted(limit?: number, offset?: number): Promise<Property[]>
   update(property: Property): Promise<Property>
   delete(id: string): Promise<void>
   count(filters?: PropertyFilters): Promise<number>

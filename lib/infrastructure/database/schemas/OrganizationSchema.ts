@@ -144,7 +144,7 @@ const OrganizationSchema = new Schema<OrganizationDocument>({
 })
 
 // Indexes for better query performance
-OrganizationSchema.index({ slug: 1 })
+// Note: slug index is automatically created by unique: true constraint
 OrganizationSchema.index({ ownerId: 1 })
 OrganizationSchema.index({ status: 1 })
 OrganizationSchema.index({ createdAt: -1 })

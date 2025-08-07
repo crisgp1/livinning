@@ -19,7 +19,10 @@ export async function POST(request: Request) {
       propertyAddress,
       contactPhone,
       preferredDate,
-      specialRequests
+      specialRequests,
+      propertyId,
+      propertyTitle,
+      highlightDuration
     } = await request.json()
 
     if (!serviceId || !serviceName || !price) {
@@ -59,7 +62,10 @@ export async function POST(request: Request) {
         propertyAddress,
         contactPhone,
         preferredDate,
-        specialRequests: specialRequests || ''
+        specialRequests: specialRequests || '',
+        propertyId: propertyId || '',
+        propertyTitle: propertyTitle || '',
+        highlightDuration: highlightDuration?.toString() || ''
       }
     })
 

@@ -16,7 +16,8 @@ import {
   Download,
   Eye,
   User,
-  X
+  X,
+  Star
 } from 'lucide-react'
 
 interface ServiceOrder {
@@ -109,7 +110,19 @@ export default function ServiceOrders({ className }: ServiceOrdersProps) {
   }
 
   const getServiceIcon = (serviceType: string) => {
-    return <div className="w-2 h-2 rounded-full bg-white opacity-60"></div>
+    switch (serviceType) {
+      case 'highlight':
+      case 'highlight-7':
+      case 'highlight-15':
+      case 'highlight-30':
+        return <Star className="w-5 h-5 text-yellow-500" />
+      case 'photography':
+        return <div className="w-2 h-2 rounded-full bg-blue-500 opacity-60"></div>
+      case 'legal':
+        return <div className="w-2 h-2 rounded-full bg-green-500 opacity-60"></div>
+      default:
+        return <div className="w-2 h-2 rounded-full bg-white opacity-60"></div>
+    }
   }
 
   const formatDate = (dateString: string) => {
@@ -183,8 +196,15 @@ export default function ServiceOrders({ className }: ServiceOrdersProps) {
               {/* Header */}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-primary to-blue-600">
-                    <FileText className="w-5 h-5 text-white" />
+                  <div className={`p-3 rounded-xl ${
+                    order.serviceType.includes('highlight') 
+                      ? 'bg-gradient-to-br from-yellow-400 to-yellow-600' 
+                      : 'bg-gradient-to-br from-primary to-blue-600'
+                  }`}>
+                    {order.serviceType.includes('highlight') 
+                      ? <Star className="w-5 h-5 text-white" />
+                      : <FileText className="w-5 h-5 text-white" />
+                    }
                   </div>
                   <div>
                     <h4 className="font-medium text-gray-900">{order.serviceName}</h4>

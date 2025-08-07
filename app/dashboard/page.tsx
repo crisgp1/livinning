@@ -21,7 +21,8 @@ import {
   Eye,
   MessageSquare,
   Sparkles,
-  FileText
+  FileText,
+  Heart
 } from 'lucide-react'
 
 interface Property {
@@ -187,6 +188,7 @@ export default function Dashboard() {
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3, href: '/dashboard' },
     { id: 'publish', label: 'Publicar', icon: PlusCircle, href: '/publish' },
     { id: 'properties', label: 'Propiedades', icon: Building, href: '/dashboard/properties' },
+    { id: 'favorites', label: 'Favoritos', icon: Heart, href: '/dashboard/favorites' },
     { id: 'services', label: 'Servicios', icon: Wrench, href: '/services' },
     { id: 'my-services', label: 'Servicios Contratados', icon: FileText, href: '/dashboard/services' },
     { id: 'settings', label: 'Configuración', icon: Settings, href: '/dashboard/settings' },

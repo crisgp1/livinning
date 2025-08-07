@@ -1,36 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
 import { PropertyService } from '@/lib/application/services/PropertyService'
 import { MongoPropertyRepository } from '@/lib/infrastructure/repositories/MongoPropertyRepository'
-import { getOrganizationContext } from '@/lib/utils/organizationContext'
 
 const propertyRepository = new MongoPropertyRepository()
 const propertyService = new PropertyService(propertyRepository)
 
 export async function GET(request: NextRequest) {
   try {
-    const { userId, organization } = await getOrganizationContext()
-
     const { searchParams } = new URL(request.url)
-    const status = searchParams.get('status')
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
+    const offset = (page - 1) * limit
 
-    // Get properties owned by the authenticated user within their organization
-    const filters = {
-      ownerId: userId,
-      organizationId: organization.id,
-      ...(status && { status })
-    }
+    const properties = await propertyService.getHighlightedProperties(limit, offset)
 
-    const result = await propertyService.getProperties({ 
-      filters, 
-      page, 
-      limit 
-    })
-
-    // Transform properties to include all necessary data
-    const transformedProperties = result.properties.map(property => ({
+    // Serialize the properties to plain objects
+    const serializedProperties = properties.map(property => ({
       id: property.id,
       title: property.title,
       description: property.description,
@@ -39,46 +24,50 @@ export async function GET(request: NextRequest) {
         currency: property.price.currency
       },
       propertyType: property.propertyType.value,
+      status: property.status,
       address: {
         street: property.address?.street || '',
         city: property.address?.city || '',
         state: property.address?.state || '',
         country: property.address?.country || '',
-        postalCode: property.address?.postalCode || ''
+        postalCode: property.address?.postalCode || '',
+        coordinates: property.address?.coordinates ? {
+          latitude: property.address.coordinates.latitude,
+          longitude: property.address.coordinates.longitude
+        } : undefined
       },
       features: {
         bedrooms: property.features.bedrooms,
         bathrooms: property.features.bathrooms,
         squareMeters: property.features.squareMeters,
-        parking: property.features.parking
+        parking: property.features.parking,
+        amenities: property.features.amenities
       },
       images: property.images,
-      status: property.status,
+      ownerId: property.ownerId,
+      organizationId: property.organizationId,
       isHighlighted: property.isHighlighted,
       highlightExpiresAt: property.highlightExpiresAt,
       isHighlightActive: property.isHighlightActive(),
       createdAt: property.createdAt,
-      updatedAt: property.updatedAt,
-      ownerId: property.ownerId,
-      organizationId: property.organizationId
+      updatedAt: property.updatedAt
     }))
 
     return NextResponse.json({
       success: true,
-      data: transformedProperties,
-      pagination: {
-        page: result.page,
-        limit: result.limit,
-        total: result.total,
-        totalPages: result.totalPages
+      data: {
+        properties: serializedProperties,
+        page,
+        limit,
+        total: serializedProperties.length
       }
     })
   } catch (error) {
-    console.error('Error fetching user properties:', error)
+    console.error('Error fetching highlighted properties:', error)
     return NextResponse.json(
       { 
         success: false, 
-        error: error instanceof Error ? error.message : 'Failed to fetch properties' 
+        error: error instanceof Error ? error.message : 'Failed to fetch highlighted properties' 
       },
       { status: 500 }
     )

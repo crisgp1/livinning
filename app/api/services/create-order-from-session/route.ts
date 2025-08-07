@@ -4,6 +4,8 @@ import { v4 as uuidv4 } from 'uuid'
 import connectDB from '@/lib/infrastructure/database/connection'
 import ServiceOrderModel from '@/lib/infrastructure/database/models/ServiceOrderModel'
 import { ServiceOrderStatus, ServiceType } from '@/lib/domain/entities/ServiceOrder'
+import { PropertyService } from '@/lib/application/services/PropertyService'
+import { MongoPropertyRepository } from '@/lib/infrastructure/repositories/MongoPropertyRepository'
 
 export async function POST(request: Request) {
   try {
@@ -57,12 +59,12 @@ export async function POST(request: Request) {
     const serviceOrderData = {
       _id: uuidv4(),
       userId,
-      serviceType: sessionData.metadata.serviceId,
+      serviceType: sessionData.metadata.serviceId?.startsWith('highlight-') ? ServiceType.HIGHLIGHT : sessionData.metadata.serviceId,
       serviceName: sessionData.metadata.serviceName,
       serviceDescription: `Professional ${sessionData.metadata.serviceName} service`,
-      propertyAddress: sessionData.metadata.propertyAddress,
-      contactPhone: sessionData.metadata.contactPhone,
-      preferredDate: sessionData.metadata.preferredDate,
+      propertyAddress: sessionData.metadata.propertyAddress || 'Dirección no especificada',
+      contactPhone: sessionData.metadata.contactPhone || sessionData.customer_email || 'No proporcionado',
+      preferredDate: sessionData.metadata.preferredDate || new Date().toISOString().split('T')[0],
       specialRequests: sessionData.metadata.specialRequests || '',
       amount: (sessionData.amount_total || 0) / 100, // Convert from cents
       currency: 'MXN',
@@ -84,6 +86,44 @@ export async function POST(request: Request) {
     const savedOrder = await serviceOrder.save()
     console.log('✅ Service order created successfully:', savedOrder._id)
     console.log('🎉 Service order saved with status:', savedOrder.status)
+
+    // Check if this is a highlight service and apply highlight to property
+    if (sessionData.metadata.serviceId?.startsWith('highlight-')) {
+      console.log('🌟 Processing highlight service...')
+      const propertyId = sessionData.metadata.propertyId
+      const highlightDuration = parseInt(sessionData.metadata.highlightDuration || '0')
+      
+      if (propertyId && highlightDuration > 0) {
+        try {
+          const propertyRepository = new MongoPropertyRepository()
+          const propertyService = new PropertyService(propertyRepository)
+          
+          // Apply highlight to property
+          const highlightedProperty = await propertyService.highlightProperty(
+            propertyId,
+            userId,
+            highlightDuration
+          )
+          
+          console.log('✅ Property highlighted successfully:', propertyId)
+          console.log('⏰ Highlight expires at:', highlightedProperty.highlightExpiresAt)
+          
+          // Update service order with completion info
+          savedOrder.status = ServiceOrderStatus.COMPLETED
+          savedOrder.actualDelivery = new Date()
+          savedOrder.deliverables = [`Property ${propertyId} highlighted for ${highlightDuration} days`]
+          savedOrder.notes = [`Highlight activated at ${new Date().toISOString()}`]
+          await savedOrder.save()
+          
+          console.log('✅ Service order marked as completed')
+        } catch (error) {
+          console.error('❌ Failed to apply highlight:', error)
+          // The payment was successful, so we should log this error but not fail the request
+          savedOrder.notes = [`Error applying highlight: ${error instanceof Error ? error.message : 'Unknown error'}`]
+          await savedOrder.save()
+        }
+      }
+    }
 
     return NextResponse.json({
       success: true,

@@ -6,6 +6,8 @@ import { v4 as uuidv4 } from 'uuid'
 import connectDB from '@/lib/infrastructure/database/connection'
 import ServiceOrderModel from '@/lib/infrastructure/database/models/ServiceOrderModel'
 import { ServiceOrderStatus, ServiceType } from '@/lib/domain/entities/ServiceOrder'
+import { PropertyService } from '@/lib/application/services/PropertyService'
+import { MongoPropertyRepository } from '@/lib/infrastructure/repositories/MongoPropertyRepository'
 
 export async function POST(request: Request) {
   console.log('🔔 Webhook received at:', new Date().toISOString())
@@ -100,15 +102,58 @@ export async function POST(request: Request) {
             await connectDB()
             console.log('✅ MongoDB connection successful')
 
+            // Check if service order already exists for this session
+            const existingOrder = await ServiceOrderModel.findOne({ 
+              stripeSessionId: session.id 
+            })
+
+            if (existingOrder) {
+              console.log('⚠️ Service order already exists for session:', session.id)
+              console.log('📋 Existing order status:', existingOrder.status)
+              
+              // If the order exists but property hasn't been highlighted yet, do it now
+              if (session.metadata.serviceId?.startsWith('highlight-') && 
+                  existingOrder.status !== ServiceOrderStatus.COMPLETED) {
+                console.log('🌟 Applying highlight to property for existing order...')
+                const propertyId = session.metadata.propertyId
+                const highlightDuration = parseInt(session.metadata.highlightDuration || '0')
+                
+                if (propertyId && highlightDuration > 0) {
+                  try {
+                    const propertyRepository = new MongoPropertyRepository()
+                    const propertyService = new PropertyService(propertyRepository)
+                    
+                    const highlightedProperty = await propertyService.highlightProperty(
+                      propertyId,
+                      userId,
+                      highlightDuration
+                    )
+                    
+                    console.log('✅ Property highlighted successfully:', propertyId)
+                    
+                    // Update existing order
+                    existingOrder.status = ServiceOrderStatus.COMPLETED
+                    existingOrder.actualDelivery = new Date()
+                    existingOrder.deliverables = [`Property ${propertyId} highlighted for ${highlightDuration} days`]
+                    existingOrder.notes = [...existingOrder.notes, `Highlight activated via webhook at ${new Date().toISOString()}`]
+                    await existingOrder.save()
+                  } catch (error) {
+                    console.error('❌ Failed to apply highlight:', error)
+                  }
+                }
+              }
+              break
+            }
+
             const serviceOrderData = {
               _id: uuidv4(),
               userId,
-              serviceType: session.metadata.serviceId,
+              serviceType: session.metadata.serviceId?.startsWith('highlight-') ? ServiceType.HIGHLIGHT : session.metadata.serviceId,
               serviceName: session.metadata.serviceName,
               serviceDescription: `Professional ${session.metadata.serviceName} service`,
-              propertyAddress: session.metadata.propertyAddress,
-              contactPhone: session.metadata.contactPhone,
-              preferredDate: session.metadata.preferredDate,
+              propertyAddress: session.metadata.propertyAddress || 'Dirección no especificada',
+              contactPhone: session.metadata.contactPhone || customerEmail || 'No proporcionado',
+              preferredDate: session.metadata.preferredDate || new Date().toISOString().split('T')[0],
               specialRequests: session.metadata.specialRequests || '',
               amount: (session.amount_total || 0) / 100, // Convert from cents
               currency: 'MXN',
@@ -130,6 +175,44 @@ export async function POST(request: Request) {
             const savedOrder = await serviceOrder.save()
             console.log('✅ Service order created successfully:', savedOrder._id)
             console.log('🎉 Service order saved with status:', savedOrder.status)
+
+            // Check if this is a highlight service
+            if (session.metadata.serviceId?.startsWith('highlight-')) {
+              console.log('🌟 Processing highlight service...')
+              const propertyId = session.metadata.propertyId
+              const highlightDuration = parseInt(session.metadata.highlightDuration || '0')
+              
+              if (propertyId && highlightDuration > 0) {
+                try {
+                  const propertyRepository = new MongoPropertyRepository()
+                  const propertyService = new PropertyService(propertyRepository)
+                  
+                  // Apply highlight to property
+                  const highlightedProperty = await propertyService.highlightProperty(
+                    propertyId,
+                    userId,
+                    highlightDuration
+                  )
+                  
+                  console.log('✅ Property highlighted successfully:', propertyId)
+                  console.log('⏰ Highlight expires at:', highlightedProperty.highlightExpiresAt)
+                  
+                  // Update service order with completion info
+                  savedOrder.status = ServiceOrderStatus.COMPLETED
+                  savedOrder.actualDelivery = new Date()
+                  savedOrder.deliverables = [`Property ${propertyId} highlighted for ${highlightDuration} days`]
+                  savedOrder.notes = [`Highlight activated at ${new Date().toISOString()}`]
+                  await savedOrder.save()
+                  
+                  console.log('✅ Service order marked as completed')
+                } catch (error) {
+                  console.error('❌ Failed to apply highlight:', error)
+                  // The payment was successful, so we should log this error but not fail the webhook
+                  savedOrder.notes = [`Error applying highlight: ${error instanceof Error ? error.message : 'Unknown error'}`]
+                  await savedOrder.save()
+                }
+              }
+            }
 
             // TODO: Send notification email to service team
             // TODO: Send confirmation email to customer

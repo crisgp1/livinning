@@ -25,7 +25,7 @@ function ServiceSuccessContent() {
     // Create service order from successful payment session
     const createServiceOrder = async () => {
       try {
-        console.log('🔄 Creating service order from successful payment...')
+        console.log('🔄 Processing successful payment...')
         
         // Get session details from Stripe
         const sessionResponse = await fetch(`/api/payments/get-session?session_id=${sessionId}`)
@@ -37,8 +37,14 @@ function ServiceSuccessContent() {
           if (sessionData.success && sessionData.session) {
             const session = sessionData.session
             
+            // Set service name from session
+            setServiceName(session.metadata?.serviceName || 'Servicio Profesional')
+            
             // Create service order if it has serviceId metadata
             if (session.metadata?.serviceId) {
+              // Wait a bit to let webhook process first
+              await new Promise(resolve => setTimeout(resolve, 2000))
+              
               const createOrderResponse = await fetch('/api/services/create-order-from-session', {
                 method: 'POST',
                 headers: {
@@ -52,19 +58,18 @@ function ServiceSuccessContent() {
               
               if (createOrderResponse.ok) {
                 const orderData = await createOrderResponse.json()
-                console.log('✅ Service order created successfully', orderData)
-                setServiceName(session.metadata.serviceName || 'Servicio Profesional')
+                console.log('✅ Service order processed', orderData)
                 if (orderData.data?.id) {
                   setOrderId(orderData.data.id)
                 }
               } else {
-                console.error('❌ Failed to create service order')
+                console.error('❌ Failed to process service order')
               }
             }
           }
         }
       } catch (error) {
-        console.error('❌ Error creating service order:', error)
+        console.error('❌ Error processing service order:', error)
       } finally {
         setIsLoading(false)
       }

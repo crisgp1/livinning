@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import Navigation from '@/components/Navigation'
+import HighlightPropertyService from '@/components/HighlightPropertyService'
 import { 
   Edit3, 
   Save, 
@@ -36,15 +37,25 @@ interface Property {
     state: string
     country: string
     zipCode: string
+    postalCode?: string
+    coordinates?: {
+      latitude: number
+      longitude: number
+    }
   }
   features: {
     bedrooms: number
     bathrooms: number
     squareMeters: number
     parking: number
+    lotSize?: number
+    yearBuilt?: number
   }
   images: string[]
   amenities: string[]
+  isHighlighted?: boolean
+  highlightExpiresAt?: string
+  isHighlightActive?: boolean
 }
 
 export default function EditProperty() {
@@ -89,22 +100,65 @@ export default function EditProperty() {
 
     setIsSaving(true)
     try {
+      // Format the data correctly for the API
+      const updateData = {
+        title: property.title,
+        description: property.description,
+        price: property.price,
+        propertyType: property.propertyType,
+        status: property.status,
+        address: {
+          street: property.address.street,
+          city: property.address.city,
+          state: property.address.state,
+          country: property.address.country,
+          postalCode: property.address.postalCode || property.address.zipCode,
+          coordinates: property.address.coordinates
+        },
+        features: {
+          bedrooms: property.features.bedrooms,
+          bathrooms: property.features.bathrooms,
+          squareMeters: property.features.squareMeters,
+          parking: property.features.parking,
+          lotSize: property.features.lotSize || undefined,
+          yearBuilt: property.features.yearBuilt || undefined
+        },
+        images: property.images,
+        amenities: property.amenities || []
+      }
+
+      console.log('Sending update data:', updateData)
+
       const response = await fetch(`/api/properties/${propertyId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(property)
+        body: JSON.stringify(updateData)
       })
 
+      console.log('Response status:', response.status)
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()))
+
       if (response.ok) {
+        const successData = await response.json()
+        console.log('Success response:', successData)
         router.push('/dashboard/properties')
       } else {
-        alert('Error al guardar la propiedad')
+        let errorData
+        try {
+          errorData = await response.json()
+        } catch (parseError) {
+          console.error('Failed to parse error response:', parseError)
+          errorData = { error: `HTTP ${response.status} - ${response.statusText}` }
+        }
+        console.error('Error response:', errorData)
+        console.error('Full response:', response)
+        alert(`Error al guardar la propiedad: ${errorData.error || `HTTP ${response.status}`}`)
       }
     } catch (error) {
-      console.error('Error saving property:', error)
-      alert('Error al guardar la propiedad')
+      console.error('Network/Request error:', error)
+      alert('Error de conexión al guardar la propiedad')
     } finally {
       setIsSaving(false)
     }
@@ -146,12 +200,39 @@ export default function EditProperty() {
     setProperty({ ...property, images: newImages })
   }
 
-  const toggleStatus = () => {
+  const toggleStatus = async () => {
     if (!property) return
-    setProperty({
-      ...property,
-      status: property.status === 'published' ? 'draft' : 'published'
-    })
+
+    try {
+      if (property.status === 'draft') {
+        // Publish the property
+        const response = await fetch(`/api/properties/${propertyId}/publish`, {
+          method: 'POST'
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          setProperty({
+            ...property,
+            status: 'published'
+          })
+        } else {
+          const error = await response.json()
+          alert(error.error || 'Error al publicar la propiedad')
+        }
+      } else {
+        // Change to draft
+        setProperty({
+          ...property,
+          status: 'draft'
+        })
+        // Save the change
+        await handleSave()
+      }
+    } catch (error) {
+      console.error('Error toggling status:', error)
+      alert('Error al cambiar el estado de la propiedad')
+    }
   }
 
   if (!isLoaded || !user) {
@@ -303,13 +384,14 @@ export default function EditProperty() {
                         onChange={(e) => setProperty({ ...property, propertyType: e.target.value })}
                         className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                       >
-                        <option value="casa">Casa</option>
-                        <option value="apartamento">Apartamento</option>
+                        <option value="house">Casa</option>
+                        <option value="apartment">Apartamento</option>
                         <option value="villa">Villa</option>
                         <option value="penthouse">Penthouse</option>
                         <option value="loft">Loft</option>
-                        <option value="chalet">Chalet</option>
-                        <option value="estudio">Estudio</option>
+                        <option value="townhouse">Casa Adosada</option>
+                        <option value="studio">Estudio</option>
+                        <option value="duplex">Dúplex</option>
                       </select>
                     </div>
 
@@ -545,6 +627,24 @@ export default function EditProperty() {
                   )}
                 </div>
               </div>
+
+              {/* Highlight Property Section */}
+              {property.status === 'published' && (
+                <div className="glass-icon-container rounded-2xl p-8">
+                  <h2 className="text-xl font-medium mb-6 text-gray-900">Destacar propiedad</h2>
+                  <HighlightPropertyService
+                    propertyId={property.id}
+                    propertyTitle={property.title}
+                    propertyAddress={`${property.address.street}, ${property.address.city}, ${property.address.state}`}
+                    isHighlighted={property.isHighlighted}
+                    isHighlightActive={property.isHighlightActive}
+                    highlightExpiresAt={property.highlightExpiresAt}
+                    onHighlightChange={(highlighted) => {
+                      fetchProperty() // Refresh property data
+                    }}
+                  />
+                </div>
+              )}
 
               {/* Actions */}
               <div className="flex items-center gap-4 pt-8">

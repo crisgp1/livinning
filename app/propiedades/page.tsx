@@ -28,6 +28,8 @@ interface Property {
   }
   images: string[]
   highlighted?: boolean
+  isHighlighted?: boolean
+  highlightExpiresAt?: string
 }
 
 
@@ -80,7 +82,9 @@ export default function PropertiesPage() {
                 builtArea: prop.features?.squareMeters || 0
               },
               images: prop.images || [],
-              highlighted: false
+              highlighted: prop.isHighlightActive || false,
+              isHighlighted: prop.isHighlighted || false,
+              highlightExpiresAt: prop.highlightExpiresAt
             }))
             setProperties(mappedProperties)
           } else {
@@ -243,13 +247,14 @@ export default function PropertiesPage() {
                     className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                   >
                     <option value="todos">Todos</option>
-                    <option value="casa">Casa</option>
-                    <option value="apartamento">Apartamento</option>
+                    <option value="house">Casa</option>
+                    <option value="apartment">Apartamento</option>
                     <option value="villa">Villa</option>
                     <option value="penthouse">Penthouse</option>
                     <option value="loft">Loft</option>
-                    <option value="chalet">Chalet</option>
-                    <option value="estudio">Estudio</option>
+                    <option value="townhouse">Casa Adosada</option>
+                    <option value="studio">Estudio</option>
+                    <option value="duplex">Dúplex</option>
                   </select>
                 </div>
 
@@ -350,7 +355,10 @@ export default function PropertiesPage() {
                   baths={property.features.bathrooms}
                   sqft={property.features.totalArea || 0}
                   image={property.images[0] || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800'}
-                  badge={property.highlighted ? 'Destacado' : undefined}
+                  images={property.images}
+                  badge={undefined}
+                  isHighlighted={property.isHighlighted}
+                  isHighlightActive={property.highlighted}
                   index={index}
                 />
               ))}

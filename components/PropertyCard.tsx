@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Bed, Bath, Square, Heart, MapPin, Camera } from 'lucide-react'
+import { Bed, Bath, Square, Heart, MapPin, Camera, Star } from 'lucide-react'
 
 interface PropertyCardProps {
   id: string
@@ -18,6 +18,11 @@ interface PropertyCardProps {
   badge?: string | null
   index: number
   images?: string[]
+  isHighlighted?: boolean
+  isHighlightActive?: boolean
+  showFavoriteButton?: boolean
+  isFavorite?: boolean
+  onFavoriteChange?: (isFavorite: boolean) => void
 }
 
 export default function PropertyCard({
@@ -31,11 +36,21 @@ export default function PropertyCard({
   image,
   badge,
   index,
-  images = []
+  images = [],
+  isHighlighted = false,
+  isHighlightActive = false,
+  showFavoriteButton = true,
+  isFavorite = false,
+  onFavoriteChange
 }: PropertyCardProps) {
-  const [isFavorite, setIsFavorite] = useState(false)
+  const [favoriteState, setFavoriteState] = useState(isFavorite)
+  const [favoriteLoading, setFavoriteLoading] = useState(false)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const allImages = [image, ...(images || [])]
+
+  useEffect(() => {
+    setFavoriteState(isFavorite)
+  }, [isFavorite])
 
   return (
     <motion.div
@@ -45,7 +60,9 @@ export default function PropertyCard({
       className="group"
     >
       <Link href={`/properties/${id}`} className="block">
-        <div className="relative overflow-hidden rounded-2xl glass-icon-container h-full">
+        <div className={`relative overflow-hidden rounded-2xl glass-icon-container h-full transition-all duration-300 ${
+          isHighlightActive ? 'ring-4 ring-yellow-400 shadow-xl shadow-yellow-400/40 bg-gradient-to-br from-yellow-50/40 to-white/90' : ''
+        }`}>
           <div className="relative h-64 overflow-hidden rounded-t-xl">
           <Image
             src={allImages[currentImageIndex] || image}
@@ -60,6 +77,13 @@ export default function PropertyCard({
             </div>
           )}
           
+          {isHighlightActive && (
+            <div className={`absolute top-3 ${badge ? 'left-28' : 'left-3'} px-2.5 py-1.5 rounded-full text-xs font-semibold bg-yellow-400/90 backdrop-blur-sm text-yellow-900 shadow-lg flex items-center gap-1`}>
+              <Star size={12} className="fill-yellow-900" />
+              <span>Destacado</span>
+            </div>
+          )}
+          
           {allImages.length > 1 && (
             <div className="absolute bottom-3 left-3 px-2.5 py-1.5 rounded-full text-xs flex items-center gap-1 bg-white/90 backdrop-blur-sm text-gray-700 shadow-lg">
               <Camera size={14} />
@@ -67,20 +91,44 @@ export default function PropertyCard({
             </div>
           )}
           
-          <button 
-            onClick={(e) => {
-              e.preventDefault()
-              setIsFavorite(!isFavorite)
-            }}
-            className="absolute top-3 right-3 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-110"
-          >
-            <Heart 
-              size={20} 
-              className={`transition-all duration-200 ${
-                isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400 hover:text-red-500'
-              }`}
-            />
-          </button>
+          {showFavoriteButton && (
+            <button 
+              onClick={async (e) => {
+                e.preventDefault()
+                if (favoriteLoading) return
+
+                setFavoriteLoading(true)
+                try {
+                  const response = await fetch('/api/favorites/toggle', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ propertyId: id })
+                  })
+
+                  if (response.ok) {
+                    const data = await response.json()
+                    setFavoriteState(data.data.isFavorite)
+                    onFavoriteChange?.(data.data.isFavorite)
+                  }
+                } catch (error) {
+                  console.error('Error toggling favorite:', error)
+                } finally {
+                  setFavoriteLoading(false)
+                }
+              }}
+              className="absolute top-3 right-3 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-110 disabled:opacity-50"
+              disabled={favoriteLoading}
+            >
+              <Heart 
+                size={20} 
+                className={`transition-all duration-200 ${
+                  favoriteState ? 'fill-red-500 text-red-500' : 'text-gray-400 hover:text-red-500'
+                }`}
+              />
+            </button>
+          )}
 
           {/* Image Navigation Dots */}
           {allImages.length > 1 && (

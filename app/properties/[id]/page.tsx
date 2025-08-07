@@ -11,6 +11,7 @@ import Link from 'next/link'
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
 import PhotoGallery from '@/components/PhotoGallery'
+import { useUser } from '@clerk/nextjs'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -193,9 +194,12 @@ const propertyData = {
 
 export default function PropertyDetail() {
   const params = useParams()
+  const { user } = useUser()
   const id = params.id as string
   const [property, setProperty] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [isFavorite, setIsFavorite] = useState(false)
+  const [favoriteLoading, setFavoriteLoading] = useState(false)
   const galleryRef = useRef<HTMLDivElement>(null)
   const detailsRef = useRef<HTMLDivElement>(null)
 
@@ -229,6 +233,11 @@ export default function PropertyDetail() {
             lotSize: apiProperty.features?.lotSize || `${apiProperty.features?.squareMeters || 0} m²`
           }
           setProperty(mappedProperty)
+          
+          // Check if property is favorited by user
+          if (user) {
+            checkFavoriteStatus(apiProperty.id || apiProperty._id)
+          }
         } else {
           // Fallback to static data if API fails
           const staticProperty = propertyData[id as keyof typeof propertyData]
@@ -253,7 +262,48 @@ export default function PropertyDetail() {
     }
 
     fetchProperty()
-  }, [id])
+  }, [id, user])
+
+  const checkFavoriteStatus = async (propertyId: string) => {
+    try {
+      const response = await fetch(`/api/favorites/check?propertyId=${propertyId}`)
+      if (response.ok) {
+        const data = await response.json()
+        setIsFavorite(data.data.isFavorite)
+      }
+    } catch (error) {
+      console.error('Error checking favorite status:', error)
+    }
+  }
+
+  const toggleFavorite = async () => {
+    if (!user) {
+      alert('Debes iniciar sesión para guardar favoritos')
+      return
+    }
+
+    if (favoriteLoading || !property) return
+
+    setFavoriteLoading(true)
+    try {
+      const response = await fetch('/api/favorites/toggle', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ propertyId: property.id })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setIsFavorite(data.data.isFavorite)
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error)
+    } finally {
+      setFavoriteLoading(false)
+    }
+  }
 
   useEffect(() => {
     if (!property) return
@@ -354,8 +404,19 @@ export default function PropertyDetail() {
                   </div>
                   
                   <div className="flex gap-3">
-                    <button className="p-3 rounded-lg glass-icon-container text-gray-600 hover:text-gray-900 transition-colors">
-                      <Heart size={20} />
+                    <button 
+                      onClick={toggleFavorite}
+                      disabled={favoriteLoading}
+                      className={`p-3 rounded-lg glass-icon-container transition-all duration-200 ${
+                        isFavorite 
+                          ? 'text-red-500 hover:text-red-600' 
+                          : 'text-gray-600 hover:text-gray-900'
+                      } ${favoriteLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      <Heart 
+                        size={20} 
+                        className={isFavorite ? 'fill-current' : ''}
+                      />
                     </button>
                     <button className="p-3 rounded-lg glass-icon-container text-gray-600 hover:text-gray-900 transition-colors">
                       <Share2 size={20} />

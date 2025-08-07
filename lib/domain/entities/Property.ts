@@ -25,6 +25,8 @@ export class Property {
     public readonly ownerId: string,
     public readonly organizationId: string,
     public readonly status: PropertyStatus = PropertyStatus.DRAFT,
+    public readonly isHighlighted: boolean = false,
+    public readonly highlightExpiresAt?: Date,
     public readonly createdAt: Date = new Date(),
     public readonly updatedAt: Date = new Date()
   ) {
@@ -77,6 +79,8 @@ export class Property {
       this.ownerId,
       this.organizationId,
       PropertyStatus.PUBLISHED,
+      this.isHighlighted,
+      this.highlightExpiresAt,
       this.createdAt,
       new Date()
     )
@@ -99,6 +103,8 @@ export class Property {
       this.ownerId,
       this.organizationId,
       this.status,
+      this.isHighlighted,
+      this.highlightExpiresAt,
       this.createdAt,
       new Date()
     )
@@ -121,6 +127,8 @@ export class Property {
       this.ownerId,
       this.organizationId,
       this.status,
+      this.isHighlighted,
+      this.highlightExpiresAt,
       this.createdAt,
       new Date()
     )
@@ -145,6 +153,8 @@ export class Property {
       this.ownerId,
       this.organizationId,
       this.status,
+      this.isHighlighted,
+      this.highlightExpiresAt,
       this.createdAt,
       new Date()
     )
@@ -163,6 +173,8 @@ export class Property {
       this.ownerId,
       this.organizationId,
       PropertyStatus.SUSPENDED,
+      this.isHighlighted,
+      this.highlightExpiresAt,
       this.createdAt,
       new Date()
     )
@@ -181,6 +193,8 @@ export class Property {
       this.ownerId,
       this.organizationId,
       PropertyStatus.SOLD,
+      this.isHighlighted,
+      this.highlightExpiresAt,
       this.createdAt,
       new Date()
     )
@@ -196,5 +210,95 @@ export class Property {
 
   isPublished(): boolean {
     return this.status === PropertyStatus.PUBLISHED
+  }
+
+  highlight(durationInDays: number = 30): Property {
+    if (durationInDays <= 0) {
+      throw new Error('Highlight duration must be greater than 0')
+    }
+
+    const expiresAt = new Date()
+    expiresAt.setDate(expiresAt.getDate() + durationInDays)
+
+    return new Property(
+      this.id,
+      this.title,
+      this.description,
+      this.price,
+      this.propertyType,
+      this.address,
+      this.features,
+      this.images,
+      this.ownerId,
+      this.organizationId,
+      this.status,
+      true,
+      expiresAt,
+      this.createdAt,
+      new Date()
+    )
+  }
+
+  removeHighlight(): Property {
+    return new Property(
+      this.id,
+      this.title,
+      this.description,
+      this.price,
+      this.propertyType,
+      this.address,
+      this.features,
+      this.images,
+      this.ownerId,
+      this.organizationId,
+      this.status,
+      false,
+      undefined,
+      this.createdAt,
+      new Date()
+    )
+  }
+
+  isHighlightActive(): boolean {
+    if (!this.isHighlighted || !this.highlightExpiresAt) {
+      return false
+    }
+    return this.highlightExpiresAt > new Date()
+  }
+
+  extendHighlight(additionalDays: number): Property {
+    if (additionalDays <= 0) {
+      throw new Error('Additional days must be greater than 0')
+    }
+
+    let newExpiresAt: Date
+
+    if (this.highlightExpiresAt && this.highlightExpiresAt > new Date()) {
+      // Extend from current expiration date
+      newExpiresAt = new Date(this.highlightExpiresAt)
+      newExpiresAt.setDate(newExpiresAt.getDate() + additionalDays)
+    } else {
+      // Start from today if expired or no previous highlight
+      newExpiresAt = new Date()
+      newExpiresAt.setDate(newExpiresAt.getDate() + additionalDays)
+    }
+
+    return new Property(
+      this.id,
+      this.title,
+      this.description,
+      this.price,
+      this.propertyType,
+      this.address,
+      this.features,
+      this.images,
+      this.ownerId,
+      this.organizationId,
+      this.status,
+      true,
+      newExpiresAt,
+      this.createdAt,
+      new Date()
+    )
   }
 }

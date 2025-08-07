@@ -36,6 +36,8 @@ export interface PropertyDocument extends Document {
   ownerId: string
   organizationId: string
   status: PropertyStatus
+  isHighlighted: boolean
+  highlightExpiresAt?: Date
   createdAt: Date
   updatedAt: Date
 }
@@ -90,7 +92,9 @@ const PropertySchema = new Schema({
     required: true, 
     enum: Object.values(PropertyStatus),
     default: PropertyStatus.DRAFT 
-  }
+  },
+  isHighlighted: { type: Boolean, default: false },
+  highlightExpiresAt: { type: Date, required: false }
 }, {
   timestamps: true,
   versionKey: false
@@ -109,5 +113,7 @@ PropertySchema.index({ 'price.amount': 1 })
 PropertySchema.index({ 'features.bedrooms': 1 })
 PropertySchema.index({ 'features.bathrooms': 1 })
 PropertySchema.index({ createdAt: -1 })
+PropertySchema.index({ isHighlighted: 1, highlightExpiresAt: 1 })
+PropertySchema.index({ isHighlighted: 1, status: 1 })
 
 export const PropertyModel = mongoose.models.Property || mongoose.model<PropertyDocument>('Property', PropertySchema)
