@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Users, Building2, Settings, Shield, Plus, Edit, Trash2, Eye, X, LayoutDashboard, Home, Menu } from 'lucide-react'
+import { Users, Building2, Settings, Shield, Plus, Edit, Trash2, Eye, X, LayoutDashboard, Home, Menu, UserCheck } from 'lucide-react'
 import Navigation from '@/components/Navigation'
 import Modal from '@/components/ui/Modal'
 import { useModal } from '@/hooks/useModal'
@@ -26,6 +26,48 @@ interface Stats {
   totalOrganizations: number
   totalProperties: number
   activeOrganizations: number
+  totalProviders: number
+  activeProviders: number
+}
+
+interface Provider {
+  id: string
+  userId: string
+  businessName: string
+  description: string
+  status: string
+  tier: string
+  isVerified: boolean
+  rating: {
+    averageRating: number
+    totalReviews: number
+  }
+  location: {
+    city: string
+    state: string
+    country: string
+  }
+  serviceCapabilities: Array<{
+    serviceType: string
+    basePrice: number
+    currency: string
+    estimatedDuration: string
+    description: string
+  }>
+  completedJobs: number
+  responseTime: number
+  createdAt: string
+  lastActive: string
+}
+
+interface CreateProviderForm {
+  userId: string
+  businessName: string
+  description: string
+  serviceTypes: string[]
+  city: string
+  state: string
+  country: string
 }
 
 interface CreateOrgForm {
@@ -43,9 +85,25 @@ export default function SuperAdminDashboard() {
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState<Stats | null>(null)
   const [organizations, setOrganizations] = useState<Organization[]>([])
+  const [providers, setProviders] = useState<Provider[]>([])
   const [activeTab, setActiveTab] = useState('overview')
   const { isOpen: showCreateModal, openModal: openCreateModal, closeModal: closeCreateModal } = useModal()
+  const { isOpen: showCreateProviderModal, openModal: openCreateProviderModal, closeModal: closeCreateProviderModal } = useModal()
+  const { isOpen: showViewProviderModal, openModal: openViewProviderModal, closeModal: closeViewProviderModal } = useModal()
+  const { isOpen: showEditProviderModal, openModal: openEditProviderModal, closeModal: closeEditProviderModal } = useModal()
   const [showMobileSidebar, setShowMobileSidebar] = useState(false)
+  const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null)
+  const [editProviderForm, setEditProviderForm] = useState<CreateProviderForm>({
+    userId: '',
+    businessName: '',
+    description: '',
+    serviceTypes: [],
+    city: '',
+    state: '',
+    country: 'México'
+  })
+  const [isEditingProvider, setIsEditingProvider] = useState(false)
+  const [isDeletingProvider, setIsDeletingProvider] = useState<string | null>(null)
   const [createForm, setCreateForm] = useState<CreateOrgForm>({
     name: '',
     slug: '',
@@ -53,7 +111,17 @@ export default function SuperAdminDashboard() {
     ownerId: '',
     plan: 'free'
   })
+  const [createProviderForm, setCreateProviderForm] = useState<CreateProviderForm>({
+    userId: '',
+    businessName: '',
+    description: '',
+    serviceTypes: [],
+    city: '',
+    state: '',
+    country: 'México'
+  })
   const [isCreating, setIsCreating] = useState(false)
+  const [isCreatingProvider, setIsCreatingProvider] = useState(false)
 
   // Check superadmin status
   useEffect(() => {
@@ -81,10 +149,11 @@ export default function SuperAdminDashboard() {
     try {
       setLoading(true)
       
-      // Fetch stats and organizations
-      const [statsRes, orgsRes] = await Promise.all([
+      // Fetch stats, organizations, and providers
+      const [statsRes, orgsRes, providersRes] = await Promise.all([
         fetch('/api/superadmin/stats'),
-        fetch('/api/superadmin/organizations')
+        fetch('/api/superadmin/organizations'),
+        fetch('/api/superadmin/providers')
       ])
 
       if (statsRes.ok) {
@@ -96,10 +165,134 @@ export default function SuperAdminDashboard() {
         const orgsData = await orgsRes.json()
         setOrganizations(orgsData.data || [])
       }
+
+      if (providersRes.ok) {
+        const providersData = await providersRes.json()
+        setProviders(providersData.data || [])
+      }
     } catch (error) {
       console.error('Error fetching data:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleCreateProvider = async () => {
+    if (!createProviderForm.userId || !createProviderForm.businessName || !createProviderForm.city) {
+      alert('Por favor completa todos los campos requeridos')
+      return
+    }
+
+    setIsCreatingProvider(true)
+    try {
+      const response = await fetch('/api/superadmin/providers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(createProviderForm)
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Reset form and close modal
+        setCreateProviderForm({
+          userId: '',
+          businessName: '',
+          description: '',
+          serviceTypes: [],
+          city: '',
+          state: '',
+          country: 'México'
+        })
+        closeCreateProviderModal()
+        // Refresh data
+        fetchData()
+        alert('Proveedor creado exitosamente')
+      } else {
+        alert(result.error || 'Error al crear el proveedor')
+      }
+    } catch (error) {
+      console.error('Error creating provider:', error)
+      alert('Error al crear el proveedor')
+    } finally {
+      setIsCreatingProvider(false)
+    }
+  }
+
+  const handleViewProvider = (provider: Provider) => {
+    setSelectedProvider(provider)
+    openViewProviderModal()
+  }
+
+  const handleEditProvider = (provider: Provider) => {
+    setSelectedProvider(provider)
+    setEditProviderForm({
+      userId: provider.userId,
+      businessName: provider.businessName,
+      description: provider.description,
+      serviceTypes: provider.serviceCapabilities.map(cap => cap.serviceType),
+      city: provider.location.city,
+      state: provider.location.state,
+      country: provider.location.country
+    })
+    openEditProviderModal()
+  }
+
+  const handleUpdateProvider = async () => {
+    if (!selectedProvider || !editProviderForm.userId || !editProviderForm.businessName || !editProviderForm.city) {
+      alert('Por favor completa todos los campos requeridos')
+      return
+    }
+
+    setIsEditingProvider(true)
+    try {
+      const response = await fetch(`/api/superadmin/providers/${selectedProvider.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editProviderForm)
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        closeEditProviderModal()
+        fetchData()
+        alert('Proveedor actualizado exitosamente')
+      } else {
+        alert(result.error || 'Error al actualizar el proveedor')
+      }
+    } catch (error) {
+      console.error('Error updating provider:', error)
+      alert('Error al actualizar el proveedor')
+    } finally {
+      setIsEditingProvider(false)
+    }
+  }
+
+  const handleDeleteProvider = async (providerId: string) => {
+    if (!confirm('¿Estás seguro de que deseas eliminar este proveedor? Esta acción no se puede deshacer.')) {
+      return
+    }
+
+    setIsDeletingProvider(providerId)
+    try {
+      const response = await fetch(`/api/superadmin/providers/${providerId}`, {
+        method: 'DELETE'
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        fetchData()
+        alert('Proveedor eliminado exitosamente')
+      } else {
+        alert(result.error || 'Error al eliminar el proveedor')
+      }
+    } catch (error) {
+      console.error('Error deleting provider:', error)
+      alert('Error al eliminar el proveedor')
+    } finally {
+      setIsDeletingProvider(null)
     }
   }
 
@@ -234,6 +427,7 @@ export default function SuperAdminDashboard() {
                 {[
                   { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
                   { id: 'organizations', label: 'Organizaciones', icon: Building2 },
+                  { id: 'providers', label: 'Proveedores', icon: UserCheck },
                   { id: 'settings', label: 'Configuración', icon: Settings }
                 ].map((tab) => (
                   <button
@@ -299,6 +493,7 @@ export default function SuperAdminDashboard() {
                     {[
                       { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
                       { id: 'organizations', label: 'Organizaciones', icon: Building2 },
+                      { id: 'providers', label: 'Proveedores', icon: UserCheck },
                       { id: 'settings', label: 'Configuración', icon: Settings }
                     ].map((tab) => (
                       <button
@@ -370,6 +565,29 @@ export default function SuperAdminDashboard() {
               </motion.div>
             )}
 
+            {activeTab === 'providers' && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-8"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div>
+                    <h1 className="text-2xl lg:text-3xl font-light mb-2 text-gray-900">Proveedores</h1>
+                    <p className="text-gray-600">Gestiona todos los proveedores de servicios del sistema</p>
+                  </div>
+                  <button
+                    onClick={openCreateProviderModal}
+                    className="btn-primary flex items-center gap-2 w-full sm:w-auto justify-center"
+                  >
+                    <Plus size={20} />
+                    <span className="hidden sm:inline">Nuevo Proveedor</span>
+                    <span className="sm:hidden">Nuevo</span>
+                  </button>
+                </div>
+              </motion.div>
+            )}
+
             {activeTab === 'settings' && (
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
@@ -386,8 +604,8 @@ export default function SuperAdminDashboard() {
               <div className="space-y-8">
                 {/* Stats Cards */}
                 {stats && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-                    <motion.div 
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 lg:gap-6">
+                    <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.1 }}
@@ -404,7 +622,7 @@ export default function SuperAdminDashboard() {
                       <div className="text-sm text-gray-600">Usuarios</div>
                     </motion.div>
 
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.2 }}
@@ -421,7 +639,7 @@ export default function SuperAdminDashboard() {
                       <div className="text-sm text-gray-600">Organizaciones</div>
                     </motion.div>
 
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.3 }}
@@ -438,7 +656,7 @@ export default function SuperAdminDashboard() {
                       <div className="text-sm text-gray-600">Propiedades</div>
                     </motion.div>
 
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.4 }}
@@ -453,6 +671,40 @@ export default function SuperAdminDashboard() {
                       </div>
                       <div className="text-3xl font-light mb-1 text-gray-900">{stats.activeOrganizations}</div>
                       <div className="text-sm text-gray-600">Org. Activas</div>
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.5 }}
+                      className="glass-card p-6"
+                      whileHover={{ y: -4 }}
+                    >
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="p-3 rounded-xl bg-gradient-to-br from-teal-500 to-green-500">
+                          <UserCheck className="h-6 w-6 text-white" />
+                        </div>
+                        <span className="text-xs font-medium text-gray-500">Total</span>
+                      </div>
+                      <div className="text-3xl font-light mb-1 text-gray-900">{stats.totalProviders}</div>
+                      <div className="text-sm text-gray-600">Proveedores</div>
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.6 }}
+                      className="glass-card p-6"
+                      whileHover={{ y: -4 }}
+                    >
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500">
+                          <UserCheck className="h-6 w-6 text-white" />
+                        </div>
+                        <span className="text-xs font-medium text-gray-500">Activos</span>
+                      </div>
+                      <div className="text-3xl font-light mb-1 text-gray-900">{stats.activeProviders}</div>
+                      <div className="text-sm text-gray-600">Prov. Activos</div>
                     </motion.div>
                   </div>
                 )}
@@ -625,6 +877,214 @@ export default function SuperAdminDashboard() {
               </motion.div>
             )}
 
+            {/* Providers Content */}
+            {activeTab === 'providers' && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="glass-icon-container rounded-2xl overflow-hidden"
+              >
+                {/* Desktop Table */}
+                <div className="hidden lg:block overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-gray-100">
+                        <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">
+                          Proveedor
+                        </th>
+                        <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">
+                          Servicios
+                        </th>
+                        <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">
+                          Estado
+                        </th>
+                        <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">
+                          Rating
+                        </th>
+                        <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">
+                          Ubicación
+                        </th>
+                        <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">
+                          Acciones
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                      {providers.map((provider) => (
+                        <tr key={provider.id} className="hover:bg-white/50 transition-colors">
+                          <td className="px-6 py-4">
+                            <div>
+                              <div className="font-medium text-gray-900">{provider.businessName}</div>
+                              <div className="text-sm text-gray-600">{provider.description}</div>
+                              <div className="text-xs text-gray-500">
+                                {provider.completedJobs} trabajos • {provider.responseTime}min respuesta
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex flex-wrap gap-1">
+                              {provider.serviceCapabilities.slice(0, 2).map((service, index) => (
+                                <span key={index} className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-700 border border-blue-200">
+                                  {service.serviceType}
+                                </span>
+                              ))}
+                              {provider.serviceCapabilities.length > 2 && (
+                                <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600 border border-gray-200">
+                                  +{provider.serviceCapabilities.length - 2}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex flex-col gap-1">
+                              <span className={`px-3 py-1 text-xs rounded-full font-medium w-fit ${
+                                provider.status === 'active'
+                                  ? 'bg-green-100 text-green-700 border border-green-200'
+                                  : provider.status === 'busy'
+                                  ? 'bg-yellow-100 text-yellow-700 border border-yellow-200'
+                                  : 'bg-red-100 text-red-700 border border-red-200'
+                              }`}>
+                                {provider.status.toUpperCase()}
+                              </span>
+                              {provider.isVerified && (
+                                <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-700 border border-blue-200 w-fit">
+                                  Verificado
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-1">
+                              <span className="text-yellow-400">★</span>
+                              <span className="font-medium">{provider.rating.averageRating.toFixed(1)}</span>
+                              <span className="text-xs text-gray-500">({provider.rating.totalReviews})</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-600">
+                            {provider.location.city}, {provider.location.state}
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => handleViewProvider(provider)}
+                                className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
+                                title="Ver detalles"
+                              >
+                                <Eye size={16} />
+                              </button>
+                              <button
+                                onClick={() => handleEditProvider(provider)}
+                                className="p-2 rounded-lg bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors"
+                                title="Editar proveedor"
+                              >
+                                <Edit size={16} />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteProvider(provider.id)}
+                                disabled={isDeletingProvider === provider.id}
+                                className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Eliminar proveedor"
+                              >
+                                {isDeletingProvider === provider.id ? (
+                                  <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                  <Trash2 size={16} />
+                                )}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile Cards */}
+                <div className="lg:hidden divide-y divide-gray-50">
+                  {providers.map((provider) => (
+                    <div key={provider.id} className="p-4 hover:bg-white/50 transition-colors">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900 mb-1">{provider.businessName}</div>
+                          <div className="text-sm text-gray-600 mb-2">{provider.description}</div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-yellow-400">★</span>
+                            <span className="text-sm font-medium">{provider.rating.averageRating.toFixed(1)}</span>
+                            <span className="text-xs text-gray-500">({provider.rating.totalReviews})</span>
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {provider.location.city}, {provider.location.state}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 ml-4">
+                          <button
+                            onClick={() => handleViewProvider(provider)}
+                            className="p-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
+                            title="Ver detalles"
+                          >
+                            <Eye size={14} />
+                          </button>
+                          <button
+                            onClick={() => handleEditProvider(provider)}
+                            className="p-1.5 rounded-lg bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors"
+                            title="Editar proveedor"
+                          >
+                            <Edit size={14} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteProvider(provider.id)}
+                            disabled={isDeletingProvider === provider.id}
+                            className="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Eliminar proveedor"
+                          >
+                            {isDeletingProvider === provider.id ? (
+                              <div className="w-3 h-3 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              <Trash2 size={14} />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                            provider.status === 'active'
+                              ? 'bg-green-100 text-green-700 border border-green-200'
+                              : provider.status === 'busy'
+                              ? 'bg-yellow-100 text-yellow-700 border border-yellow-200'
+                              : 'bg-red-100 text-red-700 border border-red-200'
+                          }`}>
+                            {provider.status.toUpperCase()}
+                          </span>
+                          {provider.isVerified && (
+                            <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-700 border border-blue-200">
+                              Verificado
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {provider.completedJobs} trabajos
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-1 mt-3">
+                        {provider.serviceCapabilities.slice(0, 3).map((service, index) => (
+                          <span key={index} className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-700 border border-blue-200">
+                            {service.serviceType}
+                          </span>
+                        ))}
+                        {provider.serviceCapabilities.length > 3 && (
+                          <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600 border border-gray-200">
+                            +{provider.serviceCapabilities.length - 3}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
             {/* Settings Content */}
             {activeTab === 'settings' && (
               <motion.div 
@@ -755,6 +1215,466 @@ export default function SuperAdminDashboard() {
                 </button>
               </div>
             </div>
+      </Modal>
+
+      {/* Create Provider Modal */}
+      <Modal
+        isOpen={showCreateProviderModal}
+        onClose={closeCreateProviderModal}
+        title="Nuevo Proveedor"
+        size="lg"
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-2 text-gray-700">
+              ID del Usuario (Clerk User ID) *
+            </label>
+            <input
+              type="text"
+              value={createProviderForm.userId}
+              onChange={(e) => setCreateProviderForm(prev => ({ ...prev, userId: e.target.value }))}
+              className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+              placeholder="user_2..."
+            />
+            {user && (
+              <div className="mt-2 p-3 rounded-lg bg-blue-50 border border-blue-200">
+                <p className="mb-1 text-xs text-blue-700"><strong>Tu ID:</strong> {user.id}</p>
+                <button
+                  type="button"
+                  onClick={() => setCreateProviderForm(prev => ({ ...prev, userId: user.id }))}
+                  className="text-xs text-blue-600 hover:text-blue-800 underline"
+                >
+                  Usar mi ID
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2 text-gray-700">
+              Nombre del Negocio *
+            </label>
+            <input
+              type="text"
+              value={createProviderForm.businessName}
+              onChange={(e) => setCreateProviderForm(prev => ({ ...prev, businessName: e.target.value }))}
+              className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+              placeholder="Ej. Servicios de Limpieza ABC"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2 text-gray-700">
+              Descripción
+            </label>
+            <textarea
+              value={createProviderForm.description}
+              onChange={(e) => setCreateProviderForm(prev => ({ ...prev, description: e.target.value }))}
+              className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 resize-none"
+              placeholder="Breve descripción de los servicios que ofrece..."
+              rows={3}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2 text-gray-700">
+              Tipos de Servicios *
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                'cleaning',
+                'maintenance',
+                'gardening',
+                'plumbing',
+                'electrical',
+                'painting',
+                'carpentry',
+                'air-conditioning'
+              ].map((serviceType) => (
+                <label key={serviceType} className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={createProviderForm.serviceTypes.includes(serviceType)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setCreateProviderForm(prev => ({
+                          ...prev,
+                          serviceTypes: [...prev.serviceTypes, serviceType]
+                        }))
+                      } else {
+                        setCreateProviderForm(prev => ({
+                          ...prev,
+                          serviceTypes: prev.serviceTypes.filter(type => type !== serviceType)
+                        }))
+                      }
+                    }}
+                    className="rounded border-gray-300"
+                  />
+                  <span className="text-sm text-gray-700">
+                    {serviceType === 'cleaning' ? 'Limpieza' :
+                     serviceType === 'maintenance' ? 'Mantenimiento' :
+                     serviceType === 'gardening' ? 'Jardinería' :
+                     serviceType === 'plumbing' ? 'Plomería' :
+                     serviceType === 'electrical' ? 'Electricidad' :
+                     serviceType === 'painting' ? 'Pintura' :
+                     serviceType === 'carpentry' ? 'Carpintería' :
+                     serviceType === 'air-conditioning' ? 'Aire Acondicionado' :
+                     serviceType.replace('-', ' ')}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-700">
+                Ciudad *
+              </label>
+              <input
+                type="text"
+                value={createProviderForm.city}
+                onChange={(e) => setCreateProviderForm(prev => ({ ...prev, city: e.target.value }))}
+                className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                placeholder="Ciudad"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-700">
+                Estado
+              </label>
+              <input
+                type="text"
+                value={createProviderForm.state}
+                onChange={(e) => setCreateProviderForm(prev => ({ ...prev, state: e.target.value }))}
+                className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                placeholder="Estado"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-700">
+                País
+              </label>
+              <select
+                value={createProviderForm.country}
+                onChange={(e) => setCreateProviderForm(prev => ({ ...prev, country: e.target.value }))}
+                className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+              >
+                <option value="México">México</option>
+                <option value="Estados Unidos">Estados Unidos</option>
+                <option value="Canadá">Canadá</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-6">
+            <button
+              onClick={closeCreateProviderModal}
+              className="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+              disabled={isCreatingProvider}
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleCreateProvider}
+              disabled={isCreatingProvider || !createProviderForm.userId || !createProviderForm.businessName || !createProviderForm.city || createProviderForm.serviceTypes.length === 0}
+              className="btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isCreatingProvider ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Creando...
+                </>
+              ) : (
+                'Crear Proveedor'
+              )}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* View Provider Details Modal */}
+      <Modal
+        isOpen={showViewProviderModal}
+        onClose={closeViewProviderModal}
+        title="Detalles del Proveedor"
+        size="lg"
+      >
+        {selectedProvider && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del Negocio</label>
+                <p className="text-gray-900 font-medium">{selectedProvider.businessName}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Usuario ID</label>
+                <p className="text-gray-600 text-sm font-mono">{selectedProvider.userId}</p>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+              <p className="text-gray-900">{selectedProvider.description || 'Sin descripción'}</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Estado y Verificación</label>
+              <div className="flex items-center gap-3">
+                <span className={`px-3 py-1 text-xs rounded-full font-medium ${
+                  selectedProvider.status === 'active'
+                    ? 'bg-green-100 text-green-700 border border-green-200'
+                    : selectedProvider.status === 'busy'
+                    ? 'bg-yellow-100 text-yellow-700 border border-yellow-200'
+                    : 'bg-red-100 text-red-700 border border-red-200'
+                }`}>
+                  {selectedProvider.status.toUpperCase()}
+                </span>
+                {selectedProvider.isVerified && (
+                  <span className="px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 border border-blue-200">
+                    Verificado
+                  </span>
+                )}
+                <span className={`px-3 py-1 text-xs rounded-full font-medium ${
+                  selectedProvider.tier === 'premium' ? 'bg-purple-100 text-purple-700 border border-purple-200' :
+                  selectedProvider.tier === 'standard' ? 'bg-blue-100 text-blue-700 border border-blue-200' :
+                  'bg-gray-100 text-gray-700 border border-gray-200'
+                }`}>
+                  {selectedProvider.tier.toUpperCase()}
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Rating y Estadísticas</label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-1 mb-1">
+                    <span className="text-yellow-400 text-lg">★</span>
+                    <span className="font-semibold text-lg">{selectedProvider.rating.averageRating.toFixed(1)}</span>
+                  </div>
+                  <p className="text-xs text-gray-500">{selectedProvider.rating.totalReviews} reseñas</p>
+                </div>
+                <div className="text-center">
+                  <div className="font-semibold text-lg text-blue-600">{selectedProvider.completedJobs}</div>
+                  <p className="text-xs text-gray-500">Trabajos completados</p>
+                </div>
+                <div className="text-center">
+                  <div className="font-semibold text-lg text-green-600">{selectedProvider.responseTime}</div>
+                  <p className="text-xs text-gray-500">min respuesta</p>
+                </div>
+                <div className="text-center">
+                  <div className="font-semibold text-lg text-purple-600">
+                    {new Date(selectedProvider.lastActive).toLocaleDateString('es-ES')}
+                  </div>
+                  <p className="text-xs text-gray-500">Última actividad</p>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Ubicación</label>
+              <p className="text-gray-900">
+                {selectedProvider.location.city}, {selectedProvider.location.state}, {selectedProvider.location.country}
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Servicios Ofrecidos</label>
+              <div className="grid grid-cols-1 gap-3">
+                {selectedProvider.serviceCapabilities.map((service, index) => (
+                  <div key={index} className="border border-gray-200 rounded-lg p-3">
+                    <div className="flex items-start justify-between mb-2">
+                      <h4 className="font-medium text-gray-900 capitalize">{service.serviceType.replace('-', ' ')}</h4>
+                      <span className="text-lg font-semibold text-green-600">
+                        ${service.basePrice} {service.currency}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-1">{service.description}</p>
+                    <p className="text-xs text-gray-500">Duración estimada: {service.estimatedDuration}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-4 border-t border-gray-100">
+              <button
+                onClick={closeViewProviderModal}
+                className="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Edit Provider Modal */}
+      <Modal
+        isOpen={showEditProviderModal}
+        onClose={closeEditProviderModal}
+        title="Editar Proveedor"
+        size="lg"
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-2 text-gray-700">
+              ID del Usuario (Clerk User ID) *
+            </label>
+            <input
+              type="text"
+              value={editProviderForm.userId}
+              onChange={(e) => setEditProviderForm(prev => ({ ...prev, userId: e.target.value }))}
+              className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+              placeholder="user_2..."
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2 text-gray-700">
+              Nombre del Negocio *
+            </label>
+            <input
+              type="text"
+              value={editProviderForm.businessName}
+              onChange={(e) => setEditProviderForm(prev => ({ ...prev, businessName: e.target.value }))}
+              className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+              placeholder="Ej. Servicios de Limpieza ABC"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2 text-gray-700">
+              Descripción
+            </label>
+            <textarea
+              value={editProviderForm.description}
+              onChange={(e) => setEditProviderForm(prev => ({ ...prev, description: e.target.value }))}
+              className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 resize-none"
+              placeholder="Breve descripción de los servicios que ofrece..."
+              rows={3}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2 text-gray-700">
+              Tipos de Servicios *
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                'cleaning',
+                'maintenance',
+                'gardening',
+                'plumbing',
+                'electrical',
+                'painting',
+                'carpentry',
+                'air-conditioning'
+              ].map((serviceType) => (
+                <label key={serviceType} className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={editProviderForm.serviceTypes.includes(serviceType)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setEditProviderForm(prev => ({
+                          ...prev,
+                          serviceTypes: [...prev.serviceTypes, serviceType]
+                        }))
+                      } else {
+                        setEditProviderForm(prev => ({
+                          ...prev,
+                          serviceTypes: prev.serviceTypes.filter(type => type !== serviceType)
+                        }))
+                      }
+                    }}
+                    className="rounded border-gray-300"
+                  />
+                  <span className="text-sm text-gray-700">
+                    {serviceType === 'cleaning' ? 'Limpieza' :
+                     serviceType === 'maintenance' ? 'Mantenimiento' :
+                     serviceType === 'gardening' ? 'Jardinería' :
+                     serviceType === 'plumbing' ? 'Plomería' :
+                     serviceType === 'electrical' ? 'Electricidad' :
+                     serviceType === 'painting' ? 'Pintura' :
+                     serviceType === 'carpentry' ? 'Carpintería' :
+                     serviceType === 'air-conditioning' ? 'Aire Acondicionado' :
+                     serviceType.replace('-', ' ')}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-700">
+                Ciudad *
+              </label>
+              <input
+                type="text"
+                value={editProviderForm.city}
+                onChange={(e) => setEditProviderForm(prev => ({ ...prev, city: e.target.value }))}
+                className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                placeholder="Ciudad"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-700">
+                Estado
+              </label>
+              <input
+                type="text"
+                value={editProviderForm.state}
+                onChange={(e) => setEditProviderForm(prev => ({ ...prev, state: e.target.value }))}
+                className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                placeholder="Estado"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-700">
+                País
+              </label>
+              <select
+                value={editProviderForm.country}
+                onChange={(e) => setEditProviderForm(prev => ({ ...prev, country: e.target.value }))}
+                className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+              >
+                <option value="México">México</option>
+                <option value="Estados Unidos">Estados Unidos</option>
+                <option value="Canadá">Canadá</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-6">
+            <button
+              onClick={closeEditProviderModal}
+              className="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+              disabled={isEditingProvider}
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleUpdateProvider}
+              disabled={isEditingProvider || !editProviderForm.userId || !editProviderForm.businessName || !editProviderForm.city || editProviderForm.serviceTypes.length === 0}
+              className="btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isEditingProvider ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Actualizando...
+                </>
+              ) : (
+                'Actualizar Proveedor'
+              )}
+            </button>
+          </div>
+        </div>
       </Modal>
     </div>
   </div>

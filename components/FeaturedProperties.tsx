@@ -68,8 +68,8 @@ export default function FeaturedProperties() {
             id: prop.id,
             title: prop.title,
             location: `${prop.address.city}, ${prop.address.state}`,
-            price: prop.price.currency === 'EUR' 
-              ? `€${prop.price.amount.toLocaleString()}` 
+            price: prop.price.currency === 'MXN'
+              ? `$${prop.price.amount.toLocaleString()}`
               : `$${prop.price.amount.toLocaleString()} ${prop.price.currency}`,
             beds: prop.features.bedrooms,
             baths: prop.features.bathrooms,

@@ -15,7 +15,15 @@ export enum ServiceType {
   HOME_STAGING = 'home-staging',
   MARKET_ANALYSIS = 'market-analysis',
   DOCUMENTATION = 'documentation',
-  HIGHLIGHT = 'highlight'
+  HIGHLIGHT = 'highlight',
+  CLEANING = 'cleaning',
+  MAINTENANCE = 'maintenance',
+  GARDENING = 'gardening',
+  ELECTRICAL = 'electrical',
+  CARPENTRY = 'carpentry',
+  PLUMBING = 'plumbing',
+  PAINTING = 'painting',
+  AIR_CONDITIONING = 'air-conditioning'
 }
 
 export class ServiceOrder {

@@ -48,7 +48,7 @@ const plans: Plan[] = [
     id: 'basic',
     name: 'Basic',
     price: 49,
-    currency: 'EUR',
+    currency: 'MXN',
     period: '/mes',
     description: 'Perfecto para agencias pequeñas que están comenzando',
     icon: Building,
@@ -73,7 +73,7 @@ const plans: Plan[] = [
     id: 'premium',
     name: 'Premium',
     price: 99,
-    currency: 'EUR',
+    currency: 'MXN',
     period: '/mes',
     description: 'La opción más popular para agencias en crecimiento',
     icon: Star,
@@ -101,7 +101,7 @@ const plans: Plan[] = [
     id: 'enterprise',
     name: 'Enterprise',
     price: 199,
-    currency: 'EUR',
+    currency: 'MXN',
     period: '/mes',
     description: 'Solución completa para grandes agencias inmobiliarias',
     icon: Crown,
@@ -344,11 +344,11 @@ export default function UpgradeAgency() {
                       <div className="flex items-baseline gap-1">
                         {isAnnual && plan.price !== discountedPrice && (
                           <span className="text-lg text-gray-400 line-through">
-                            €{plan.price}
+                            ${plan.price}
                           </span>
                         )}
                         <span className="text-4xl font-light text-gray-900">
-                          €{discountedPrice}
+                          ${discountedPrice}
                         </span>
                         <span className="text-gray-500">
                           {plan.period}
@@ -356,7 +356,7 @@ export default function UpgradeAgency() {
                       </div>
                       {isAnnual && (
                         <span className="text-sm text-green-600 font-medium">
-                          Ahorro anual: €{(plan.price - discountedPrice) * 12}
+                          Ahorro anual: ${(plan.price - discountedPrice) * 12}
                         </span>
                       )}
                     </div>

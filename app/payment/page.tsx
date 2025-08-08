@@ -23,21 +23,21 @@ const plans: Record<string, Plan> = {
     id: 'basic',
     name: 'Basic',
     price: 49,
-    currency: 'EUR',
+    currency: 'MXN',
     period: 'mes'
   },
   premium: {
     id: 'premium',
     name: 'Premium',
     price: 99,
-    currency: 'EUR',
+    currency: 'MXN',
     period: 'mes'
   },
   enterprise: {
     id: 'enterprise',
     name: 'Enterprise',
     price: 199,
-    currency: 'EUR',
+    currency: 'MXN',
     period: 'mes'
   }
 }
@@ -236,15 +236,15 @@ function PaymentContent() {
                   <div className="border-t border-gray-100 pt-4 space-y-3">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Subtotal</span>
-                      <span className="font-medium text-gray-900">€{selectedPlan.price.toLocaleString()}</span>
+                      <span className="font-medium text-gray-900">${selectedPlan.price.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">IVA (21%)</span>
-                      <span className="font-medium text-gray-900">€{tax.toLocaleString()}</span>
+                      <span className="font-medium text-gray-900">${tax.toLocaleString()}</span>
                     </div>
                     <div className="border-t border-gray-100 pt-3 flex justify-between text-lg font-medium">
                       <span className="text-gray-900">Total</span>
-                      <span className="text-primary">€{total.toLocaleString()}</span>
+                      <span className="text-primary">${total.toLocaleString()}</span>
                     </div>
                   </div>
 

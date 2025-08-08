@@ -1,7 +1,7 @@
 export class Price {
   constructor(
     public readonly amount: number,
-    public readonly currency: string = 'EUR'
+    public readonly currency: string = 'MXN'
   ) {
     if (amount < 0) throw new Error('Price amount cannot be negative')
     if (!currency.trim()) throw new Error('Currency is required')

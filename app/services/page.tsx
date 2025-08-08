@@ -3,13 +3,13 @@
 import { useState } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
-import { 
-  Camera, 
-  Scale, 
-  Home, 
-  Briefcase, 
-  FileText, 
+import { motion, AnimatePresence } from 'framer-motion'
+import {
+  Camera,
+  Scale,
+  Home,
+  Briefcase,
+  FileText,
   Video,
   Users,
   Shield,
@@ -17,10 +17,14 @@ import {
   Check,
   ArrowRight,
   Clock,
-  Award
+  Award,
+  MapPin,
+  X
 } from 'lucide-react'
 import Navigation from '@/components/Navigation'
+import AvailableProvidersList from '@/components/AvailableProvidersList'
 import { useToast } from '@/components/Toast'
+import { ServiceType } from '@/lib/domain/entities/ServiceOrder'
 
 interface Service {
   id: string
@@ -33,6 +37,40 @@ interface Service {
   duration: string
   popular?: boolean
   category: string
+  serviceType: ServiceType
+}
+
+interface AvailableProvider {
+  id: string
+  userId: string
+  businessName: string
+  description: string
+  profileImageUrl?: string
+  tier: 'basic' | 'premium' | 'elite'
+  status: string
+  isVerified: boolean
+  rating: {
+    averageRating: number
+    totalReviews: number
+  }
+  location: {
+    city: string
+    state: string
+    country: string
+    distance?: number | null
+  }
+  service: {
+    basePrice: number
+    currency: string
+    estimatedDuration: string
+    availableSlots: number
+    description: string
+  } | null
+  completedJobs: number
+  responseTime: number
+  portfolioImages: string[]
+  isOnline: boolean
+  lastActive: Date
 }
 
 const services: Service[] = [
@@ -42,6 +80,7 @@ const services: Service[] = [
     description: 'Sesión fotográfica profesional para tu propiedad con equipo de alta calidad',
     icon: Camera,
     category: 'visual',
+    serviceType: ServiceType.PHOTOGRAPHY,
     features: [
       '20-30 fotos profesionales editadas',
       'Fotografía con dron incluida',
@@ -60,6 +99,7 @@ const services: Service[] = [
     description: 'Revisión completa de contratos y documentación legal por abogados especializados',
     icon: Scale,
     category: 'legal',
+    serviceType: ServiceType.LEGAL,
     features: [
       'Revisión de contratos de compraventa',
       'Verificación de documentos de propiedad',
@@ -77,6 +117,7 @@ const services: Service[] = [
     description: 'Recorrido virtual interactivo de alta calidad para tus propiedades',
     icon: Video,
     category: 'visual',
+    serviceType: ServiceType.VIRTUAL_TOUR,
     features: [
       'Tour virtual 360° completo',
       'Compatible con VR',
@@ -94,6 +135,7 @@ const services: Service[] = [
     description: 'Diseño y decoración profesional para maximizar el atractivo de tu propiedad',
     icon: Home,
     category: 'staging',
+    serviceType: ServiceType.HOME_STAGING,
     features: [
       'Consultoría de diseño interior',
       'Plan de staging personalizado',
@@ -111,6 +153,7 @@ const services: Service[] = [
     description: 'Estudio detallado del mercado inmobiliario para optimizar tu estrategia',
     icon: Briefcase,
     category: 'consulting',
+    serviceType: ServiceType.MARKET_ANALYSIS,
     features: [
       'Análisis comparativo de mercado',
       'Valuación profesional',
@@ -128,6 +171,7 @@ const services: Service[] = [
     description: 'Organización y digitalización completa de documentación inmobiliaria',
     icon: FileText,
     category: 'legal',
+    serviceType: ServiceType.DOCUMENTATION,
     features: [
       'Digitalización de documentos',
       'Organización en nube segura',
@@ -155,7 +199,10 @@ export default function Services() {
   const { showToast } = useToast()
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedService, setSelectedService] = useState<Service | null>(null)
+  const [selectedProvider, setSelectedProvider] = useState<AvailableProvider | null>(null)
   const [showModal, setShowModal] = useState(false)
+  const [showProviders, setShowProviders] = useState(false)
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | undefined>()
 
   const filteredServices = selectedCategory === 'all' 
     ? services 
@@ -171,15 +218,58 @@ export default function Services() {
     setShowModal(true)
   }
 
+  const handleViewProviders = () => {
+    if (selectedService) {
+      setShowProviders(true)
+      setShowModal(false)
+      
+      // Try to get user location
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setUserLocation({
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude
+            })
+          },
+          (error) => {
+            console.log('Location access denied or failed:', error)
+          }
+        )
+      }
+    }
+  }
+
+  const handleProviderSelect = (provider: AvailableProvider) => {
+    setSelectedProvider(provider)
+  }
+
   const handlePurchase = () => {
     if (selectedService) {
-      router.push(`/services/checkout?service=${selectedService.id}`)
+      const params = new URLSearchParams({
+        service: selectedService.id
+      })
+      
+      if (selectedProvider) {
+        params.append('providerId', selectedProvider.id)
+        params.append('providerName', selectedProvider.businessName)
+        if (selectedProvider.service) {
+          params.append('providerPrice', selectedProvider.service.basePrice.toString())
+        }
+      }
+      
+      router.push(`/services/checkout?${params.toString()}`)
     }
   }
 
   const closeModal = () => {
     setShowModal(false)
     setSelectedService(null)
+  }
+
+  const closeProviders = () => {
+    setShowProviders(false)
+    setSelectedProvider(null)
   }
 
   if (!isLoaded) {
@@ -309,13 +399,25 @@ export default function Services() {
                         </span>
                       </div>
                       
-                      <button
-                        onClick={() => handleServiceSelect(service)}
-                        className="btn-primary w-full flex items-center justify-center gap-2 group"
-                      >
-                        Contratar Servicio
-                        <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                      </button>
+                      <div className="space-y-3">
+                        <button
+                          onClick={() => handleServiceSelect(service)}
+                          className="btn-primary w-full flex items-center justify-center gap-2 group"
+                        >
+                          Ver Proveedores Disponibles
+                          <Users size={18} className="group-hover:scale-110 transition-transform" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedService(service)
+                            router.push(`/services/checkout?service=${service.id}`)
+                          }}
+                          className="btn-secondary w-full flex items-center justify-center gap-2 group"
+                        >
+                          Contratar Directamente
+                          <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -424,7 +526,7 @@ export default function Services() {
                 <div className="border-t border-gray-100 pt-6">
                   <div className="flex items-center justify-between mb-6">
                     <div>
-                      <p className="mb-1 text-gray-600">Precio del servicio</p>
+                      <p className="mb-1 text-gray-600">Precio base del servicio</p>
                       <div className="flex items-baseline gap-1">
                         <span className="text-3xl font-light text-gray-900">
                           ${selectedService.price.toLocaleString()}
@@ -433,26 +535,36 @@ export default function Services() {
                           {selectedService.currency} {selectedService.duration}
                         </span>
                       </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        *Los precios pueden variar según el proveedor seleccionado
+                      </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm text-gray-600">Tiempo de entrega</p>
+                      <p className="text-sm text-gray-600">Tiempo estimado</p>
                       <p className="font-medium text-gray-900">48-72 horas</p>
                     </div>
                   </div>
 
-                  <div className="flex gap-4">
+                  <div className="space-y-3">
                     <button
-                      onClick={closeModal}
-                      className="flex-1 py-3 px-4 rounded-xl bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-colors"
+                      onClick={handleViewProviders}
+                      className="btn-primary w-full flex items-center justify-center gap-2"
                     >
-                      Cancelar
+                      <Users size={18} />
+                      Ver Proveedores Disponibles
                     </button>
                     <button
                       onClick={handlePurchase}
-                      className="btn-primary flex-1 flex items-center justify-center gap-2"
+                      className="btn-secondary w-full flex items-center justify-center gap-2"
                     >
-                      Continuar con el Pago
+                      Continuar sin Proveedor Específico
                       <ArrowRight size={18} />
+                    </button>
+                    <button
+                      onClick={closeModal}
+                      className="w-full py-3 px-4 rounded-xl bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-colors"
+                    >
+                      Cancelar
                     </button>
                   </div>
                 </div>
@@ -461,6 +573,112 @@ export default function Services() {
           </motion.div>
         </div>
       )}
+
+      {/* Available Providers Modal */}
+      <AnimatePresence>
+        {showProviders && selectedService && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="glass-icon-container rounded-2xl w-full max-w-4xl h-[80vh] flex flex-col"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+                    {selectedService.icon && <selectedService.icon className="w-5 h-5 text-primary" />}
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900">
+                      {selectedService.title}
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      Selecciona un proveedor para tu servicio
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={closeProviders}
+                  className="w-8 h-8 rounded-lg glass flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Providers List */}
+              <div className="flex-1 overflow-auto p-6">
+                <AvailableProvidersList
+                  serviceType={selectedService.serviceType}
+                  userLocation={userLocation}
+                  onProviderSelect={handleProviderSelect}
+                  selectedProviderId={selectedProvider?.id}
+                />
+              </div>
+
+              {/* Footer with selected provider info and action buttons */}
+              {selectedProvider && (
+                <div className="border-t border-gray-100 p-6">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full overflow-hidden ring-2 ring-white shadow-sm">
+                        {selectedProvider.profileImageUrl ? (
+                          <img
+                            src={selectedProvider.profileImageUrl}
+                            alt={selectedProvider.businessName}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+                            <span className="text-primary font-medium">
+                              {selectedProvider.businessName[0]}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">
+                          {selectedProvider.businessName}
+                        </p>
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                          <span>{selectedProvider.rating.averageRating.toFixed(1)}</span>
+                          <span>•</span>
+                          <span>${selectedProvider.service?.basePrice.toLocaleString()} {selectedProvider.service?.currency}</span>
+                          {selectedProvider.location.distance && (
+                            <>
+                              <span>•</span>
+                              <MapPin className="w-3 h-3" />
+                              <span>{selectedProvider.location.distance.toFixed(1)} km</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-3">
+                      <button
+                        onClick={closeProviders}
+                        className="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-colors"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        onClick={handlePurchase}
+                        className="btn-primary flex items-center gap-2"
+                      >
+                        Continuar con {selectedProvider.businessName}
+                        <ArrowRight size={16} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

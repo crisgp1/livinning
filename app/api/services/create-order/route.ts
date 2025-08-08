@@ -24,8 +24,11 @@ export async function POST(request: Request) {
       amount,
       currency,
       customerEmail,
+      customerName,
       stripePaymentIntentId,
-      stripeSessionId
+      stripeSessionId,
+      providerId,
+      providerName
     } = await request.json()
 
     // Validate required fields
@@ -59,19 +62,22 @@ export async function POST(request: Request) {
       specialRequests: specialRequests || '',
       amount,
       currency: currency || 'MXN',
-      status: ServiceOrderStatus.PENDING,
+      status: providerId ? ServiceOrderStatus.CONFIRMED : ServiceOrderStatus.PENDING, // Auto-confirm if provider is selected
       stripePaymentIntentId,
       stripeSessionId,
       customerEmail,
+      customerName: customerName || customerEmail || 'Cliente sin nombre',
+      assignedTo: providerId || undefined, // Legacy field
+      assignedProviderId: providerId || undefined, // New field for provider queries
       deliverables: [],
-      notes: [],
+      notes: providerId ? [`Orden asignada automáticamente a ${providerName || 'proveedor seleccionado'}`] : [],
       createdAt: new Date(),
       updatedAt: new Date()
     })
 
     await serviceOrder.save()
 
-    console.log(`Created service order ${serviceOrder._id} for user ${userId}`)
+    console.log(`Created service order ${serviceOrder._id} for user ${userId}${providerId ? ` assigned to provider ${providerId}` : ''}`)
 
     return NextResponse.json({
       success: true,

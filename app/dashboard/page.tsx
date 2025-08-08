@@ -528,7 +528,7 @@ export default function Dashboard() {
                       
                       <div className="flex items-center justify-between mb-4">
                         <div className="text-xl font-light text-gray-900">
-                          €{property.price.amount.toLocaleString()}
+                          ${property.price.amount.toLocaleString()}
                         </div>
                         <div className="flex items-center gap-3 text-xs text-gray-600">
                           <span>{property.features.bedrooms} hab</span>

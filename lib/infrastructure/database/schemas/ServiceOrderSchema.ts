@@ -20,6 +20,8 @@ export interface ServiceOrderDocument extends Document {
   estimatedDelivery?: string
   actualDelivery?: Date
   assignedTo?: string
+  assignedProviderId?: string
+  customerName?: string
   deliverables: string[]
   notes: string[]
   createdAt: Date
@@ -55,6 +57,8 @@ const ServiceOrderSchema = new Schema<ServiceOrderDocument>({
   estimatedDelivery: { type: String },
   actualDelivery: { type: Date },
   assignedTo: { type: String, trim: true },
+  assignedProviderId: { type: String, trim: true, index: true },
+  customerName: { type: String, trim: true },
   deliverables: { type: [String], default: [] },
   notes: { type: [String], default: [] },
   createdAt: { type: Date, default: Date.now, index: true },
@@ -67,6 +71,7 @@ ServiceOrderSchema.index({ status: 1, createdAt: -1 })
 ServiceOrderSchema.index({ serviceType: 1, createdAt: -1 })
 ServiceOrderSchema.index({ stripePaymentIntentId: 1 })
 ServiceOrderSchema.index({ stripeSessionId: 1 })
+ServiceOrderSchema.index({ assignedProviderId: 1, status: 1 })
 
 // Update the updatedAt field before saving
 ServiceOrderSchema.pre('save', function(next) {

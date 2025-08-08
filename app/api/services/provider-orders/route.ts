@@ -1,73 +1,90 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@clerk/nextjs/server'
 import connectDB from '@/lib/infrastructure/database/connection'
 import ServiceOrderModel from '@/lib/infrastructure/database/models/ServiceOrderModel'
+import { ServiceOrderStatus } from '@/lib/domain/entities/ServiceOrder'
 
 export async function GET(request: Request) {
   try {
     const { userId } = await auth()
+    const user = await currentUser()
     
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!userId || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    // Check if user has provider access
+    const metadata = user.publicMetadata as any
+    const userRole = metadata?.role
+    const hasProviderAccess = userRole === 'supplier' || userRole === 'provider'
+
+    if (!hasProviderAccess) {
+      return NextResponse.json(
+        { error: 'Forbidden: Provider access required' },
+        { status: 403 }
+      )
     }
 
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
     const serviceType = searchParams.get('serviceType')
-    const limit = parseInt(searchParams.get('limit') || '20')
-    const offset = parseInt(searchParams.get('offset') || '0')
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
+    const limit = parseInt(searchParams.get('limit') || '20')
+    const offset = parseInt(searchParams.get('offset') || '0')
 
     await connectDB()
 
-    // Build query - filter by assignedTo field for providers
-    const query: any = { assignedTo: userId }
-    
-    if (status) {
-      query.status = status
-    }
-    
-    if (serviceType) {
-      query.serviceType = serviceType
+    // Build query filter for orders assigned to this provider
+    const filter: any = {
+      assignedProviderId: userId  // Orders assigned to this provider
     }
 
-    // Add date range filter if provided
+    if (status) filter.status = status
+    if (serviceType) filter.serviceType = serviceType
     if (startDate || endDate) {
-      query.createdAt = {}
-      if (startDate) {
-        query.createdAt.$gte = new Date(startDate)
-      }
-      if (endDate) {
-        query.createdAt.$lte = new Date(endDate)
-      }
+      filter.createdAt = {}
+      if (startDate) filter.createdAt.$gte = new Date(startDate)
+      if (endDate) filter.createdAt.$lte = new Date(endDate)
     }
 
     // Get orders with pagination
     const orders = await ServiceOrderModel
-      .find(query)
+      .find(filter)
       .sort({ createdAt: -1 })
       .limit(limit)
       .skip(offset)
       .lean()
 
     // Get total count for pagination
-    const totalCount = await ServiceOrderModel.countDocuments(query)
+    const totalCount = await ServiceOrderModel.countDocuments(filter)
 
-    // Get status counts for dashboard stats
-    const statusCounts = await ServiceOrderModel.aggregate([
-      { $match: { assignedTo: userId } },
-      { 
-        $group: { 
-          _id: '$status', 
+    // Calculate stats
+    const statsAggregation = await ServiceOrderModel.aggregate([
+      { $match: { assignedProviderId: userId } },
+      {
+        $group: {
+          _id: '$status',
           count: { $sum: 1 },
           totalAmount: { $sum: '$amount' }
-        } 
+        }
       }
     ])
 
-    // Transform the data for the frontend
-    const transformedOrders = orders.map(order => ({
+    const stats = Object.values(ServiceOrderStatus).reduce((acc, status) => {
+      const stat = statsAggregation.find(s => s._id === status)
+      acc[status] = {
+        count: stat?.count || 0,
+        totalAmount: stat?.totalAmount || 0
+      }
+      return acc
+    }, {} as any)
+
+    // Transform orders for frontend
+    const transformedOrders = orders.map((order: any) => ({
       id: order._id,
       serviceType: order.serviceType,
       serviceName: order.serviceName,
@@ -81,21 +98,13 @@ export async function GET(request: Request) {
       status: order.status,
       estimatedDelivery: order.estimatedDelivery,
       actualDelivery: order.actualDelivery,
-      deliverables: order.deliverables,
-      notes: order.notes,
+      deliverables: order.deliverables || [],
+      notes: order.notes || [],
       createdAt: order.createdAt,
       updatedAt: order.updatedAt,
-      customerEmail: order.customerEmail
+      customerEmail: order.customerEmail,
+      customerName: order.customerName
     }))
-
-    // Transform status counts
-    const stats = statusCounts.reduce((acc, item) => {
-      acc[item._id] = {
-        count: item.count,
-        totalAmount: item.totalAmount
-      }
-      return acc
-    }, {} as Record<string, { count: number, totalAmount: number }>)
 
     return NextResponse.json({
       success: true,
@@ -110,12 +119,11 @@ export async function GET(request: Request) {
     })
 
   } catch (error) {
-    console.error('Get provider service orders error:', error)
-    
+    console.error('Provider orders API error:', error)
     return NextResponse.json(
       { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to fetch provider service orders'
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to fetch provider orders'
       },
       { status: 500 }
     )

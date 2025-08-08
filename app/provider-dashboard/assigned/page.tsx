@@ -2,14 +2,13 @@
 
 import { useAuth, useUser } from '@clerk/nextjs'
 import { useEffect, useState } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import ServiceTrackingList from '@/components/ServiceTrackingList'
+import ProviderServicesList from '@/components/ProviderServicesList'
 import { canAccessProviderDashboard, getProviderDisplayName } from '@/lib/utils/provider-helpers'
 import Navigation from '@/components/Navigation'
 import {
   Home,
-  Building,
   BarChart3,
   Settings,
   Menu,
@@ -19,25 +18,21 @@ import {
   FileText,
   Users,
   Package,
-  PlusCircle,
-  Heart,
-  TrendingUp
+  TrendingUp,
+  ArrowLeft
 } from 'lucide-react'
 
-export default function ProviderDashboard() {
+export default function AssignedServicesPage() {
   const { isLoaded, userId } = useAuth()
   const { user } = useUser()
   const router = useRouter()
-  const pathname = usePathname()
   const [hasAccess, setHasAccess] = useState<boolean | null>(null)
   const [loading, setLoading] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     const checkProviderAccess = async () => {
-      if (!isLoaded) {
-        return
-      }
+      if (!isLoaded) return
 
       if (!userId) {
         router.push('/')
@@ -49,7 +44,6 @@ export default function ProviderDashboard() {
         const userRole = metadata?.role
         const providerAccess = canAccessProviderDashboard(user)
         
-        // Allow access for both 'supplier' and 'provider' roles, or users with providerAccess
         const hasRoleAccess = userRole === 'supplier' || userRole === 'provider' || providerAccess
         
         if (!hasRoleAccess) {
@@ -110,12 +104,11 @@ export default function ProviderDashboard() {
       <Navigation />
       
       <div className="pt-20 flex relative">
-        {/* Enhanced Background decorations for glassmorphism */}
+        {/* Enhanced Background decorations */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-orange-200 to-red-200 rounded-full filter blur-3xl opacity-60"></div>
           <div className="absolute top-80 -left-40 w-96 h-96 bg-gradient-to-br from-purple-200 to-pink-200 rounded-full filter blur-3xl opacity-60"></div>
           <div className="absolute bottom-20 right-20 w-72 h-72 bg-gradient-to-br from-green-200 to-emerald-200 rounded-full filter blur-3xl opacity-40"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-indigo-100 to-blue-100 rounded-full filter blur-3xl opacity-30"></div>
         </div>
 
         {/* Mobile Sidebar Overlay */}
@@ -159,7 +152,7 @@ export default function ProviderDashboard() {
             {/* Navigation */}
             <nav className="space-y-2">
               {sidebarItems.map((item) => {
-                const isActive = pathname === item.href || (item.id === 'dashboard' && pathname === '/provider-dashboard')
+                const isActive = item.href === '/provider-dashboard/assigned'
                 return (
                   <button
                     key={item.id}
@@ -200,9 +193,14 @@ export default function ProviderDashboard() {
                   <Menu size={20} className="text-gray-700" />
                 </button>
                 <h1 className="text-xl font-medium text-gray-900">
-                  Dashboard Proveedor
+                  Servicios Asignados
                 </h1>
-                <div className="w-10"></div>
+                <button
+                  onClick={() => router.push('/provider-dashboard')}
+                  className="p-2 rounded-lg glass-icon-container"
+                >
+                  <ArrowLeft size={20} className="text-gray-700" />
+                </button>
               </div>
           
               {/* Header */}
@@ -214,46 +212,30 @@ export default function ProviderDashboard() {
                       animate={{ opacity: 1, y: 0 }}
                       className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium mb-6 glass-icon-container"
                     >
-                      <div className="w-4 h-4 rounded-full bg-gradient-to-br from-gray-600 to-gray-700 flex items-center justify-center">
-                        <Sparkles className="w-3 h-3 text-white" />
+                      <div className="w-4 h-4 rounded-full bg-gradient-to-br from-orange-600 to-red-700 flex items-center justify-center">
+                        <Wrench className="w-3 h-3 text-white" />
                       </div>
-                      <span className="text-gray-700">Panel de Proveedor</span>
+                      <span className="text-gray-700">Servicios Asignados</span>
                     </motion.div>
                     <h1 className="text-4xl md:text-6xl font-light mb-6 text-gray-900">
-                      Bienvenido, <span className="text-gray-700 font-medium">{getProviderDisplayName(user)}</span>
+                      Mis <span className="text-orange-600 font-medium">Servicios</span>
                     </h1>
                     <p className="text-xl max-w-3xl text-gray-600 mb-8">
-                      Gestiona tus servicios y órdenes de trabajo con las herramientas profesionales de la plataforma
+                      Consulta y gestiona todos los servicios que te han sido asignados. 
+                      Actualiza el estado, comunícate con clientes y mantén un seguimiento detallado.
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Service Tracking Section */}
-              <div className="mb-8 lg:mb-12">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="mb-8"
-                >
-                  <h2 className="text-2xl font-light mb-2 text-gray-900">
-                    Seguimiento de Servicios
-                  </h2>
-                  <p className="text-gray-600">
-                    Gestiona el progreso, incidencias y comunicación de tus servicios activos
-                  </p>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
-                >
-                  <ServiceTrackingList />
-                </motion.div>
-              </div>
-
+              {/* Services Content */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <ProviderServicesList />
+              </motion.div>
             </div>
           </main>
         </div>

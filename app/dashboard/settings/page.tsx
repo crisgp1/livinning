@@ -487,7 +487,7 @@ export default function DashboardSettings() {
                             </div>
                             <div>
                               <span className="text-gray-600">Precio:</span>
-                              <div className="font-medium text-gray-900">€0/mes</div>
+                              <div className="font-medium text-gray-900">$0/mes</div>
                             </div>
                           </div>
                         </div>
@@ -498,7 +498,7 @@ export default function DashboardSettings() {
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="p-6 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200">
                               <h4 className="font-medium text-gray-900 mb-2">Basic</h4>
-                              <div className="text-2xl font-light text-gray-900 mb-4">€29<span className="text-sm text-gray-600">/mes</span></div>
+                              <div className="text-2xl font-light text-gray-900 mb-4">$29<span className="text-sm text-gray-600">/mes</span></div>
                               <ul className="space-y-2 text-sm text-gray-600 mb-6">
                                 <li>• Hasta 25 propiedades</li>
                                 <li>• Soporte por email</li>
@@ -512,7 +512,7 @@ export default function DashboardSettings() {
                                 Popular
                               </div>
                               <h4 className="font-medium text-gray-900 mb-2">Premium</h4>
-                              <div className="text-2xl font-light text-gray-900 mb-4">€79<span className="text-sm text-gray-600">/mes</span></div>
+                              <div className="text-2xl font-light text-gray-900 mb-4">$79<span className="text-sm text-gray-600">/mes</span></div>
                               <ul className="space-y-2 text-sm text-gray-600 mb-6">
                                 <li>• Propiedades ilimitadas</li>
                                 <li>• Soporte prioritario</li>

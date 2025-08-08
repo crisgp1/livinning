@@ -425,7 +425,7 @@ export default function PropertyDetail() {
                 </div>
 
                 <div className="text-3xl font-light mb-8 text-gray-900">
-                  €{typeof property.price === 'object' ? property.price?.amount?.toLocaleString() : property.price?.toLocaleString() || '0'}
+                  ${typeof property.price === 'object' ? property.price?.amount?.toLocaleString() : property.price?.toLocaleString() || '0'}
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8 p-6 rounded-xl glass-icon-container">

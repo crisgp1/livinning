@@ -10,11 +10,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { 
-      serviceId, 
-      serviceName, 
-      price, 
-      currency, 
+    const {
+      serviceId,
+      serviceName,
+      price,
+      currency,
       userEmail,
       propertyAddress,
       contactPhone,
@@ -22,7 +22,9 @@ export async function POST(request: Request) {
       specialRequests,
       propertyId,
       propertyTitle,
-      highlightDuration
+      highlightDuration,
+      providerId,
+      providerName
     } = await request.json()
 
     if (!serviceId || !serviceName || !price) {
@@ -40,8 +42,8 @@ export async function POST(request: Request) {
         price_data: {
           currency: currency.toLowerCase(),
           product_data: {
-            name: `${serviceName} - Servicio Profesional`,
-            description: `Servicio profesional de ${serviceName} para tu propiedad en ${propertyAddress}`,
+            name: `${serviceName} - Servicio Profesional${providerName ? ` por ${providerName}` : ''}`,
+            description: `Servicio profesional de ${serviceName} para tu propiedad en ${propertyAddress}${providerName ? ` • Proveedor: ${providerName}` : ''}`,
             metadata: {
               preferredDate,
               propertyAddress
@@ -65,7 +67,9 @@ export async function POST(request: Request) {
         specialRequests: specialRequests || '',
         propertyId: propertyId || '',
         propertyTitle: propertyTitle || '',
-        highlightDuration: highlightDuration?.toString() || ''
+        highlightDuration: highlightDuration?.toString() || '',
+        providerId: providerId || '',
+        providerName: providerName || ''
       }
     })
 
