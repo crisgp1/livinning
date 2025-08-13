@@ -4,14 +4,13 @@ import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import Navigation from '@/components/Navigation'
-import { 
-  Building, 
-  Search, 
-  Filter, 
-  Eye, 
-  Edit3, 
-  Trash2, 
+import {
+  Building,
+  Search,
+  Filter,
+  Eye,
+  Edit3,
+  Trash2,
   Plus,
   Calendar,
   MapPin,
@@ -48,12 +47,10 @@ export default function DashboardProperties() {
   const [showFilters, setShowFilters] = useState(false)
 
   useEffect(() => {
-    if (isLoaded && !user) {
-      router.push('/sign-in')
-    } else if (isLoaded && user) {
+    if (isLoaded && user) {
       fetchProperties()
     }
-  }, [user, isLoaded, router])
+  }, [user, isLoaded])
 
   const fetchProperties = async () => {
     try {
@@ -141,19 +138,8 @@ export default function DashboardProperties() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <Navigation />
-      
-      <div className="pt-20 relative">
-        {/* Background decorations */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-blue-200 to-cyan-200 rounded-full filter blur-3xl opacity-60"></div>
-          <div className="absolute top-80 -left-40 w-96 h-96 bg-gradient-to-br from-purple-200 to-pink-200 rounded-full filter blur-3xl opacity-60"></div>
-          <div className="absolute bottom-20 right-20 w-72 h-72 bg-gradient-to-br from-green-200 to-emerald-200 rounded-full filter blur-3xl opacity-40"></div>
-        </div>
-
-        <main className="relative z-10 pb-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <main className="pb-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
             {/* Header */}
             <div className="mb-8 lg:mb-12 mt-6 lg:mt-8">
@@ -457,9 +443,7 @@ export default function DashboardProperties() {
                 </div>
               </motion.div>
             )}
-          </div>
-        </main>
       </div>
-    </div>
+    </main>
   )
 }

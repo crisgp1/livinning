@@ -21,7 +21,6 @@ import {
   MapPin,
   X
 } from 'lucide-react'
-import Navigation from '@/components/Navigation'
 import AvailableProvidersList from '@/components/AvailableProvidersList'
 import { useToast } from '@/components/Toast'
 import { ServiceType } from '@/lib/domain/entities/ServiceOrder'
@@ -279,22 +278,13 @@ export default function Services() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <Navigation />
-      
-      {/* Background decorations */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-blue-200 to-cyan-200 rounded-full filter blur-3xl opacity-60"></div>
-        <div className="absolute top-80 -left-40 w-96 h-96 bg-gradient-to-br from-purple-200 to-pink-200 rounded-full filter blur-3xl opacity-60"></div>
-        <div className="absolute bottom-20 right-20 w-72 h-72 bg-gradient-to-br from-green-200 to-emerald-200 rounded-full filter blur-3xl opacity-40"></div>
-      </div>
-      
-      <main className="pt-20 relative z-10">
+    <>
+      <main className="pb-16 relative z-10">
         <div className="section-container py-16">
           
           {/* Header */}
           <div className="text-center mb-16">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium mb-6 glass-icon-container"
@@ -303,7 +293,7 @@ export default function Services() {
               <span className="text-gray-700">Servicios Premium para Agencias</span>
             </motion.div>
             
-            <motion.h1 
+            <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
@@ -313,13 +303,13 @@ export default function Services() {
               <span className="text-primary font-medium"> servicios profesionales</span>
             </motion.h1>
             
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
               className="text-xl max-w-3xl mx-auto text-gray-600"
             >
-              Trabajamos con los mejores profesionales certificados para ofrecerte 
+              Trabajamos con los mejores profesionales certificados para ofrecerte
               servicios de la más alta calidad que elevarán tu negocio inmobiliario
             </motion.p>
           </div>
@@ -333,8 +323,8 @@ export default function Services() {
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
                   className={`flex items-center gap-3 px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
-                    selectedCategory === category.id 
-                      ? 'bg-primary text-white shadow-lg shadow-primary/20' 
+                    selectedCategory === category.id
+                      ? 'bg-primary text-white shadow-lg shadow-primary/20'
                       : 'glass-icon-container text-gray-600 hover:text-gray-900 hover:bg-white/50'
                   }`}
                 >
@@ -480,7 +470,7 @@ export default function Services() {
       {/* Service Detail Modal */}
       {showModal && selectedService && (
         <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="glass-icon-container rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
@@ -679,6 +669,6 @@ export default function Services() {
           </div>
         )}
       </AnimatePresence>
-    </div>
+    </>
   )
 }

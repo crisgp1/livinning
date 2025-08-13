@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
 import { gsap } from 'gsap'
 import { motion } from 'framer-motion'
-import Navigation from '@/components/Navigation'
 import ImageUpload from '@/components/ImageUpload'
 import LocationAutocomplete from '@/components/LocationAutocomplete'
 import { PropertyTypeEnum } from '@/lib/domain/value-objects/PropertyType'
@@ -198,17 +197,8 @@ export default function PublishProperty() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <Navigation />
-      
-      <main className="pt-20 pb-16 relative">
-        {/* Luxury background gradients */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-50 rounded-full filter blur-3xl opacity-50"></div>
-          <div className="absolute top-80 -left-40 w-96 h-96 bg-purple-50 rounded-full filter blur-3xl opacity-50"></div>
-        </div>
-        
-        <div className="max-w-4xl mx-auto px-6 relative z-10">
+    <main className="pb-16">
+      <div className="max-w-4xl mx-auto px-6">
           
           {/* Header */}
           <div className="text-center mb-12">
@@ -616,7 +606,6 @@ export default function PublishProperty() {
             </motion.div>
           </div>
         </div>
-      </main>
-    </div>
+    </main>
   )
 }

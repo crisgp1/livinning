@@ -6,21 +6,7 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import Navigation from '@/components/Navigation'
 import PropertyCard from '@/components/PropertyCard'
-import { 
-  Home, 
-  Building, 
-  PlusCircle, 
-  BarChart3, 
-  Settings, 
-  Users, 
-  Menu, 
-  X,
-  Wrench,
-  TrendingUp,
-  Eye,
-  MessageSquare,
-  Sparkles,
-  FileText,
+import {
   Heart,
   Trash2
 } from 'lucide-react'
@@ -68,7 +54,6 @@ export default function FavoritesDashboard() {
   const [favoritesCount, setFavoritesCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [isAgent, setIsAgent] = useState(false)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     if (isLoaded && !user) {
@@ -124,20 +109,6 @@ export default function FavoritesDashboard() {
     )
   }
 
-  const sidebarItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: BarChart3, href: '/dashboard' },
-    { id: 'publish', label: 'Publicar', icon: PlusCircle, href: '/publish' },
-    { id: 'properties', label: 'Propiedades', icon: Building, href: '/dashboard/properties' },
-    { id: 'favorites', label: 'Favoritos', icon: Heart, href: '/dashboard/favorites' },
-    { id: 'services', label: 'Servicios', icon: Wrench, href: '/services' },
-    { id: 'my-services', label: 'Servicios Contratados', icon: FileText, href: '/dashboard/services' },
-    { id: 'settings', label: 'Configuración', icon: Settings, href: '/dashboard/settings' },
-    { id: 'home', label: 'Ir al Inicio', icon: Home, href: '/' },
-  ]
-
-  if (isAgent) {
-    sidebarItems.splice(5, 0, { id: 'team', label: 'Equipo', icon: Users, href: '/dashboard/team' })
-  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -152,92 +123,12 @@ export default function FavoritesDashboard() {
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-indigo-100 to-blue-100 rounded-full filter blur-3xl opacity-30"></div>
         </div>
 
-        {/* Mobile Sidebar Overlay */}
-        {sidebarOpen && (
-          <div 
-            className="fixed inset-0 bg-white bg-opacity-50 backdrop-blur-sm z-40 lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
-
-        {/* Sidebar */}
-        <div className={`fixed left-0 top-20 h-[calc(100vh-5rem)] w-64 z-50 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-auto ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}>
-          <div className="m-4 p-6 h-full overflow-y-auto glass-sidebar rounded-2xl">
-            {/* User Info */}
-            <div className="border-b border-gray-100 pb-6 mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full overflow-hidden ring-2 ring-white shadow-lg">
-                  {user?.imageUrl ? (
-                    <img src={user.imageUrl} alt="Profile" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-blue-600">
-                      <span className="text-white font-medium text-lg">
-                        {user?.firstName?.[0] || 'U'}
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate text-gray-900">
-                    {user?.firstName || 'Usuario'}
-                  </p>
-                  <p className="text-xs truncate text-gray-500">
-                    {user?.emailAddresses?.[0]?.emailAddress}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Navigation */}
-            <nav className="space-y-2">
-              {sidebarItems.map((item) => {
-                const isActive = pathname === item.href
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      router.push(item.href)
-                      setSidebarOpen(false)
-                    }}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${
-                      isActive 
-                        ? 'bg-primary text-white shadow-lg shadow-primary/20' 
-                        : 'text-gray-600 hover:bg-white/50 hover:text-gray-900'
-                    }`}
-                  >
-                    <div className={`p-2 rounded-lg transition-colors ${
-                      isActive ? 'bg-white/20' : 'bg-gray-50'
-                    }`}>
-                      <item.icon size={18} className={isActive ? 'text-white' : ''} />
-                    </div>
-                    <span className="font-medium text-sm leading-tight">{item.label}</span>
-                  </button>
-                )
-              })}
-            </nav>
-          </div>
-        </div>
 
         {/* Main Content */}
-        <div className="flex-1 lg:ml-0 relative z-10">
+        <div className="flex-1 relative z-10">
           <main className="pb-16">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               
-              {/* Mobile Header */}
-              <div className="lg:hidden flex items-center justify-between py-6 border-b border-gray-100">
-                <button
-                  onClick={() => setSidebarOpen(true)}
-                  className="p-2 rounded-lg glass-icon-container"
-                >
-                  <Menu size={20} className="text-gray-700" />
-                </button>
-                <h1 className="text-xl font-medium text-gray-900">
-                  Favoritos
-                </h1>
-                <div className="w-10"></div>
-              </div>
           
               {/* Header */}
               <div className="mb-8 lg:mb-12 mt-6 lg:mt-8">
