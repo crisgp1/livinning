@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { ServiceOrderStatus, ServiceType } from '@/lib/domain/entities/ServiceOrder'
 
 interface ServiceOrder {
@@ -516,8 +516,8 @@ export default function ProviderServicesList() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredOrders.map((order) => (
-                  <>
-                    <tr key={order.id} className="hover:bg-gray-50">
+                  <React.Fragment key={order.id}>
+                    <tr className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
                           <div className="text-sm font-medium text-gray-900">
@@ -584,7 +584,7 @@ export default function ProviderServicesList() {
                                   <h4 className="font-medium text-gray-900">Entregables</h4>
                                   <ul className="text-sm text-gray-600 list-disc list-inside">
                                     {order.deliverables.map((deliverable, index) => (
-                                      <li key={index}>{deliverable}</li>
+                                      <li key={`deliverable-${order.id}-${index}`}>{deliverable}</li>
                                     ))}
                                   </ul>
                                 </div>
@@ -595,7 +595,7 @@ export default function ProviderServicesList() {
                                 <h4 className="font-medium text-gray-900">Notas</h4>
                                 <div className="space-y-1">
                                   {order.notes.map((note, index) => (
-                                    <p key={index} className="text-sm text-gray-600 p-2 bg-white rounded border-l-2 border-blue-200">
+                                    <p key={`note-${order.id}-${index}`} className="text-sm text-gray-600 p-2 bg-white rounded border-l-2 border-blue-200">
                                       {note}
                                     </p>
                                   ))}
@@ -606,7 +606,7 @@ export default function ProviderServicesList() {
                         </td>
                       </tr>
                     )}
-                  </>
+                  </React.Fragment>
                 ))}
               </tbody>
             </table>

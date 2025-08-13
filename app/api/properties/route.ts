@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     // Parse query parameters
     const filters: PropertyFilters = {}
     const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '20')
+    const limit = parseInt(searchParams.get('limit') || '1000')
 
     if (searchParams.get('priceMin')) {
       filters.priceMin = parseInt(searchParams.get('priceMin')!)

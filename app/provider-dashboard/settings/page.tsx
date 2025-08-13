@@ -18,6 +18,7 @@ import {
   Users,
   Package,
   TrendingUp,
+  History,
   ArrowLeft,
   Calendar,
   Clock,
@@ -38,7 +39,6 @@ import {
   MessageSquare,
   Eye,
   EyeOff,
-  Toggle,
   Palette,
   Moon,
   Sun,
@@ -92,7 +92,6 @@ export default function SettingsPage() {
   const router = useRouter()
   const [hasAccess, setHasAccess] = useState<boolean | null>(null)
   const [loading, setLoading] = useState(true)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [activeTab, setActiveTab] = useState('personal')
   const [settings, setSettings] = useState<ProviderSettings>({
@@ -238,13 +237,14 @@ export default function SettingsPage() {
 
   const sidebarItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3, href: '/provider-dashboard' },
-    { id: 'assigned-services', label: 'Servicios Asignados', icon: Wrench, href: '/provider-dashboard/assigned' },
-    { id: 'work-orders', label: 'Órdenes de Trabajo', icon: FileText, href: '/provider-dashboard/orders' },
-    { id: 'completed', label: 'Trabajos Completados', icon: Package, href: '/provider-dashboard/completed' },
-    { id: 'clients', label: 'Mis Clientes', icon: Users, href: '/provider-dashboard/clients' },
+    { id: 'assigned-services', label: 'Asignados', icon: Wrench, href: '/provider-dashboard/assigned' },
+    { id: 'work-orders', label: 'Órdenes', icon: FileText, href: '/provider-dashboard/orders' },
+    { id: 'completed', label: 'Completados', icon: Package, href: '/provider-dashboard/completed' },
+    { id: 'clients', label: 'Clientes', icon: Users, href: '/provider-dashboard/clients' },
     { id: 'earnings', label: 'Ganancias', icon: TrendingUp, href: '/provider-dashboard/earnings' },
-    { id: 'settings', label: 'Configuración', icon: Settings, href: '/provider-dashboard/settings' },
-    { id: 'home', label: 'Ir al Inicio', icon: Home, href: '/' },
+    { id: 'historial', label: 'Historial', icon: History, href: '/provider-dashboard/historial' },
+    { id: 'settings', label: 'Ajustes', icon: Settings, href: '/provider-dashboard/settings' },
+    { id: 'home', label: 'Inicio', icon: Home, href: '/' },
   ]
 
   const tabs = [
@@ -268,19 +268,9 @@ export default function SettingsPage() {
           <div className="absolute bottom-20 right-20 w-72 h-72 bg-gradient-to-br from-pink-200 to-rose-200 rounded-full filter blur-3xl opacity-40"></div>
         </div>
 
-        {/* Mobile Sidebar Overlay */}
-        {sidebarOpen && (
-          <div
-            className="fixed inset-0 bg-white bg-opacity-50 backdrop-blur-sm z-40 lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
-
         {/* Sidebar */}
-        <div className={`fixed left-0 top-20 h-[calc(100vh-5rem)] w-64 z-50 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-auto ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}>
-          <div className="m-4 p-6 h-full overflow-y-auto glass-sidebar rounded-2xl">
+        <div className="w-64 flex-shrink-0">
+          <div className="fixed left-0 top-20 h-[calc(100vh-5rem)] w-64 m-4 p-6 overflow-y-auto glass-sidebar rounded-2xl">
             {/* User Info */}
             <div className="border-b border-gray-100 pb-6 mb-6">
               <div className="flex items-center gap-3">
@@ -315,7 +305,6 @@ export default function SettingsPage() {
                     key={item.id}
                     onClick={() => {
                       router.push(item.href)
-                      setSidebarOpen(false)
                     }}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${
                       isActive
@@ -337,28 +326,10 @@ export default function SettingsPage() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 lg:ml-0 relative z-10">
+        <div className="flex-1 relative z-10">
           <main className="pb-16">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               
-              {/* Mobile Header */}
-              <div className="lg:hidden flex items-center justify-between py-6 border-b border-gray-100">
-                <button
-                  onClick={() => setSidebarOpen(true)}
-                  className="p-2 rounded-lg glass-icon-container"
-                >
-                  <Menu size={20} className="text-gray-700" />
-                </button>
-                <h1 className="text-xl font-medium text-gray-900">
-                  Configuración
-                </h1>
-                <button
-                  onClick={() => router.push('/provider-dashboard')}
-                  className="p-2 rounded-lg glass-icon-container"
-                >
-                  <ArrowLeft size={20} className="text-gray-700" />
-                </button>
-              </div>
           
               {/* Header */}
               <div className="mb-8 lg:mb-12 mt-6 lg:mt-8">

@@ -20,7 +20,7 @@ export class GetPropertiesUseCase {
 
   async execute(request: GetPropertiesRequest = {}): Promise<GetPropertiesResponse> {
     try {
-      const { filters, page = 1, limit = 20 } = request
+      const { filters, page = 1, limit = 1000 } = request
       const offset = (page - 1) * limit
 
       const [properties, total] = await Promise.all([

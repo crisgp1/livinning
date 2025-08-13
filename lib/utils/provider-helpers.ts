@@ -57,8 +57,22 @@ export function getProviderServiceTypes(user: UserResource | null | undefined): 
 }
 
 export function canAccessProviderDashboard(user: UserResource | null | undefined): boolean {
-  const access = checkProviderAccess(user)
-  return access.hasProviderAccess
+  if (!user) return false
+
+  const userRole = user.publicMetadata?.role as string
+  const providerAccess = user.publicMetadata?.providerAccess as boolean
+  
+  // Check if user was invited as a provider via Clerk Invitations
+  const isInvitedProvider = user.publicMetadata?.invitedAsProvider as boolean
+  
+  // Allow access for:
+  // 1. Users with 'supplier' or 'provider' role
+  // 2. Users with explicit provider access flag
+  // 3. Users invited as providers via Clerk Invitations
+  return userRole === 'supplier' || 
+         userRole === 'provider' || 
+         providerAccess === true ||
+         isInvitedProvider === true
 }
 
 export function getProviderDisplayName(user: UserResource | null | undefined): string {

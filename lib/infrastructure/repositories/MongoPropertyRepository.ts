@@ -120,7 +120,7 @@ export class MongoPropertyRepository implements PropertyRepository {
     return docs.map(doc => this.toDomain(doc))
   }
 
-  async findAll(filters?: PropertyFilters, limit = 20, offset = 0): Promise<Property[]> {
+  async findAll(filters?: PropertyFilters, limit = 1000, offset = 0): Promise<Property[]> {
     await this.ensureConnection()
     
     const query: any = {}
@@ -208,7 +208,7 @@ export class MongoPropertyRepository implements PropertyRepository {
     return docs.map(doc => this.toDomain(doc))
   }
 
-  async findHighlighted(limit = 20, offset = 0): Promise<Property[]> {
+  async findHighlighted(limit = 1000, offset = 0): Promise<Property[]> {
     await this.ensureConnection()
     
     const query: any = {

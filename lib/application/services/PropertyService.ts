@@ -103,7 +103,7 @@ export class PropertyService {
     return await this.propertyRepository.update(extendedProperty)
   }
 
-  async getHighlightedProperties(limit = 20, offset = 0): Promise<Property[]> {
+  async getHighlightedProperties(limit = 1000, offset = 0): Promise<Property[]> {
     return await this.propertyRepository.findHighlighted(limit, offset)
   }
 }
