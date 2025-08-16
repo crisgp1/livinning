@@ -3,12 +3,17 @@ import { auth } from '@clerk/nextjs/server'
 import { put } from '@vercel/blob'
 import { v4 as uuidv4 } from 'uuid'
 import sharp from 'sharp'
+import logger from '@/lib/utils/logger'
 
 export async function POST(request: NextRequest) {
+  const uploadTimer = logger.startTimer('File Upload API')
+  
   try {
+    logger.api('UploadAPI', 'POST', '/api/upload', { timestamp: new Date().toISOString() })
     const { userId } = await auth()
     
     if (!userId) {
+      logger.warn('UploadAPI', 'Unauthorized upload attempt')
       return NextResponse.json(
         { success: false, error: 'Authentication required' },
         { status: 401 }
@@ -18,7 +23,14 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData()
     const files = formData.getAll('files') as File[]
 
+    logger.info('UploadAPI', 'Processing file upload', {
+      userId,
+      fileCount: files.length,
+      contentType: request.headers.get('content-type')
+    })
+
     if (!files || files.length === 0) {
+      logger.warn('UploadAPI', 'No files provided in upload request', { userId })
       return NextResponse.json(
         { success: false, error: 'No files provided' },
         { status: 400 }

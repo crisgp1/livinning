@@ -29,7 +29,8 @@ import {
   CheckCircle2,
   Play,
   Pause,
-  History
+  History,
+  Store
 } from 'lucide-react'
 
 interface WorkOrder {
@@ -250,6 +251,7 @@ export default function WorkOrdersPage() {
     { id: 'completed', label: 'Completados', icon: Package, href: '/provider-dashboard/completed' },
     { id: 'clients', label: 'Clientes', icon: Users, href: '/provider-dashboard/clients' },
     { id: 'earnings', label: 'Ganancias', icon: TrendingUp, href: '/provider-dashboard/earnings' },
+    { id: 'vendor-services', label: 'Mis Servicios', icon: Store, href: '/provider-dashboard/vendor-services' },
     { id: 'historial', label: 'Historial', icon: History, href: '/provider-dashboard/historial' },
     { id: 'settings', label: 'Ajustes', icon: Settings, href: '/provider-dashboard/settings' },
     { id: 'home', label: 'Inicio', icon: Home, href: '/' },

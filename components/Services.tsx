@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
+import { useRouter } from 'next/navigation'
+import { useUser } from '@clerk/nextjs'
 import Navigation from '@/components/Navigation'
 import { 
   Users, 
@@ -14,7 +16,12 @@ import {
   HeadphonesIcon,
   Zap,
   Building2,
-  ArrowRight
+  ArrowRight,
+  Camera,
+  Video,
+  Scale,
+  Home,
+  Star
 } from 'lucide-react'
 
 interface ServiceTier {
@@ -27,7 +34,18 @@ interface ServiceTier {
 }
 
 const Services = () => {
+  const router = useRouter()
+  const { user } = useUser()
   const [activeTab, setActiveTab] = useState('consulting')
+  const [showAccountModal, setShowAccountModal] = useState(false)
+
+  const handleAccountCreation = () => {
+    if (user) {
+      setShowAccountModal(true)
+    } else {
+      router.push('/sign-up')
+    }
+  }
 
   const serviceTiers: ServiceTier[] = [
     {
@@ -62,10 +80,34 @@ const Services = () => {
 
   const digitalServices = [
     {
+      id: 'direct-services',
+      title: 'Servicios Directos',
+      description: 'Acceso directo a nuestros servicios profesionales más demandados',
+      icon: <Zap className="w-8 h-8" />,
+      features: [
+        'Fotografía profesional inmobiliaria',
+        'Tours virtuales 360°',
+        'Asesoría legal especializada',
+        'Análisis de mercado detallado'
+      ]
+    },
+    {
+      id: 'user-types',
+      title: 'Tipos de Usuario',
+      description: 'Descubre qué tipo de cuenta se adapta mejor a tus necesidades',
+      icon: <Users className="w-8 h-8" />,
+      features: [
+        'Cuenta Propietario',
+        'Cuenta Inmobiliaria',
+        'Cuenta Proveedor de Servicios',
+        'Cuenta Agencia Premium'
+      ]
+    },
+    {
       id: 'consulting',
       title: 'Consultoría Personalizada',
       description: 'Orientación experta adaptada a las necesidades de tu negocio',
-      icon: <Users className="w-8 h-8" />,
+      icon: <Briefcase className="w-8 h-8" />,
       features: [
         'Análisis e insights del mercado',
         'Desarrollo de estrategias de crecimiento',
@@ -77,24 +119,12 @@ const Services = () => {
       id: 'contracting',
       title: 'Servicios Profesionales de Un Clic',
       description: 'Acceso instantáneo a profesionales verificados con seguimiento en tiempo real',
-      icon: <Zap className="w-8 h-8" />,
+      icon: <Settings className="w-8 h-8" />,
       features: [
         'Reserva instantánea de servicios',
         'Red de profesionales verificados',
         'Seguimiento de estado en tiempo real',
         'Facturación automatizada'
-      ]
-    },
-    {
-      id: 'customization',
-      title: 'Personalización Dedicada de Tienda',
-      description: 'Soluciones adaptadas para cada escala de negocio',
-      icon: <Palette className="w-8 h-8" />,
-      features: [
-        'Opciones de marca personalizadas',
-        'Diseños de layout flexibles',
-        'Infraestructura escalable',
-        'Integraciones de API'
       ]
     }
   ]
@@ -160,6 +190,262 @@ const Services = () => {
               transition={{ duration: 0.5 }}
               className="glass-card p-8 rounded-2xl max-w-4xl mx-auto"
             >
+              {activeTab === 'direct-services' && (
+                <div className="space-y-8">
+                  <div className="text-center mb-8">
+                    <div className="glass-icon-container w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                      <Zap className="w-10 h-10 text-primary" />
+                    </div>
+                    <h2 className="text-3xl font-bold mb-4">Servicios Directos</h2>
+                    <p className="text-gray-600 max-w-2xl mx-auto">
+                      Accede directamente a nuestros servicios profesionales más demandados para potenciar tu negocio inmobiliario
+                    </p>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="glass-card p-6 rounded-xl hover:shadow-xl transition-all cursor-pointer group"
+                      onClick={() => router.push('/services')}
+                    >
+                      <div className="flex items-center gap-3 mb-4">
+                        <Camera className="w-8 h-8 text-primary" />
+                        <h3 className="text-xl font-bold">Fotografía Profesional</h3>
+                      </div>
+                      <p className="text-gray-600 mb-4">Sesiones fotográficas profesionales con dron incluido</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-2xl font-bold text-primary">$2,499 MXN</span>
+                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 }}
+                      className="glass-card p-6 rounded-xl hover:shadow-xl transition-all cursor-pointer group"
+                      onClick={() => router.push('/services')}
+                    >
+                      <div className="flex items-center gap-3 mb-4">
+                        <Video className="w-8 h-8 text-primary" />
+                        <h3 className="text-xl font-bold">Tours Virtuales 360°</h3>
+                      </div>
+                      <p className="text-gray-600 mb-4">Recorridos virtuales interactivos de alta calidad</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-2xl font-bold text-primary">$3,499 MXN</span>
+                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2 }}
+                      className="glass-card p-6 rounded-xl hover:shadow-xl transition-all cursor-pointer group"
+                      onClick={() => router.push('/services')}
+                    >
+                      <div className="flex items-center gap-3 mb-4">
+                        <Scale className="w-8 h-8 text-primary" />
+                        <h3 className="text-xl font-bold">Asesoría Legal</h3>
+                      </div>
+                      <p className="text-gray-600 mb-4">Revisión completa de contratos y documentación</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-2xl font-bold text-primary">$4,999 MXN</span>
+                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 }}
+                      className="glass-card p-6 rounded-xl hover:shadow-xl transition-all cursor-pointer group"
+                      onClick={() => router.push('/services')}
+                    >
+                      <div className="flex items-center gap-3 mb-4">
+                        <BarChart3 className="w-8 h-8 text-primary" />
+                        <h3 className="text-xl font-bold">Análisis de Mercado</h3>
+                      </div>
+                      <p className="text-gray-600 mb-4">Estudio detallado del mercado inmobiliario</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-2xl font-bold text-primary">$2,999 MXN</span>
+                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </motion.div>
+                  </div>
+
+                  <div className="text-center mt-8">
+                    <button 
+                      onClick={() => router.push('/services')}
+                      className="btn-primary px-8 py-3"
+                    >
+                      Ver Todos los Servicios
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'user-types' && (
+                <div className="space-y-8">
+                  <div className="text-center mb-8">
+                    <div className="glass-icon-container w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                      <Users className="w-10 h-10 text-primary" />
+                    </div>
+                    <h2 className="text-3xl font-bold mb-4">Tipos de Usuario</h2>
+                    <p className="text-gray-600 max-w-2xl mx-auto">
+                      Elige el tipo de cuenta que mejor se adapte a tus necesidades y objetivos profesionales
+                    </p>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="glass-card p-6 rounded-xl border-2 border-transparent hover:border-primary transition-all"
+                    >
+                      <div className="flex items-center gap-3 mb-4">
+                        <Home className="w-8 h-8 text-blue-500" />
+                        <h3 className="text-xl font-bold">Propietario</h3>
+                      </div>
+                      <p className="text-gray-600 mb-4">Para personas que buscan vender o rentar sus propiedades</p>
+                      <ul className="space-y-2 mb-6">
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-500" />
+                          <span className="text-sm">Publicaciones ilimitadas</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-500" />
+                          <span className="text-sm">Herramientas de promoción</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-500" />
+                          <span className="text-sm">Soporte especializado</span>
+                        </li>
+                      </ul>
+                      <button 
+                        onClick={handleAccountCreation}
+                        className="btn-primary w-full"
+                      >
+                        Crear Cuenta Propietario
+                      </button>
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 }}
+                      className="glass-card p-6 rounded-xl border-2 border-transparent hover:border-primary transition-all"
+                    >
+                      <div className="flex items-center gap-3 mb-4">
+                        <Building2 className="w-8 h-8 text-purple-500" />
+                        <h3 className="text-xl font-bold">Inmobiliaria</h3>
+                      </div>
+                      <p className="text-gray-600 mb-4">Para agencias y corredores inmobiliarios profesionales</p>
+                      <ul className="space-y-2 mb-6">
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-500" />
+                          <span className="text-sm">Dashboard avanzado</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-500" />
+                          <span className="text-sm">CRM integrado</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-500" />
+                          <span className="text-sm">Análiticas detalladas</span>
+                        </li>
+                      </ul>
+                      <button 
+                        onClick={handleAccountCreation}
+                        className="btn-primary w-full"
+                      >
+                        Crear Cuenta Inmobiliaria
+                      </button>
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2 }}
+                      className="glass-card p-6 rounded-xl border-2 border-transparent hover:border-primary transition-all"
+                    >
+                      <div className="flex items-center gap-3 mb-4">
+                        <Briefcase className="w-8 h-8 text-green-500" />
+                        <h3 className="text-xl font-bold">Proveedor de Servicios</h3>
+                      </div>
+                      <p className="text-gray-600 mb-4">Para profesionales que ofrecen servicios inmobiliarios</p>
+                      <ul className="space-y-2 mb-6">
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-500" />
+                          <span className="text-sm">Perfil profesional</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-500" />
+                          <span className="text-sm">Sistema de pedidos</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-500" />
+                          <span className="text-sm">Tracking de trabajos</span>
+                        </li>
+                      </ul>
+                      <button 
+                        onClick={handleAccountCreation}
+                        className="btn-primary w-full"
+                      >
+                        Crear Cuenta Proveedor
+                      </button>
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 }}
+                      className="glass-card p-6 rounded-xl border-2 border-primary hover:shadow-xl transition-all"
+                    >
+                      <div className="bg-primary text-white text-sm px-3 py-1 rounded-full inline-block mb-4">
+                        Premium
+                      </div>
+                      <div className="flex items-center gap-3 mb-4">
+                        <Star className="w-8 h-8 text-yellow-500" />
+                        <h3 className="text-xl font-bold">Agencia Premium</h3>
+                      </div>
+                      <p className="text-gray-600 mb-4">Para agencias de alto volumen con necesidades avanzadas</p>
+                      <ul className="space-y-2 mb-6">
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-500" />
+                          <span className="text-sm">Características ilimitadas</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-500" />
+                          <span className="text-sm">Soporte prioritario 24/7</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-500" />
+                          <span className="text-sm">API personalizada</span>
+                        </li>
+                      </ul>
+                      <button 
+                        onClick={handleAccountCreation}
+                        className="btn-primary w-full"
+                      >
+                        Crear Cuenta Premium
+                      </button>
+                    </motion.div>
+                  </div>
+
+                  <div className="text-center mt-8">
+                    <p className="text-gray-600 mb-4">¿No estás seguro qué tipo de cuenta necesitas?</p>
+                    <button 
+                      onClick={() => router.push('/contacto')}
+                      className="btn-outline px-8 py-3"
+                    >
+                      Hablar con un Experto
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {activeTab === 'consulting' && (
                 <div className="space-y-8">
                   <div className="text-center mb-8">
@@ -203,7 +489,10 @@ const Services = () => {
                             </li>
                           ))}
                         </ul>
-                        <button className="btn-primary w-full mt-6">
+                        <button 
+                          onClick={handleAccountCreation}
+                          className="btn-primary w-full mt-6"
+                        >
                           Comenzar
                         </button>
                       </motion.div>
@@ -271,95 +560,6 @@ const Services = () => {
                 </div>
               )}
 
-              {activeTab === 'customization' && (
-                <div className="space-y-8">
-                  <div className="text-center mb-8">
-                    <div className="glass-icon-container w-20 h-20 mx-auto mb-4 flex items-center justify-center">
-                      <Palette className="w-10 h-10 text-primary" />
-                    </div>
-                    <h2 className="text-3xl font-bold mb-4">Personalización Dedicada de Tienda</h2>
-                    <p className="text-gray-600 max-w-2xl mx-auto">
-                      Desde soporte limitado hasta amplio, adaptamos soluciones para satisfacer tus necesidades exactas
-                    </p>
-                  </div>
-
-                  <div className="grid md:grid-cols-2 gap-8">
-                    <motion.div
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      className="space-y-4"
-                    >
-                      <h3 className="text-xl font-bold flex items-center gap-2">
-                        <Settings className="w-5 h-5" />
-                        Soporte Limitado
-                      </h3>
-                      <div className="glass-card p-6 rounded-xl space-y-3">
-                        <div className="flex items-start gap-3">
-                          <CheckCircle className="w-5 h-5 text-primary mt-0.5" />
-                          <div>
-                            <div className="font-medium">Marca Básica</div>
-                            <div className="text-sm text-gray-600">Logo, colores y tipografía</div>
-                          </div>
-                        </div>
-                        <div className="flex items-start gap-3">
-                          <CheckCircle className="w-5 h-5 text-primary mt-0.5" />
-                          <div>
-                            <div className="font-medium">Plantillas Prediseñadas</div>
-                            <div className="text-sm text-gray-600">Elige de nuestra biblioteca de diseños</div>
-                          </div>
-                        </div>
-                        <div className="flex items-start gap-3">
-                          <CheckCircle className="w-5 h-5 text-primary mt-0.5" />
-                          <div>
-                            <div className="font-medium">Características Estándar</div>
-                            <div className="text-sm text-gray-600">Herramientas esenciales e integraciones</div>
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-
-                    <motion.div
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      className="space-y-4"
-                    >
-                      <h3 className="text-xl font-bold flex items-center gap-2">
-                        <HeadphonesIcon className="w-5 h-5" />
-                        Soporte Amplio
-                      </h3>
-                      <div className="glass-card p-6 rounded-xl space-y-3">
-                        <div className="flex items-start gap-3">
-                          <CheckCircle className="w-5 h-5 text-green-500 mt-0.5" />
-                          <div>
-                            <div className="font-medium">Personalización Completa</div>
-                            <div className="text-sm text-gray-600">Libertad total de diseño</div>
-                          </div>
-                        </div>
-                        <div className="flex items-start gap-3">
-                          <CheckCircle className="w-5 h-5 text-green-500 mt-0.5" />
-                          <div>
-                            <div className="font-medium">Desarrollo Personalizado</div>
-                            <div className="text-sm text-gray-600">Características y flujos de trabajo adaptados</div>
-                          </div>
-                        </div>
-                        <div className="flex items-start gap-3">
-                          <CheckCircle className="w-5 h-5 text-green-500 mt-0.5" />
-                          <div>
-                            <div className="font-medium">Equipo Dedicado</div>
-                            <div className="text-sm text-gray-600">Soporte personal y mantenimiento</div>
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  </div>
-
-                  <div className="text-center mt-8">
-                    <button className="btn-primary px-8 py-3">
-                      Comenzar a Personalizar tu Tienda
-                    </button>
-                  </div>
-                </div>
-              )}
             </motion.div>
           </div>
 
@@ -374,16 +574,66 @@ const Services = () => {
               Únete a miles de empresas que ya utilizan los servicios digitales de Livinning
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="btn-primary px-8 py-3">
+              <button 
+                onClick={handleAccountCreation}
+                className="btn-primary px-8 py-3"
+              >
                 Comenzar Hoy
               </button>
-              <button className="btn-outline px-8 py-3">
+              <button 
+                onClick={() => router.push('/contacto')}
+                className="btn-outline px-8 py-3"
+              >
                 Programar Demo
               </button>
             </div>
           </motion.div>
         </div>
       </main>
+
+      {/* Account Already Exists Modal */}
+      {showAccountModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="glass-icon-container rounded-2xl max-w-md w-full p-8"
+          >
+            <div className="text-center">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center mx-auto mb-6">
+                <Users className="w-8 h-8 text-primary" />
+              </div>
+              
+              <h3 className="text-2xl font-bold mb-4 text-gray-900">
+                Ya tienes una cuenta
+              </h3>
+              
+              <p className="text-gray-600 mb-8">
+                Ya estás registrado en Livinning. ¿Te gustaría contactarnos para obtener más información o continuar navegando?
+              </p>
+              
+              <div className="space-y-3">
+                <button
+                  onClick={() => {
+                    setShowAccountModal(false)
+                    router.push('/contacto')
+                  }}
+                  className="btn-primary w-full"
+                >
+                  Contactarnos
+                </button>
+                
+                <button
+                  onClick={() => setShowAccountModal(false)}
+                  className="btn-outline w-full"
+                >
+                  Continuar Navegando
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   )
 }

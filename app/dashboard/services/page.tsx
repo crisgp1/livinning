@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { ArrowLeft, Plus, ExternalLink, TrendingUp, Clock, CheckCircle, Zap } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import Navigation from '@/components/Navigation'
 import ServiceOrders from '@/components/ServiceOrders'
 import OrderStatus from '@/components/OrderStatus'
 import { useToast } from '@/components/Toast'
@@ -131,9 +130,7 @@ export default function ServicesPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Navigation />
-      
-      <main className="pt-20">
+      <main>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div>
             

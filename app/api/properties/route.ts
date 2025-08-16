@@ -6,6 +6,7 @@ import { CreatePropertyDTOSchema } from '@/lib/application/dtos/CreatePropertyDT
 import { PropertyFilters } from '@/lib/domain/repositories/PropertyRepository'
 import { getOrganizationContext } from '@/lib/utils/organizationContext'
 import { clerkClient } from '@clerk/nextjs/server'
+import logger from '@/lib/utils/logger'
 
 const propertyRepository = new MongoPropertyRepository()
 const propertyService = new PropertyService(propertyRepository)
@@ -47,7 +48,13 @@ export async function GET(request: NextRequest) {
       filters.isHighlighted = searchParams.get('isHighlighted') === 'true'
     }
 
+    logger.debug('PropertiesAPI', 'Getting properties', { filters, page, limit })
     const result = await propertyService.getProperties({ filters, page, limit })
+    logger.info('PropertiesAPI', 'Properties retrieved', { 
+      count: result.properties.length, 
+      total: result.totalCount,
+      hasFilters: Object.keys(filters).length > 0 
+    })
 
     // Serialize the properties to plain objects
     const serializedResult = {
@@ -109,9 +116,17 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    logger.info('PropertiesAPI', 'Property creation request received')
     const { userId, organization } = await getOrganizationContext()
     
     const body = await request.json()
+    logger.debug('PropertiesAPI', 'Property creation data', { 
+      title: body.title,
+      propertyType: body.propertyType,
+      price: body.price,
+      userId,
+      organizationId: organization.id
+    })
     
     // Validate the request body
     const validationResult = CreatePropertyDTOSchema.safeParse({
@@ -121,6 +136,10 @@ export async function POST(request: NextRequest) {
     })
 
     if (!validationResult.success) {
+      logger.warn('PropertiesAPI', 'Property validation failed', {
+        errors: validationResult.error.issues,
+        userId
+      })
       return NextResponse.json(
         { 
           success: false, 
@@ -132,6 +151,12 @@ export async function POST(request: NextRequest) {
     }
 
     const property = await propertyService.createProperty(validationResult.data)
+    logger.info('PropertiesAPI', 'Property created successfully', {
+      propertyId: property.id,
+      title: property.title,
+      userId,
+      organizationId: organization.id
+    })
 
     // Auto-upgrade logic: upgrade regular users to agent when they publish their first property
     try {

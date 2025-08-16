@@ -4,6 +4,7 @@ import { useUser } from '@clerk/nextjs'
 import { useRouter, usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Navigation from '@/components/Navigation'
+import logger from '@/lib/utils/logger'
 import { 
   Home, 
   Building, 
@@ -34,16 +35,21 @@ export default function ServicesLayout({
       const userRole = metadata?.role || (user as any).privateMetadata?.role
       const providerAccess = metadata?.providerAccess
       
-      // Redirect both suppliers and providers to the unified provider dashboard
-      if (userRole === 'supplier' || userRole === 'provider' || providerAccess === true) {
-        router.push('/provider-dashboard')
-        return
-      }
+      logger.debug('ServicesLayout', 'User access check', {
+        userRole,
+        providerAccess,
+        pathname,
+        allowServiceAccess: true
+      })
+      
+      // Allow providers to access the services page
+      // Only redirect to provider dashboard from other restricted areas, not from services
+      // This allows providers to view and purchase services
       
       const isAgency = metadata?.isAgency || metadata?.organizationId
       setIsAgent(userRole === 'agent' || isAgency)
     }
-  }, [user])
+  }, [user, pathname])
 
   // Para la página de servicios, no redireccionar si no está logueado para permitir ver los servicios
   const shouldShowLayout = isLoaded && user

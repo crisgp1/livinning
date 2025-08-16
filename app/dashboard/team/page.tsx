@@ -4,7 +4,6 @@ import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import Navigation from '@/components/Navigation'
 import { 
   Users, 
   UserPlus, 
@@ -178,9 +177,7 @@ export default function DashboardTeam() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Navigation />
-      
-      <div className="pt-20 relative">
+      <div className="relative">
         {/* Background decorations */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-blue-200 to-cyan-200 rounded-full filter blur-3xl opacity-60"></div>

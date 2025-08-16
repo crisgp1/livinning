@@ -28,6 +28,9 @@ export interface ClerkPublicMetadata {
   // Organization/Agency metadata
   organizationId?: string
   organizationRole?: 'owner' | 'admin' | 'member'
+  
+  // Vendor invitation metadata
+  invitedVendor?: boolean
 }
 
 // Metadatos privados que se almacenan en Clerk

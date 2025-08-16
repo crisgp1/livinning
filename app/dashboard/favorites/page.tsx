@@ -4,7 +4,6 @@ import { useUser } from '@clerk/nextjs'
 import { useRouter, usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import Navigation from '@/components/Navigation'
 import PropertyCard from '@/components/PropertyCard'
 import {
   Heart,
@@ -112,9 +111,7 @@ export default function FavoritesDashboard() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Navigation />
-      
-      <div className="pt-20 flex relative">
+      <div className="flex relative">
         {/* Enhanced Background decorations for glassmorphism */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-blue-200 to-cyan-200 rounded-full filter blur-3xl opacity-60"></div>

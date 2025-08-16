@@ -8,19 +8,22 @@ import ServiceOrderModel from '@/lib/infrastructure/database/models/ServiceOrder
 import { ServiceOrderStatus, ServiceType } from '@/lib/domain/entities/ServiceOrder'
 import { PropertyService } from '@/lib/application/services/PropertyService'
 import { MongoPropertyRepository } from '@/lib/infrastructure/repositories/MongoPropertyRepository'
+import logger from '@/lib/utils/logger'
 
 export async function POST(request: Request) {
-  console.log('🔔 Webhook received at:', new Date().toISOString())
+  logger.info('StripeWebhook', 'Webhook received', { timestamp: new Date().toISOString() })
   
   const body = await request.text()
   const signature = (await headers()).get('stripe-signature')
 
-  console.log('📥 Webhook body length:', body.length)
-  console.log('🔐 Stripe signature present:', !!signature)
-  console.log('🔑 Webhook secret configured:', !!process.env.STRIPE_WEBHOOK_SECRET)
+  logger.debug('StripeWebhook', 'Webhook details', { 
+    bodyLength: body.length,
+    hasSignature: !!signature,
+    hasWebhookSecret: !!process.env.STRIPE_WEBHOOK_SECRET 
+  })
 
   if (!signature) {
-    console.error('❌ No signature provided in webhook request')
+    logger.error('StripeWebhook', 'No signature provided in webhook request')
     return NextResponse.json(
       { error: 'No signature provided' },
       { status: 400 }
@@ -30,18 +33,18 @@ export async function POST(request: Request) {
   let event: Stripe.Event
 
   try {
-    console.log('🔐 Verifying webhook signature...')
+    logger.debug('StripeWebhook', 'Verifying webhook signature')
     event = stripe.webhooks.constructEvent(
       body,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET!
     )
-    console.log('✅ Webhook signature verified successfully')
-    console.log('📦 Event type:', event.type)
-    console.log('🆔 Event ID:', event.id)
+    logger.info('StripeWebhook', 'Webhook signature verified successfully', {
+      eventType: event.type,
+      eventId: event.id
+    })
   } catch (err) {
-    console.error('❌ Webhook signature verification failed:', err)
-    console.error('❌ Error details:', err instanceof Error ? err.message : 'Unknown error')
+    logger.error('StripeWebhook', 'Webhook signature verification failed', err)
     return NextResponse.json(
       { error: 'Invalid signature' },
       { status: 400 }

@@ -6,6 +6,8 @@ import DeveloperRoleChanger from "@/components/DeveloperRoleChanger";
 import UpgradeNotification from "@/components/UpgradeNotification";
 import ImpersonationBanner from "@/components/ImpersonationBanner";
 import ImpersonationTransitionProvider from "@/components/ImpersonationTransitionProvider";
+import ErrorBoundary from "@/components/ErrorBoundary";
+import RouterLogger from "@/components/RouterLogger";
 import "./globals.css";
 
 const lexend = Lexend({
@@ -27,13 +29,16 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="es">
         <body className={`${lexend.variable} antialiased`}>
-          <ImpersonationBanner />
-          <ImpersonationTransitionProvider />
-          <ToastProvider>
-            {children}
-            <DeveloperRoleChanger />
-            <UpgradeNotification />
-          </ToastProvider>
+          <ErrorBoundary>
+            <RouterLogger />
+            <ImpersonationBanner />
+            <ImpersonationTransitionProvider />
+            <ToastProvider>
+              {children}
+              <DeveloperRoleChanger />
+              <UpgradeNotification />
+            </ToastProvider>
+          </ErrorBoundary>
         </body>
       </html>
     </ClerkProvider>

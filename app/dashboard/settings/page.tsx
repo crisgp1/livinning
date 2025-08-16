@@ -4,7 +4,7 @@ import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import Navigation from '@/components/Navigation'
+import { useToast } from '@/components/Toast'
 import { 
   Settings, 
   User,
@@ -37,6 +37,7 @@ interface UserSettings {
 export default function DashboardSettings() {
   const { user, isLoaded } = useUser()
   const router = useRouter()
+  const { showToast } = useToast()
   const [settings, setSettings] = useState<UserSettings>({
     firstName: '',
     lastName: '',
@@ -65,24 +66,62 @@ export default function DashboardSettings() {
     if (isLoaded && !user) {
       router.push('/sign-in')
     } else if (isLoaded && user) {
-      setSettings(prev => ({
-        ...prev,
-        firstName: user.firstName || '',
-        lastName: user.lastName || '',
-        email: user.emailAddresses?.[0]?.emailAddress || '',
-        phone: user.phoneNumbers?.[0]?.phoneNumber || ''
-      }))
+      // Load user settings from API
+      fetchUserSettings()
     }
   }, [user, isLoaded, router])
+
+  const fetchUserSettings = async () => {
+    try {
+      const response = await fetch('/api/user/settings')
+      if (response.ok) {
+        const data = await response.json()
+        setSettings(data.data)
+      } else {
+        // Fallback to Clerk user data
+        setSettings(prev => ({
+          ...prev,
+          firstName: user?.firstName || '',
+          lastName: user?.lastName || '',
+          email: user?.emailAddresses?.[0]?.emailAddress || '',
+          phone: user?.phoneNumbers?.[0]?.phoneNumber || ''
+        }))
+      }
+    } catch (error) {
+      console.error('Error fetching user settings:', error)
+      // Fallback to Clerk user data
+      setSettings(prev => ({
+        ...prev,
+        firstName: user?.firstName || '',
+        lastName: user?.lastName || '',
+        email: user?.emailAddresses?.[0]?.emailAddress || '',
+        phone: user?.phoneNumbers?.[0]?.phoneNumber || ''
+      }))
+    }
+  }
 
   const handleSaveProfile = async () => {
     setIsLoading(true)
     try {
-      // Mock save - replace with actual API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      console.log('Settings saved:', settings)
+      const response = await fetch('/api/user/settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(settings)
+      })
+
+      if (response.ok) {
+        showToast('Configuración guardada correctamente', 'success')
+        // Update Clerk user session to reflect changes
+        await user?.reload()
+      } else {
+        const error = await response.json()
+        showToast(error.error || 'Error al guardar la configuración', 'error')
+      }
     } catch (error) {
       console.error('Error saving settings:', error)
+      showToast('Error al guardar la configuración', 'error')
     } finally {
       setIsLoading(false)
     }
@@ -90,21 +129,12 @@ export default function DashboardSettings() {
 
   const handlePasswordChange = async () => {
     if (passwordData.new !== passwordData.confirm) {
-      alert('Las contraseñas no coinciden')
+      showToast('Las contraseñas no coinciden', 'error')
       return
     }
     
-    setIsLoading(true)
-    try {
-      // Mock password change - replace with actual API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      setPasswordData({ current: '', new: '', confirm: '' })
-      alert('Contraseña actualizada correctamente')
-    } catch (error) {
-      console.error('Error changing password:', error)
-    } finally {
-      setIsLoading(false)
-    }
+    // Note: Password changes should be handled through Clerk's UI
+    showToast('Para cambiar tu contraseña, usa la opción de "Gestionar cuenta" en tu perfil', 'info')
   }
 
   const tabs = [
@@ -124,9 +154,7 @@ export default function DashboardSettings() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Navigation />
-      
-      <div className="pt-20 relative">
+      <div className="relative">
         {/* Background decorations */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-blue-200 to-cyan-200 rounded-full filter blur-3xl opacity-60"></div>
@@ -248,8 +276,8 @@ export default function DashboardSettings() {
                           <input
                             type="email"
                             value={settings.email}
-                            onChange={(e) => setSettings({...settings, email: e.target.value})}
-                            className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                            disabled
+                            className="w-full px-4 py-3 rounded-xl bg-gray-100 border border-gray-200 text-gray-600 cursor-not-allowed"
                           />
                         </div>
                         

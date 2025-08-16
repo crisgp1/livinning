@@ -7,9 +7,13 @@ import { Menu, X, Home, Building2, Phone, User2, Shield, Package, Wrench } from 
 import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
 import { useUser } from '@clerk/nextjs'
 import ImpersonationUserButton from '@/components/ImpersonationUserButton'
+import logger from '@/lib/utils/logger'
+import { useLogger, useUserInteractionLogger } from '@/hooks/useLogger'
 
 export default function Navigation() {
   const { user } = useUser()
+  const { logUserAction } = useLogger({ component: 'Navigation' })
+  const { logClick, logNavigation } = useUserInteractionLogger('Navigation')
   const [isImpersonating, setIsImpersonating] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -39,9 +43,14 @@ export default function Navigation() {
           .find(row => row.startsWith('impersonation='))
           ?.split('=')[1]
         
-        setIsImpersonating(!!impersonationCookie)
+        const isImpersonatingNow = !!impersonationCookie
+        setIsImpersonating(isImpersonatingNow)
+        
+        if (isImpersonatingNow) {
+          logger.debug('Navigation', 'Impersonation detected')
+        }
       } catch (error) {
-        console.error('Error checking impersonation:', error)
+        logger.error('Navigation', 'Error checking impersonation', error)
         setIsImpersonating(false)
       }
     }
@@ -52,19 +61,33 @@ export default function Navigation() {
       const metadata = user.publicMetadata as any
       
       // Dynamic superadmin check (same logic as utility function)
-      setIsSuperAdmin(
-        metadata?.isSuperAdmin === true ||
+      const superAdminStatus = metadata?.isSuperAdmin === true ||
         metadata?.role === 'superadmin' ||
-        user.emailAddresses?.some(email => email.emailAddress === 'cristiangp2001@gmail.com') // fallback
-      )
+        user.emailAddresses?.some(email => email.emailAddress === 'cristiangp2001@gmail.com')
       
-      setIsAgency(metadata?.isAgency === true)
-      setIsSupplier(metadata?.role === 'supplier')
-      setIsProvider(metadata?.role === 'provider' || metadata?.providerAccess === true)
+      const agencyStatus = metadata?.isAgency === true
+      const supplierStatus = metadata?.role === 'supplier'
+      const providerStatus = metadata?.role === 'provider' || metadata?.providerAccess === true
+      
+      setIsSuperAdmin(superAdminStatus)
+      setIsAgency(agencyStatus)
+      setIsSupplier(supplierStatus)
+      setIsProvider(providerStatus)
+      
+      logger.debug('Navigation', 'User role detection', {
+        userId: user.id,
+        email: user.emailAddresses?.[0]?.emailAddress,
+        isSuperAdmin: superAdminStatus,
+        isAgency: agencyStatus,
+        isSupplier: supplierStatus,
+        isProvider: providerStatus,
+        role: metadata?.role
+      })
     }
   }, [user])
 
   const toggleMobileMenu = () => {
+    logClick('mobile-menu-toggle', 'toggle-btn', { isOpen: !isMobileMenuOpen })
     setIsMobileMenuOpen(!isMobileMenuOpen)
   }
 

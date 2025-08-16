@@ -104,7 +104,7 @@ export default function DashboardLayout({
         )}
 
         {/* Sidebar */}
-        <div className={`fixed left-0 top-20 h-[calc(100vh-5rem)] w-64 z-50 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-auto ${
+        <div className={`fixed left-0 top-20 h-[calc(100vh-5rem)] w-64 z-50 transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}>
           <div className="m-4 p-6 h-full overflow-y-auto glass-sidebar rounded-2xl">
@@ -164,7 +164,7 @@ export default function DashboardLayout({
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 lg:ml-0 relative z-10">
+        <div className="flex-1 lg:ml-72 relative z-10">
           {/* Mobile Header */}
           <div className="lg:hidden flex items-center justify-between py-6 px-4 sm:px-6 border-b border-gray-100">
             <button

@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import logger from '@/lib/utils/logger'
 
 const MONGODB_URI = process.env.MONGODB_URI
 
@@ -23,6 +24,7 @@ if (!cached) {
 
 async function connectDB(): Promise<typeof mongoose> {
   if (cached!.conn) {
+    logger.debug('Database', 'Using existing MongoDB connection')
     return cached!.conn
   }
 
@@ -31,8 +33,30 @@ async function connectDB(): Promise<typeof mongoose> {
       bufferCommands: false,
     }
 
+    logger.info('Database', 'Establishing MongoDB connection')
+    const connectionTimer = logger.startTimer('MongoDB Connection')
+
     cached!.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
-      console.log('✅ Connected to MongoDB')
+      connectionTimer()
+      logger.database('Database', 'Connected successfully', {
+        readyState: mongoose.connection.readyState,
+        host: mongoose.connection.host,
+        name: mongoose.connection.name
+      })
+      
+      // Add connection event listeners
+      mongoose.connection.on('error', (err) => {
+        logger.error('Database', 'MongoDB connection error', err)
+      })
+      
+      mongoose.connection.on('disconnected', () => {
+        logger.warn('Database', 'MongoDB disconnected')
+      })
+      
+      mongoose.connection.on('reconnected', () => {
+        logger.info('Database', 'MongoDB reconnected')
+      })
+      
       return mongoose
     })
   }
@@ -41,7 +65,7 @@ async function connectDB(): Promise<typeof mongoose> {
     cached!.conn = await cached!.promise
   } catch (e) {
     cached!.promise = null
-    console.error('❌ Failed to connect to MongoDB:', e)
+    logger.error('Database', 'Failed to connect to MongoDB', e)
     throw e
   }
 

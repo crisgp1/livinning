@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import Navigation from '@/components/Navigation'
 import { useToast } from '@/components/Toast'
+import { useLogger, useUserInteractionLogger, useApiLogger } from '@/hooks/useLogger'
 
 interface ContactForm {
   name: string
@@ -30,6 +31,9 @@ interface ContactForm {
 export default function ContactPage() {
   const { user } = useUser()
   const { showToast } = useToast()
+  const { logUserAction } = useLogger({ component: 'ContactPage' })
+  const { logFormSubmit, logFormChange } = useUserInteractionLogger('ContactPage')
+  const { logApiCall } = useApiLogger('ContactPage')
   const [form, setForm] = useState<ContactForm>({
     name: '',
     email: '',
@@ -98,32 +102,50 @@ export default function ContactPage() {
     e.preventDefault()
     setIsSubmitting(true)
     
+    logFormSubmit('contact-form', {
+      subject: form.subject,
+      priority: form.priority,
+      userPlan,
+      isAgency,
+      hasUser: !!user
+    })
+    
     try {
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...form,
-          userPlan,
-          isAgency,
-          supportEmail: supportInfo.email,
-          userId: user?.id
-        }),
+      const result = await logApiCall('POST', '/api/contact', {
+        ...form,
+        userPlan,
+        isAgency,
+        supportEmail: supportInfo.email,
+        userId: user?.id
+      }, async () => {
+        return await fetch('/api/contact', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...form,
+            userPlan,
+            isAgency,
+            supportEmail: supportInfo.email,
+            userId: user?.id
+          }),
+        })
       })
 
-      if (response.ok) {
+      if (result && result.ok) {
         setSubmitStatus('success')
         setForm({ name: '', email: '', subject: '', message: '', priority: 'normal' })
+        logUserAction('contact-form-success', { priority: form.priority })
         showToast('¡Mensaje enviado correctamente! Te responderemos pronto.', 'success')
       } else {
         setSubmitStatus('error')
+        logUserAction('contact-form-error', { status: result?.status })
         showToast('Error al enviar el mensaje. Por favor, inténtalo de nuevo.', 'error')
       }
     } catch (error) {
-      console.error('Error submitting contact form:', error)
       setSubmitStatus('error')
+      logUserAction('contact-form-exception', { error: error instanceof Error ? error.message : 'Unknown error' })
       showToast('Error al enviar el mensaje. Por favor, inténtalo de nuevo.', 'error')
     } finally {
       setIsSubmitting(false)

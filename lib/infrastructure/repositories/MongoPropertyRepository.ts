@@ -6,6 +6,7 @@ import { PropertyType, PropertyTypeEnum } from '../../domain/value-objects/Prope
 import { PropertyFeatures } from '../../domain/value-objects/PropertyFeatures'
 import { PropertyModel, PropertyDocument } from '../database/schemas/PropertySchema'
 import connectDB from '../database/connection'
+import logger from '@/lib/utils/logger'
 
 export class MongoPropertyRepository implements PropertyRepository {
   private async ensureConnection(): Promise<void> {
@@ -100,10 +101,29 @@ export class MongoPropertyRepository implements PropertyRepository {
   async save(property: Property): Promise<Property> {
     await this.ensureConnection()
     
-    const doc = new PropertyModel(this.toDocument(property))
-    const savedDoc = await doc.save()
+    const timer = logger.startTimer('Property Save')
+    logger.database('PropertyRepository', 'Saving property', {
+      id: property.id,
+      title: property.title,
+      ownerId: property.ownerId
+    })
     
-    return this.toDomain(savedDoc)
+    try {
+      const doc = new PropertyModel(this.toDocument(property))
+      const savedDoc = await doc.save()
+      
+      timer()
+      logger.database('PropertyRepository', 'Property saved successfully', {
+        id: savedDoc._id,
+        title: savedDoc.title
+      })
+      
+      return this.toDomain(savedDoc)
+    } catch (error) {
+      timer()
+      logger.error('PropertyRepository', 'Failed to save property', error)
+      throw error
+    }
   }
 
   async findById(id: string): Promise<Property | null> {

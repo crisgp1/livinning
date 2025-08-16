@@ -4,6 +4,7 @@ import { useState, useRef, useCallback } from 'react'
 import { gsap } from 'gsap'
 import { Upload, X, Image as ImageIcon } from 'lucide-react'
 import Image from 'next/image'
+import logger from '@/lib/utils/logger'
 
 interface ImageUploadProps {
   onImagesChange: (images: string[]) => void
@@ -28,10 +29,25 @@ export default function ImageUpload({
     if (files.length === 0) return
 
     setUploading(true)
+    
+    const uploadTimer = logger.startTimer('Image Upload')
+    logger.info('ImageUpload', 'Starting file upload', {
+      fileCount: files.length,
+      totalSize: files.reduce((sum, file) => sum + file.size, 0),
+      fileTypes: files.map(file => file.type),
+      maxImages
+    })
 
     try {
       const formData = new FormData()
-      files.forEach(file => formData.append('files', file))
+      files.forEach((file, index) => {
+        formData.append('files', file)
+        logger.debug('ImageUpload', `Added file ${index}`, {
+          name: file.name,
+          size: file.size,
+          type: file.type
+        })
+      })
 
       const response = await fetch('/api/upload', {
         method: 'POST',
@@ -39,11 +55,18 @@ export default function ImageUpload({
       })
 
       const result = await response.json()
+      uploadTimer()
 
       if (result.success) {
         const newImages = [...images, ...result.data.files].slice(0, maxImages)
         setImages(newImages)
         onImagesChange(newImages)
+        
+        logger.info('ImageUpload', 'Upload successful', {
+          uploadedCount: result.data.files.length,
+          totalImages: newImages.length,
+          uploadedFiles: result.data.files
+        })
 
         // Animate new images
         const newImageElements = gridRef.current?.querySelectorAll('.image-item:nth-last-child(-n+' + result.data.files.length + ')')
@@ -54,10 +77,15 @@ export default function ImageUpload({
           )
         }
       } else {
+        logger.error('ImageUpload', 'Upload failed', { error: result.error })
         throw new Error(result.error || 'Upload failed')
       }
     } catch (error) {
-      console.error('Upload error:', error)
+      uploadTimer()
+      logger.error('ImageUpload', 'Upload error', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        fileCount: files.length
+      })
       alert('Failed to upload images. Please try again.')
     } finally {
       setUploading(false)

@@ -23,6 +23,7 @@ import { EmbeddedCheckoutProvider, EmbeddedCheckout } from '@stripe/react-stripe
 import Navigation from '@/components/Navigation'
 import { getStripePublishableKey } from '@/lib/utils/stripe-client'
 import { useToast } from '@/components/Toast'
+import logger from '@/lib/utils/logger'
 
 // Service definitions (same as services page)
 const services = {
@@ -145,6 +146,14 @@ function ServiceCheckoutContent() {
       const tax = Math.round(selectedService.price * 0.16)
       const total = selectedService.price + tax
 
+      logger.info('ServiceCheckout', 'Creating checkout session', {
+        serviceId: selectedService.id,
+        serviceName: selectedService.title,
+        price: total,
+        userId: user.id,
+        userEmail: user.emailAddresses?.[0]?.emailAddress
+      })
+
       // Create Stripe checkout session for service payment
       const response = await fetch('/api/payments/create-service-checkout', {
         method: 'POST',
@@ -167,13 +176,16 @@ function ServiceCheckoutContent() {
         // Set client secret to show embedded checkout
         setClientSecret(data.clientSecret)
         setShowCheckout(true)
+        logger.info('ServiceCheckout', 'Checkout session created successfully', {
+          clientSecret: data.clientSecret.substring(0, 20) + '...'
+        })
         showToast('Redirigiendo al procesador de pagos...', 'info')
       } else {
         throw new Error(data.error || 'Failed to create checkout session')
       }
 
     } catch (error) {
-      console.error('Service request error:', error)
+      logger.error('ServiceCheckout', 'Service request error', error)
       showToast('Error al procesar la solicitud. Por favor intenta de nuevo.', 'error')
     } finally {
       setIsLoading(false)
