@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Lexend } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ToastProvider } from "@/components/Toast";
 import UpgradeNotification from "@/components/UpgradeNotification";
 import ErrorBoundary from "@/components/ErrorBoundary";
@@ -31,6 +33,8 @@ export default function RootLayout({
             <ToastProvider>
               {children}
               <UpgradeNotification />
+              <Analytics />
+              <SpeedInsights />
             </ToastProvider>
           </ErrorBoundary>
         </body>
