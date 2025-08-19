@@ -27,8 +27,7 @@ class ErrorBoundary extends Component<Props, State> {
     logger.error('ErrorBoundary', 'React error boundary caught error', {
       error: error.message,
       stack: error.stack,
-      componentStack: errorInfo.componentStack,
-      errorBoundary: errorInfo.errorBoundary
+      componentStack: errorInfo.componentStack
     })
   }
 

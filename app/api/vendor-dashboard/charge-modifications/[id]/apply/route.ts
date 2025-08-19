@@ -6,7 +6,7 @@ import { VendorDashboardServiceModel } from '@/lib/infrastructure/database/schem
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth()
@@ -43,9 +43,10 @@ export async function POST(
 
     await connectDB()
 
+    const resolvedParams = await params
     // Find the modification
     const modification = await ServiceChargeModificationModel.findOne({
-      _id: params.id,
+      _id: resolvedParams.id,
       vendorId: userId
     })
 

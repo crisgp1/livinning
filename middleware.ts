@@ -1,38 +1,14 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
 
 const isProtectedRoute = createRouteMatcher([
   '/dashboard(.*)',
   '/api/admin(.*)',
 ]);
 
-export default clerkMiddleware(async (auth, req: NextRequest) => {
-  // Always protect routes first with the actual authenticated user
+export default clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req)) {
     await auth.protect();
-  }
-
-  // After auth is confirmed, check for impersonation cookie
-  const impersonationCookie = req.cookies.get('impersonation');
-  
-  if (impersonationCookie) {
-    try {
-      const impersonationData = JSON.parse(impersonationCookie.value);
-      
-      // Create response with impersonation headers
-      const response = NextResponse.next();
-      
-      // Add custom headers that can be read by server components
-      response.headers.set('x-impersonated-user-id', impersonationData.targetUserId);
-      response.headers.set('x-impersonated-user-role', impersonationData.targetUserRole);
-      response.headers.set('x-original-user-id', impersonationData.originalUserId);
-      response.headers.set('x-is-impersonating', 'true');
-      
-      return response;
-    } catch (error) {
-      console.error('Error parsing impersonation cookie:', error);
-    }
   }
   
   return NextResponse.next();

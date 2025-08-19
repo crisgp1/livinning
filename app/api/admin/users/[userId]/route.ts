@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
     const { userId: currentUserId } = await auth()
@@ -15,7 +15,7 @@ export async function GET(
       )
     }
 
-    const { userId } = params
+    const { userId } = await params
 
     // Get user from Clerk
     const { clerkClient } = await import('@clerk/nextjs/server')

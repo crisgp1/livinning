@@ -6,7 +6,6 @@ import { motion } from 'framer-motion'
 import { Menu, X, Home, Building2, Phone, User2, Shield, Package, Wrench } from 'lucide-react'
 import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
 import { useUser } from '@clerk/nextjs'
-import ImpersonationUserButton from '@/components/ImpersonationUserButton'
 import logger from '@/lib/utils/logger'
 import { useLogger, useUserInteractionLogger } from '@/hooks/useLogger'
 
@@ -14,7 +13,6 @@ export default function Navigation() {
   const { user } = useUser()
   const { logUserAction } = useLogger({ component: 'Navigation' })
   const { logClick, logNavigation } = useUserInteractionLogger('Navigation')
-  const [isImpersonating, setIsImpersonating] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isSuperAdmin, setIsSuperAdmin] = useState(false)
@@ -35,28 +33,6 @@ export default function Navigation() {
   }, [])
 
   useEffect(() => {
-    // Check for impersonation
-    const checkImpersonation = () => {
-      try {
-        const impersonationCookie = document.cookie
-          .split('; ')
-          .find(row => row.startsWith('impersonation='))
-          ?.split('=')[1]
-        
-        const isImpersonatingNow = !!impersonationCookie
-        setIsImpersonating(isImpersonatingNow)
-        
-        if (isImpersonatingNow) {
-          logger.debug('Navigation', 'Impersonation detected')
-        }
-      } catch (error) {
-        logger.error('Navigation', 'Error checking impersonation', error)
-        setIsImpersonating(false)
-      }
-    }
-
-    checkImpersonation()
-
     if (user) {
       const metadata = user.publicMetadata as any
       
@@ -185,7 +161,7 @@ export default function Navigation() {
                   Publicar Propiedad
                 </Link>
               )}
-              <ImpersonationUserButton />
+              <UserButton />
             </SignedIn>
           </div>
 
@@ -282,7 +258,7 @@ export default function Navigation() {
                 </Link>
               )}
               <div className="flex justify-center pt-2">
-                <ImpersonationUserButton />
+                <UserButton />
               </div>
             </SignedIn>
           </div>

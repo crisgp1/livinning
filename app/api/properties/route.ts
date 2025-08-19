@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
     const result = await propertyService.getProperties({ filters, page, limit })
     logger.info('PropertiesAPI', 'Properties retrieved', { 
       count: result.properties.length, 
-      total: result.totalCount,
+      total: result.total,
       hasFilters: Object.keys(filters).length > 0 
     })
 

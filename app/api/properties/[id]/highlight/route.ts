@@ -9,7 +9,7 @@ const propertyService = new PropertyService(propertyRepository)
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await getOrganizationContext()
@@ -26,8 +26,9 @@ export async function POST(
       )
     }
 
+    const resolvedParams = await params
     const property = await propertyService.highlightProperty(
-      params.id, 
+      resolvedParams.id, 
       userId, 
       durationInDays
     )
@@ -56,12 +57,13 @@ export async function POST(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await getOrganizationContext()
 
-    const property = await propertyService.removeHighlight(params.id, userId)
+    const resolvedParams = await params
+    const property = await propertyService.removeHighlight(resolvedParams.id, userId)
 
     return NextResponse.json({
       success: true,
@@ -87,7 +89,7 @@ export async function DELETE(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await getOrganizationContext()
@@ -104,8 +106,9 @@ export async function PATCH(
       )
     }
 
+    const resolvedParams = await params
     const property = await propertyService.extendHighlight(
-      params.id, 
+      resolvedParams.id, 
       userId, 
       additionalDays
     )

@@ -11,7 +11,7 @@ interface ServiceStatusUpdateRequest {
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth()
@@ -22,7 +22,8 @@ export async function PUT(
 
     const body: ServiceStatusUpdateRequest = await request.json()
     const { status, notes } = body
-    const { id } = params
+    const resolvedParams = await params
+    const { id } = resolvedParams
 
     if (!Object.values(ServiceOrderStatus).includes(status)) {
       return NextResponse.json(
@@ -95,7 +96,7 @@ export async function PUT(
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth()
@@ -104,7 +105,8 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id } = params
+    const resolvedParams = await params
+    const { id } = resolvedParams
 
     await connectDB()
 

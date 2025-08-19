@@ -2,12 +2,9 @@ import type { Metadata } from "next";
 import { Lexend } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ToastProvider } from "@/components/Toast";
-import DeveloperRoleChanger from "@/components/DeveloperRoleChanger";
 import UpgradeNotification from "@/components/UpgradeNotification";
-import ImpersonationBanner from "@/components/ImpersonationBanner";
-import ImpersonationTransitionProvider from "@/components/ImpersonationTransitionProvider";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import RouterLogger from "@/components/RouterLogger";
+import RouterLoggerWrapper from "@/components/RouterLoggerWrapper";
 import "./globals.css";
 
 const lexend = Lexend({
@@ -30,12 +27,9 @@ export default function RootLayout({
       <html lang="es">
         <body className={`${lexend.variable} antialiased`}>
           <ErrorBoundary>
-            <RouterLogger />
-            <ImpersonationBanner />
-            <ImpersonationTransitionProvider />
+            <RouterLoggerWrapper />
             <ToastProvider>
               {children}
-              <DeveloperRoleChanger />
               <UpgradeNotification />
             </ToastProvider>
           </ErrorBoundary>

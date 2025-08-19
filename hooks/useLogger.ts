@@ -21,7 +21,7 @@ export function useLogger(options: UseLoggerOptions) {
   } = options
 
   const renderCount = useRef(0)
-  const mountTime = useRef<number>()
+  const mountTime = useRef<number>(0)
 
   // Log component mount
   useEffect(() => {
@@ -127,7 +127,8 @@ export function useApiLogger(component: string) {
     try {
       const result = await apiCall()
       timer()
-      logger.api(component, `${method} ${url} - Success`, { 
+      logger.api(component, method, url, { 
+        status: 'Success',
         responseType: typeof result,
         hasData: !!result
       })

@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 export async function GET(
   request: Request,
-  { params }: { params: { trackingId: string } }
+  { params }: { params: Promise<{ trackingId: string }> }
 ) {
   try {
     const { userId } = await auth()
@@ -19,7 +19,8 @@ export async function GET(
 
     await connectDB()
 
-    const tracking = await ServiceTrackingModel.findById(params.trackingId)
+    const resolvedParams = await params
+    const tracking = await ServiceTrackingModel.findById(resolvedParams.trackingId)
     if (!tracking) {
       return NextResponse.json(
         { error: 'Registro de seguimiento no encontrado' },
@@ -59,7 +60,7 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { trackingId: string } }
+  { params }: { params: Promise<{ trackingId: string }> }
 ) {
   try {
     const { userId } = await auth()
@@ -83,7 +84,8 @@ export async function PATCH(
 
     await connectDB()
 
-    const tracking = await ServiceTrackingModel.findById(params.trackingId)
+    const resolvedParams = await params
+    const tracking = await ServiceTrackingModel.findById(resolvedParams.trackingId)
     if (!tracking) {
       return NextResponse.json(
         { error: 'Registro de seguimiento no encontrado' },
@@ -331,7 +333,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { trackingId: string } }
+  { params }: { params: Promise<{ trackingId: string }> }
 ) {
   try {
     const { userId } = await auth()
@@ -355,7 +357,8 @@ export async function DELETE(
 
     await connectDB()
 
-    const tracking = await ServiceTrackingModel.findByIdAndDelete(params.trackingId)
+    const resolvedParams = await params
+    const tracking = await ServiceTrackingModel.findByIdAndDelete(resolvedParams.trackingId)
     if (!tracking) {
       return NextResponse.json(
         { error: 'Registro de seguimiento no encontrado' },

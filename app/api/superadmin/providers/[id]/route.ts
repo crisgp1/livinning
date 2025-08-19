@@ -7,7 +7,7 @@ import { ServiceType } from '@/lib/domain/entities/ServiceOrder'
 // Update specific provider
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth()
@@ -53,8 +53,9 @@ export async function PUT(
 
     await connectDB()
 
+    const resolvedParams = await params
     // Find the provider to update
-    const existingProvider = await ProviderModel.findById(params.id)
+    const existingProvider = await ProviderModel.findById(resolvedParams.id)
     if (!existingProvider) {
       return NextResponse.json(
         { error: 'Provider not found' },
@@ -99,7 +100,7 @@ export async function PUT(
 
     // Update the provider
     const updatedProvider = await ProviderModel.findByIdAndUpdate(
-      params.id,
+      resolvedParams.id,
       {
         userId: targetUserId,
         businessName,
@@ -120,7 +121,7 @@ export async function PUT(
       )
     }
 
-    console.log(`Updated provider ${params.id}`)
+    console.log(`Updated provider ${resolvedParams.id}`)
 
     return NextResponse.json({
       success: true,
@@ -148,7 +149,7 @@ export async function PUT(
 // Delete specific provider
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth()
@@ -176,8 +177,9 @@ export async function DELETE(
 
     await connectDB()
 
+    const resolvedParams = await params
     // Find and delete the provider
-    const deletedProvider = await ProviderModel.findByIdAndDelete(params.id)
+    const deletedProvider = await ProviderModel.findByIdAndDelete(resolvedParams.id)
     
     if (!deletedProvider) {
       return NextResponse.json(
@@ -186,7 +188,7 @@ export async function DELETE(
       )
     }
 
-    console.log(`Deleted provider ${params.id} (${deletedProvider.businessName})`)
+    console.log(`Deleted provider ${resolvedParams.id} (${deletedProvider.businessName})`)
 
     return NextResponse.json({
       success: true,
@@ -208,7 +210,7 @@ export async function DELETE(
 // Get specific provider details
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth()
@@ -236,8 +238,9 @@ export async function GET(
 
     await connectDB()
 
+    const resolvedParams = await params
     // Find the specific provider
-    const provider = await ProviderModel.findById(params.id).lean()
+    const provider = await ProviderModel.findById(resolvedParams.id).lean()
     
     if (!provider) {
       return NextResponse.json(

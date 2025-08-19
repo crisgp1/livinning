@@ -873,46 +873,62 @@ function ServiceRequestModal({ onClose, onSubmit, submitting }: {
   ]
 
   const addField = (section: string, field: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [section]: {
-        ...prev[section as keyof typeof prev],
-        [field]: [...(prev[section as keyof typeof prev][field as keyof any] as string[]), '']
+    setFormData(prev => {
+      const sectionData = prev[section as keyof typeof prev]
+      if (typeof sectionData === 'object' && sectionData !== null) {
+        return {
+          ...prev,
+          [section]: {
+            ...sectionData,
+            [field]: [...((sectionData as any)[field] as string[] || []), '']
+          }
+        }
       }
-    }))
+      return prev
+    })
   }
 
   const removeField = (section: string, field: string, index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      [section]: {
-        ...prev[section as keyof typeof prev],
-        [field]: (prev[section as keyof typeof prev][field as keyof any] as string[]).filter((_, i) => i !== index)
+    setFormData(prev => {
+      const sectionData = prev[section as keyof typeof prev]
+      if (typeof sectionData === 'object' && sectionData !== null) {
+        return {
+          ...prev,
+          [section]: {
+            ...sectionData,
+            [field]: ((sectionData as any)[field] as string[] || []).filter((_, i) => i !== index)
+          }
+        }
       }
-    }))
+      return prev
+    })
   }
 
   const updateField = (section: string, field: string, value: any, index?: number) => {
     setFormData(prev => {
-      if (index !== undefined) {
-        const array = [...(prev[section as keyof typeof prev][field as keyof any] as string[])]
-        array[index] = value
-        return {
-          ...prev,
-          [section]: {
-            ...prev[section as keyof typeof prev],
-            [field]: array
+      const sectionData = prev[section as keyof typeof prev]
+      if (typeof sectionData === 'object' && sectionData !== null) {
+        if (index !== undefined) {
+          const array = [...((sectionData as any)[field] as string[] || [])]
+          array[index] = value
+          return {
+            ...prev,
+            [section]: {
+              ...sectionData,
+              [field]: array
+            }
           }
-        }
-      } else {
-        return {
-          ...prev,
-          [section]: {
-            ...prev[section as keyof typeof prev],
-            [field]: value
+        } else {
+          return {
+            ...prev,
+            [section]: {
+              ...sectionData,
+              [field]: value
+            }
           }
         }
       }
+      return prev
     })
   }
 
