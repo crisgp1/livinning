@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { canAccessProviderDashboard, getProviderDisplayName } from '@/lib/utils/provider-helpers'
+import { translateServiceType, translateServiceName } from '@/lib/utils/service-translations'
 import Navigation from '@/components/Navigation'
 import {
   Home,
@@ -96,96 +97,31 @@ export default function WorkOrdersPage() {
 
   const fetchWorkOrders = async () => {
     try {
-      // Simulated work orders data - in real app this would be from an API
-      const mockOrders: WorkOrder[] = [
-        {
-          id: '1',
-          serviceName: 'Limpieza Profunda Residencial',
-          serviceType: 'cleaning',
-          clientName: 'María González',
-          clientEmail: 'maria.gonzalez@email.com',
-          clientPhone: '+52 55 1234 5678',
-          propertyAddress: 'Av. Insurgentes 123, Colonia Roma, CDMX',
-          scheduledDate: '2024-01-15T09:00:00',
-          estimatedDuration: '4 horas',
-          status: 'scheduled',
-          priority: 'high',
-          description: 'Limpieza completa de casa de 3 recámaras después de remodelación',
-          notes: ['Cliente requiere productos ecológicos', 'Mascota en casa (gato)'],
-          amount: 1500,
-          currency: 'MXN'
-        },
-        {
-          id: '2',
-          serviceName: 'Mantenimiento de Jardín',
-          serviceType: 'gardening',
-          clientName: 'Carlos Ruiz',
-          clientEmail: 'carlos.ruiz@email.com',
-          clientPhone: '+52 55 9876 5432',
-          propertyAddress: 'Calle Palmas 456, Las Lomas, CDMX',
-          scheduledDate: '2024-01-16T10:30:00',
-          estimatedDuration: '3 horas',
-          status: 'in_progress',
-          priority: 'medium',
-          description: 'Poda de árboles, corte de césped y mantenimiento de plantas ornamentales',
-          notes: ['Herramientas propias', 'Acceso por la parte trasera de la casa'],
-          amount: 800,
-          currency: 'MXN'
-        },
-        // Órdenes completadas para consistencia con la página de trabajos completados
-        {
-          id: '3',
-          serviceName: 'Limpieza Profunda Residencial',
-          serviceType: 'cleaning',
-          clientName: 'Ana López',
-          clientEmail: 'ana.lopez@email.com',
-          clientPhone: '+52 55 1111 2222',
-          propertyAddress: 'Calle Reforma 789, Polanco, CDMX',
-          scheduledDate: '2024-01-10T16:30:00',
-          estimatedDuration: '4 horas 15 minutos',
-          status: 'completed',
-          priority: 'high',
-          description: 'Limpieza completa post-remodelación de departamento',
-          notes: ['Productos ecológicos utilizados', 'Cliente muy satisfecho'],
-          amount: 1800,
-          currency: 'MXN'
-        },
-        {
-          id: '4',
-          serviceName: 'Mantenimiento de Jardín Completo',
-          serviceType: 'gardening',
-          clientName: 'Roberto Sánchez',
-          clientEmail: 'roberto.sanchez@email.com',
-          clientPhone: '+52 55 3333 4444',
-          propertyAddress: 'Av. Universidad 456, Coyoacán, CDMX',
-          scheduledDate: '2024-01-08T14:00:00',
-          estimatedDuration: '6 horas',
-          status: 'completed',
-          priority: 'medium',
-          description: 'Poda, riego automático y renovación de áreas verdes',
-          notes: ['Trabajo completado satisfactoriamente', 'Cliente solicita servicios mensuales'],
-          amount: 2200,
-          currency: 'MXN'
-        },
-        {
-          id: '5',
-          serviceName: 'Reparación de Plomería',
-          serviceType: 'plumbing',
-          clientName: 'Carmen Herrera',
-          clientEmail: 'carmen.herrera@email.com',
-          clientPhone: '+52 55 5555 6666',
-          propertyAddress: 'Calle Insurgentes 321, Roma Norte, CDMX',
-          scheduledDate: '2024-01-05T11:45:00',
-          estimatedDuration: '2 horas 30 minutos',
-          status: 'completed',
-          priority: 'high',
-          description: 'Reparación de fuga en tubería principal y cambio de válvulas',
-          notes: ['Reparación exitosa', 'Sin fugas detectadas en prueba final'],
-          amount: 850,
-          currency: 'MXN'
-        }
-      ]
-      setWorkOrders(mockOrders)
+      const response = await fetch('/api/services/provider-orders?limit=50')
+      if (!response.ok) throw new Error('Failed to fetch work orders')
+      
+      const result = await response.json()
+      
+      // Transform the data to match WorkOrder interface
+      const orders: WorkOrder[] = result.data.map((order: any) => ({
+        id: order.id,
+        serviceName: order.serviceName,
+        serviceType: order.serviceType,
+        clientName: order.customerName,
+        clientEmail: order.customerEmail,
+        clientPhone: order.contactPhone,
+        propertyAddress: order.propertyAddress,
+        scheduledDate: order.preferredDate,
+        estimatedDuration: order.estimatedDelivery || 'N/A',
+        status: order.status === 'pending' ? 'scheduled' : order.status,
+        priority: 'medium', // Default priority as it's not in the API
+        description: order.serviceDescription,
+        notes: order.notes || [],
+        amount: order.amount,
+        currency: order.currency
+      }))
+      
+      setWorkOrders(orders)
     } catch (error) {
       console.error('Error fetching work orders:', error)
     }
@@ -423,7 +359,7 @@ export default function WorkOrdersPage() {
                                 </div>
                                 <div>
                                   <h3 className="font-semibold text-lg text-gray-900">
-                                    {order.serviceName}
+                                    {translateServiceName(order.serviceName)}
                                   </h3>
                                   <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(order.status)}`}>
                                     {order.status === 'scheduled' ? 'Programada' :

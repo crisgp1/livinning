@@ -103,7 +103,7 @@ export async function GET(request: NextRequest) {
       data: serializedResult
     })
   } catch (error) {
-    console.error('Error fetching properties:', error)
+    logger.error('PropertyAPI', 'Error fetching properties', error)
     return NextResponse.json(
       { 
         success: false, 
@@ -187,7 +187,7 @@ export async function POST(request: NextRequest) {
       }
     } catch (upgradeError) {
       // Log the error but don't fail the property creation
-      console.error('Auto-upgrade failed, but property was created successfully:', upgradeError)
+      logger.error('PropertyAPI', 'Auto-upgrade failed, but property was created successfully', upgradeError)
     }
 
     return NextResponse.json({
@@ -196,7 +196,7 @@ export async function POST(request: NextRequest) {
       message: property ? 'Property created successfully! You have been upgraded to agent status.' : 'Property created successfully!'
     }, { status: 201 })
   } catch (error) {
-    console.error('Error creating property:', error)
+    logger.error('PropertyAPI', 'Error creating property', error)
     return NextResponse.json(
       { 
         success: false, 

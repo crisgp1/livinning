@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { canAccessProviderDashboard, getProviderDisplayName } from '@/lib/utils/provider-helpers'
+import { translateServiceType, translateServiceName } from '@/lib/utils/service-translations'
 import Navigation from '@/components/Navigation'
 import {
   Home,
@@ -88,6 +89,7 @@ export default function VendorServicesPage() {
   const [selectedServiceForCharge, setSelectedServiceForCharge] = useState<VendorService | null>(null)
   const [chargeModifications, setChargeModifications] = useState<any[]>([])
   const [submittingChargeModification, setSubmittingChargeModification] = useState(false)
+  const [loadingRequest, setLoadingRequest] = useState(false)
 
   useEffect(() => {
     const checkProviderAccess = async () => {
@@ -516,8 +518,8 @@ export default function VendorServicesPage() {
                       {serviceRequests.slice(0, 3).map((request) => (
                         <div key={request.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                           <div>
-                            <p className="font-medium text-sm text-gray-900">{request.serviceName}</p>
-                            <p className="text-xs text-gray-600">{request.serviceType}</p>
+                            <p className="font-medium text-sm text-gray-900">{translateServiceName(request.serviceName)}</p>
+                            <p className="text-xs text-gray-600">{translateServiceType(request.serviceType)}</p>
                           </div>
                           <div className="text-right">
                             <span className={`px-2 py-1 text-xs font-medium rounded-full ${
@@ -582,7 +584,7 @@ export default function VendorServicesPage() {
                         {chargeModifications.slice(0, 3).map((modification) => (
                           <div key={modification.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                             <div>
-                              <p className="font-medium text-sm text-gray-900">{modification.serviceName}</p>
+                              <p className="font-medium text-sm text-gray-900">{translateServiceName(modification.serviceName)}</p>
                               <p className="text-xs text-gray-600">
                                 ${modification.originalPrice} → ${modification.newPrice} {modification.currency}
                               </p>
@@ -651,8 +653,8 @@ export default function VendorServicesPage() {
                               <Package className="w-5 h-5 text-blue-600" />
                             </div>
                             <div>
-                              <h3 className="font-semibold text-gray-900">{service.serviceName}</h3>
-                              <p className="text-sm text-gray-600">{service.serviceType}</p>
+                              <h3 className="font-semibold text-gray-900">{translateServiceName(service.serviceName)}</h3>
+                              <p className="text-sm text-gray-600">{translateServiceType(service.serviceType)}</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
@@ -718,11 +720,11 @@ export default function VendorServicesPage() {
                          onClick={() => setSelectedApprovedService(service)}>
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <h3 className="font-semibold text-gray-900">{service.serviceName}</h3>
+                          <h3 className="font-semibold text-gray-900">{translateServiceName(service.serviceName)}</h3>
                           <p className="text-sm text-gray-600 mt-1">{service.serviceDescription}</p>
                           <div className="mt-3 grid grid-cols-2 gap-4 text-sm text-gray-500">
                             <div>
-                              <span className="font-medium">Tipo:</span> {service.serviceType}
+                              <span className="font-medium">Tipo:</span> {translateServiceType(service.serviceType)}
                             </div>
                             <div>
                               <span className="font-medium">Precio:</span> ${service.pricing.basePrice} {service.pricing.currency}
@@ -790,6 +792,7 @@ export default function VendorServicesPage() {
         <ServiceRequestModal
           onClose={() => setShowRequestModal(false)}
           onSubmit={async (requestData) => {
+            setLoadingRequest(true)
             setSubmittingRequest(true)
             try {
               const response = await fetch('/api/vendor-dashboard/service-requests', {
@@ -811,10 +814,31 @@ export default function VendorServicesPage() {
               alert('Error al enviar solicitud')
             } finally {
               setSubmittingRequest(false)
+              setLoadingRequest(false)
             }
           }}
           submitting={submittingRequest}
         />
+      )}
+
+      {/* Loading Screen for Service Request */}
+      {loadingRequest && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60]">
+          <div className="bg-white rounded-2xl p-8 shadow-2xl max-w-sm w-full mx-4">
+            <div className="flex flex-col items-center">
+              <div className="relative mb-6">
+                <div className="w-20 h-20 border-4 border-primary/20 rounded-full"></div>
+                <div className="absolute top-0 left-0 w-20 h-20 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Procesando Solicitud</h3>
+              <p className="text-gray-600 text-center mb-4">Estamos enviando tu solicitud de servicio...</p>
+              <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                <div className="bg-primary h-full rounded-full animate-pulse" style={{ width: '60%' }}></div>
+              </div>
+              <p className="text-sm text-gray-500 mt-4">Por favor, no cierres esta ventana</p>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Charge Modification Modal */}
@@ -1498,8 +1522,8 @@ function ChargeModificationModal({
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="font-medium text-gray-900">{service.serviceName}</h3>
-                        <p className="text-sm text-gray-600">{service.serviceType}</p>
+                        <h3 className="font-medium text-gray-900">{translateServiceName(service.serviceName)}</h3>
+                        <p className="text-sm text-gray-600">{translateServiceType(service.serviceType)}</p>
                       </div>
                       <div className="text-right">
                         <p className="font-medium text-gray-900">

@@ -563,31 +563,6 @@ const Services = () => {
             </motion.div>
           </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-center mt-16 glass-card p-8 rounded-2xl max-w-2xl mx-auto"
-          >
-            <h2 className="text-3xl font-bold mb-4">¿Listo para Transformar tu Negocio?</h2>
-            <p className="text-gray-600 mb-6">
-              Únete a miles de empresas que ya utilizan los servicios digitales de Livinning
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button 
-                onClick={handleAccountCreation}
-                className="btn-primary px-8 py-3"
-              >
-                Comenzar Hoy
-              </button>
-              <button 
-                onClick={() => router.push('/contacto')}
-                className="btn-outline px-8 py-3"
-              >
-                Programar Demo
-              </button>
-            </div>
-          </motion.div>
         </div>
       </main>
 

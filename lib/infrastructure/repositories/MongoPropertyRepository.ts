@@ -163,7 +163,7 @@ export class MongoPropertyRepository implements PropertyRepository {
             query['address.city'] = new RegExp(cityStr.trim(), 'i')
           }
         } catch (e) {
-          console.error('Error processing city filter:', e, 'Value:', filters.city, 'Type:', typeof filters.city)
+          logger.error('MongoPropertyRepository', 'Error processing city filter', { error: e, value: filters.city, type: typeof filters.city })
         }
       }
 
@@ -174,7 +174,7 @@ export class MongoPropertyRepository implements PropertyRepository {
             query['address.state'] = new RegExp(stateStr.trim(), 'i')
           }
         } catch (e) {
-          console.error('Error processing state filter:', e, 'Value:', filters.state, 'Type:', typeof filters.state)
+          logger.error('MongoPropertyRepository', 'Error processing state filter', { error: e, value: filters.state, type: typeof filters.state })
         }
       }
 
@@ -301,7 +301,7 @@ export class MongoPropertyRepository implements PropertyRepository {
             query['address.city'] = new RegExp(cityStr.trim(), 'i')
           }
         } catch (e) {
-          console.error('Error processing city filter:', e, 'Value:', filters.city, 'Type:', typeof filters.city)
+          logger.error('MongoPropertyRepository', 'Error processing city filter', { error: e, value: filters.city, type: typeof filters.city })
         }
       }
 
@@ -312,7 +312,7 @@ export class MongoPropertyRepository implements PropertyRepository {
             query['address.state'] = new RegExp(stateStr.trim(), 'i')
           }
         } catch (e) {
-          console.error('Error processing state filter:', e, 'Value:', filters.state, 'Type:', typeof filters.state)
+          logger.error('MongoPropertyRepository', 'Error processing state filter', { error: e, value: filters.state, type: typeof filters.state })
         }
       }
 

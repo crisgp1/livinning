@@ -61,7 +61,7 @@ export async function POST(request: Request) {
         const customerEmail = session.customer_email
 
         if (!userId) {
-          console.error('Missing required userId in checkout session')
+          logger.error('StripeWebhook', 'Missing required userId in checkout session', { sessionId: session.id })
           break
         }
 
@@ -90,7 +90,7 @@ export async function POST(request: Request) {
           )
 
           if (!createOrgResponse.ok) {
-            console.error('Failed to create organization after payment')
+            logger.error('StripeWebhook', 'Failed to create organization after payment', { userId, planId })
           }
         } else if (session.metadata?.serviceId) {
           // Service payment - create service order directly
@@ -141,7 +141,7 @@ export async function POST(request: Request) {
                     existingOrder.notes = [...existingOrder.notes, `Highlight activated via webhook at ${new Date().toISOString()}`]
                     await existingOrder.save()
                   } catch (error) {
-                    console.error('❌ Failed to apply highlight:', error)
+                    logger.error('StripeWebhook', 'Failed to apply highlight (existing order)', error)
                   }
                 }
               }
@@ -209,7 +209,7 @@ export async function POST(request: Request) {
                   
                   console.log('✅ Service order marked as completed')
                 } catch (error) {
-                  console.error('❌ Failed to apply highlight:', error)
+                  logger.error('StripeWebhook', 'Failed to apply highlight (new order)', error)
                   // The payment was successful, so we should log this error but not fail the webhook
                   savedOrder.notes = [`Error applying highlight: ${error instanceof Error ? error.message : 'Unknown error'}`]
                   await savedOrder.save()
@@ -220,13 +220,15 @@ export async function POST(request: Request) {
             // TODO: Send notification email to service team
             // TODO: Send confirmation email to customer
           } catch (error) {
-            console.error('❌ Failed to create service order:', error)
-            console.error('❌ Error details:', error instanceof Error ? error.message : 'Unknown error')
-            console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack trace')
+            logger.error('StripeWebhook', 'Failed to create service order', {
+              error: error instanceof Error ? error.message : 'Unknown error',
+              stack: error instanceof Error ? error.stack : 'No stack trace',
+              sessionId: session.id
+            })
             
             // Also try to log more details about the error
             if (error instanceof Error && error.name === 'ValidationError') {
-              console.error('❌ Mongoose validation error details:', (error as any).errors)
+              logger.error('StripeWebhook', 'Mongoose validation error details', (error as any).errors)
             }
           }
         } else {
@@ -266,7 +268,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ received: true })
   } catch (error) {
-    console.error('Webhook processing error:', error)
+    logger.error('StripeWebhook', 'Webhook processing error', error)
     return NextResponse.json(
       { error: 'Webhook processing failed' },
       { status: 500 }

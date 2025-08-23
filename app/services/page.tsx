@@ -24,6 +24,7 @@ import {
 import AvailableProvidersList from '@/components/AvailableProvidersList'
 import { useToast } from '@/components/Toast'
 import { ServiceType } from '@/lib/domain/entities/ServiceOrder'
+import Image from 'next/image'
 
 interface Service {
   id: string
@@ -614,9 +615,11 @@ export default function Services() {
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 rounded-full overflow-hidden ring-2 ring-white shadow-sm">
                         {selectedProvider.profileImageUrl ? (
-                          <img
+                          <Image
                             src={selectedProvider.profileImageUrl}
                             alt={selectedProvider.businessName}
+                            width={48}
+                            height={48}
                             className="w-full h-full object-cover"
                           />
                         ) : (

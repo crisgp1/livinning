@@ -114,96 +114,13 @@ export default function ProviderHistorial() {
   const fetchHistory = async (page = 1) => {
     setLoadingHistory(true)
     try {
-      // Mock data for testing - same as completed jobs
-      const mockHistory: ServiceHistoryItem[] = [
-        {
-          id: '1',
-          serviceName: 'Limpieza Profunda Residencial',
-          serviceDescription: 'Limpieza completa post-remodelación de departamento',
-          serviceType: 'cleaning',
-          propertyAddress: 'Calle Reforma 789, Polanco, CDMX',
-          customerName: 'Ana López',
-          customerEmail: 'ana.lopez@email.com',
-          contactPhone: '+52 55 1111 2222',
-          amount: 1800,
-          currency: 'MXN',
-          status: 'completed',
-          preferredDate: '2024-01-10T16:30:00',
-          estimatedDelivery: '4 horas',
-          actualDelivery: '2024-01-10T16:30:00',
-          deliverables: ['Limpieza completa', 'Desinfección', 'Aspirado de alfombras'],
-          notes: ['Excelente trabajo', 'Cliente muy satisfecho'],
-          createdAt: '2024-01-10T12:00:00',
-          updatedAt: '2024-01-10T16:30:00'
-        },
-        {
-          id: '2',
-          serviceName: 'Mantenimiento de Jardín Completo',
-          serviceDescription: 'Poda, riego automático y renovación de áreas verdes',
-          serviceType: 'gardening',
-          propertyAddress: 'Av. Universidad 456, Coyoacán, CDMX',
-          customerName: 'Roberto Sánchez',
-          customerEmail: 'roberto.sanchez@email.com',
-          contactPhone: '+52 55 3333 4444',
-          amount: 2200,
-          currency: 'MXN',
-          status: 'completed',
-          preferredDate: '2024-01-08T14:00:00',
-          estimatedDelivery: '6 horas',
-          actualDelivery: '2024-01-08T20:00:00',
-          deliverables: ['Poda de árboles', 'Sistema de riego', 'Plantación nueva'],
-          notes: ['Trabajo bien realizado', 'Cliente contento con el resultado'],
-          createdAt: '2024-01-08T08:00:00',
-          updatedAt: '2024-01-08T20:00:00'
-        },
-        {
-          id: '3',
-          serviceName: 'Reparación de Plomería',
-          serviceDescription: 'Reparación de fuga en tubería principal y cambio de válvulas',
-          serviceType: 'plumbing',
-          propertyAddress: 'Calle Insurgentes 321, Roma Norte, CDMX',
-          customerName: 'Carmen Herrera',
-          customerEmail: 'carmen.herrera@email.com',
-          contactPhone: '+52 55 5555 6666',
-          amount: 850,
-          currency: 'MXN',
-          status: 'completed',
-          preferredDate: '2024-01-05T11:45:00',
-          estimatedDelivery: '3 horas',
-          actualDelivery: '2024-01-05T14:15:00',
-          deliverables: ['Reparación de fuga', 'Cambio de válvulas', 'Pruebas de presión'],
-          notes: ['Reparación exitosa', 'Sistema funcionando correctamente'],
-          createdAt: '2024-01-05T08:00:00',
-          updatedAt: '2024-01-05T14:15:00'
-        },
-        {
-          id: '4',
-          serviceName: 'Instalación Eléctrica',
-          serviceDescription: 'Instalación de nuevos circuitos y tomas de corriente',
-          serviceType: 'electrical',
-          propertyAddress: 'Colonia Del Valle, Benito Juárez, CDMX',
-          customerName: 'Miguel Torres',
-          customerEmail: 'miguel.torres@email.com',
-          contactPhone: '+52 55 7777 8888',
-          amount: 1500,
-          currency: 'MXN',
-          status: 'cancelled',
-          preferredDate: '2024-01-03T09:00:00',
-          estimatedDelivery: '5 horas',
-          deliverables: [],
-          notes: ['Cliente canceló por cambio de planes', 'Reembolso procesado'],
-          createdAt: '2024-01-03T08:00:00',
-          updatedAt: '2024-01-03T10:00:00'
-        }
-      ]
-
-      setHistory(mockHistory)
-      setPagination({
-        currentPage: page,
-        totalPages: 1,
-        totalOrders: mockHistory.length,
-        limit: 10
-      })
+      const response = await fetch(`/api/provider-dashboard/history?page=${page}&limit=10`)
+      if (!response.ok) throw new Error('Failed to fetch history')
+      
+      const data = await response.json()
+      
+      setHistory(data.history)
+      setPagination(data.pagination)
     } catch (error) {
       console.error('Error fetching history:', error)
     } finally {

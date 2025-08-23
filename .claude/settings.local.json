@@ -14,7 +14,8 @@
       "Bash(npm install:*)",
       "WebFetch(domain:clerk.com)",
       "Bash(npm run build:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": []
   }

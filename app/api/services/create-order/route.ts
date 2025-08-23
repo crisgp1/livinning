@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid'
 import connectDB from '@/lib/infrastructure/database/connection'
 import ServiceOrderModel from '@/lib/infrastructure/database/models/ServiceOrderModel'
 import { ServiceOrderStatus, ServiceType } from '@/lib/domain/entities/ServiceOrder'
+import logger from '@/lib/utils/logger'
 
 export async function POST(request: Request) {
   try {
@@ -94,7 +95,7 @@ export async function POST(request: Request) {
     })
 
   } catch (error) {
-    console.error('Service order creation error:', error)
+    logger.error('ServiceOrderAPI', 'Service order creation error', error)
     
     return NextResponse.json(
       { 

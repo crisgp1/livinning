@@ -51,8 +51,8 @@ const ServiceOrderSchema = new Schema<ServiceOrderDocument>({
     default: ServiceOrderStatus.PENDING,
     index: true
   },
-  stripePaymentIntentId: { type: String, index: true },
-  stripeSessionId: { type: String, index: true },
+  stripePaymentIntentId: { type: String },
+  stripeSessionId: { type: String },
   customerEmail: { type: String, trim: true },
   estimatedDelivery: { type: String },
   actualDelivery: { type: Date },
@@ -69,9 +69,10 @@ const ServiceOrderSchema = new Schema<ServiceOrderDocument>({
 ServiceOrderSchema.index({ userId: 1, createdAt: -1 })
 ServiceOrderSchema.index({ status: 1, createdAt: -1 })
 ServiceOrderSchema.index({ serviceType: 1, createdAt: -1 })
-ServiceOrderSchema.index({ stripePaymentIntentId: 1 })
-ServiceOrderSchema.index({ stripeSessionId: 1 })
 ServiceOrderSchema.index({ assignedProviderId: 1, status: 1 })
+// Stripe payment indexes - only one index per field needed
+ServiceOrderSchema.index({ stripePaymentIntentId: 1 }, { sparse: true })
+ServiceOrderSchema.index({ stripeSessionId: 1 }, { sparse: true })
 
 // Update the updatedAt field before saving
 ServiceOrderSchema.pre('save', function(next) {

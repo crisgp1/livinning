@@ -105,71 +105,37 @@ export default function CompletedJobsPage() {
 
   const fetchCompletedJobs = async () => {
     try {
-      // Simulated completed jobs data - in real app this would be from an API
-      const mockJobs: CompletedJob[] = [
-        {
-          id: '1',
-          serviceName: 'Limpieza Profunda Residencial',
-          serviceType: 'cleaning',
-          clientName: 'Ana López',
-          clientEmail: 'ana.lopez@email.com',
-          clientPhone: '+52 55 1111 2222',
-          propertyAddress: 'Calle Reforma 789, Polanco, CDMX',
-          completedDate: '2024-01-10T16:30:00',
-          duration: '4 horas 15 minutos',
-          rating: 5,
-          feedback: 'Excelente trabajo, muy detallado y profesional. La casa quedó impecable.',
-          amount: 1800,
-          currency: 'MXN',
-          description: 'Limpieza completa post-remodelación de departamento',
-          beforePhotos: ['/api/placeholder/300/200'],
-          afterPhotos: ['/api/placeholder/300/200'],
-          invoiceId: 'INV-001',
-          paymentStatus: 'paid'
-        },
-        {
-          id: '2',
-          serviceName: 'Mantenimiento de Jardín Completo',
-          serviceType: 'gardening',
-          clientName: 'Roberto Sánchez',
-          clientEmail: 'roberto.sanchez@email.com',
-          clientPhone: '+52 55 3333 4444',
-          propertyAddress: 'Av. Universidad 456, Coyoacán, CDMX',
-          completedDate: '2024-01-08T14:00:00',
-          duration: '6 horas',
-          rating: 4,
-          feedback: 'Buen trabajo en general, aunque esperaba un poco más de detalle en las plantas ornamentales.',
-          amount: 2200,
-          currency: 'MXN',
-          description: 'Poda, riego automático y renovación de áreas verdes',
-          beforePhotos: ['/api/placeholder/300/200'],
-          afterPhotos: ['/api/placeholder/300/200'],
-          invoiceId: 'INV-002',
-          paymentStatus: 'paid'
-        },
-        {
-          id: '3',
-          serviceName: 'Reparación de Plomería',
-          serviceType: 'plumbing',
-          clientName: 'Carmen Herrera',
-          clientEmail: 'carmen.herrera@email.com',
-          clientPhone: '+52 55 5555 6666',
-          propertyAddress: 'Calle Insurgentes 321, Roma Norte, CDMX',
-          completedDate: '2024-01-05T11:45:00',
-          duration: '2 horas 30 minutos',
-          rating: 5,
-          feedback: 'Muy rápido y eficiente. Solucionó el problema de inmediato y explicó todo claramente.',
-          amount: 850,
-          currency: 'MXN',
-          description: 'Reparación de fuga en tubería principal y cambio de válvulas',
-          beforePhotos: ['/api/placeholder/300/200'],
-          afterPhotos: ['/api/placeholder/300/200'],
-          invoiceId: 'INV-003',
-          paymentStatus: 'pending'
-        }
-      ]
-      setCompletedJobs(mockJobs)
-      setFilteredJobs(mockJobs)
+      const response = await fetch('/api/provider-dashboard/history?limit=50')
+      if (!response.ok) throw new Error('Failed to fetch completed jobs')
+      
+      const data = await response.json()
+      
+      // Transform the data to match CompletedJob interface
+      const jobs: CompletedJob[] = data.history
+        .filter((order: any) => order.status === 'completed')
+        .map((order: any) => ({
+          id: order.id,
+          serviceName: order.serviceName,
+          serviceType: order.serviceType,
+          clientName: order.customerName,
+          clientEmail: order.customerEmail,
+          clientPhone: order.contactPhone,
+          propertyAddress: order.propertyAddress,
+          completedDate: order.actualDelivery || order.preferredDate,
+          duration: order.estimatedDelivery || 'N/A',
+          rating: 0, // Rating not available from API yet
+          feedback: order.notes?.join(' ') || '',
+          amount: order.amount,
+          currency: order.currency,
+          description: order.serviceDescription,
+          beforePhotos: [],
+          afterPhotos: [],
+          invoiceId: `INV-${order.id.slice(-6)}`,
+          paymentStatus: 'paid' // Default to paid for completed orders
+        }))
+      
+      setCompletedJobs(jobs)
+      setFilteredJobs(jobs)
     } catch (error) {
       console.error('Error fetching completed jobs:', error)
     }

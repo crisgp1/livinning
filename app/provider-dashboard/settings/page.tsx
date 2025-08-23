@@ -46,6 +46,7 @@ import {
   VolumeX,
   Store
 } from 'lucide-react'
+import Image from 'next/image'
 
 interface ProviderSettings {
   // Personal Information
@@ -278,7 +279,7 @@ export default function SettingsPage() {
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full overflow-hidden ring-2 ring-white shadow-lg">
                   {user?.imageUrl ? (
-                    <img src={user.imageUrl} alt="Profile" className="w-full h-full object-cover" />
+                    <Image src={user.imageUrl} alt="Profile" width={60} height={60} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-500">
                       <span className="text-white font-medium text-lg">
@@ -405,7 +406,7 @@ export default function SettingsPage() {
                           <div className="relative">
                             <div className="w-24 h-24 rounded-full overflow-hidden bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
                               {user?.imageUrl ? (
-                                <img src={user.imageUrl} alt="Profile" className="w-full h-full object-cover" />
+                                <Image src={user.imageUrl} alt="Profile" width={60} height={60} className="w-full h-full object-cover" />
                               ) : (
                                 <span className="text-white font-medium text-2xl">
                                   {user?.firstName?.[0] || 'P'}

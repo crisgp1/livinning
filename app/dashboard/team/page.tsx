@@ -18,6 +18,7 @@ import {
   Trash2,
   Sparkles
 } from 'lucide-react'
+import Image from 'next/image'
 
 interface TeamMember {
   id: string
@@ -418,9 +419,11 @@ export default function DashboardTeam() {
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100">
                                 {member.avatar ? (
-                                  <img
+                                  <Image
                                     src={member.avatar}
                                     alt={`${member.firstName} ${member.lastName}`}
+                                    width={80}
+                                    height={80}
                                     className="w-full h-full object-cover"
                                   />
                                 ) : (
