@@ -20,7 +20,6 @@ import {
 } from 'lucide-react'
 import { loadStripe } from '@stripe/stripe-js'
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from '@stripe/react-stripe-js'
-import Navigation from '@/components/Navigation'
 import { getStripePublishableKey } from '@/lib/utils/stripe-client'
 import { useToast } from '@/components/Toast'
 import logger from '@/lib/utils/logger'
@@ -213,9 +212,8 @@ function ServiceCheckoutContent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
-      <Navigation />
       
-      <main className="pt-20">
+      <main>
         <div className="section-container py-16">
           
           {/* Header */}
