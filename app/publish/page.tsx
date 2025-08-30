@@ -10,6 +10,7 @@ import ImageUpload from '@/components/ImageUpload'
 import LocationAutocomplete from '@/components/LocationAutocomplete'
 import { PropertyTypeEnum } from '@/lib/domain/value-objects/PropertyType'
 import { useToast } from '@/components/Toast'
+import { getSchemaByPropertyType } from '@/lib/validations/property-schemas'
 
 const steps = [
   { id: 1, title: 'Información' },
@@ -67,7 +68,7 @@ export default function PublishProperty() {
       squareMeters: 50,
       lotSize: undefined as number | undefined,
       yearBuilt: undefined as number | undefined,
-      parking: 0 as number,
+      parking: undefined as number | undefined,
       amenities: [] as string[]
     },
     images: [] as string[],
@@ -103,29 +104,58 @@ export default function PublishProperty() {
   const validateStep = (step: number): boolean => {
     const newErrors: Record<string, string> = {}
 
-    switch (step) {
-      case 1:
-        if (!formData.title.trim()) newErrors.title = 'El título es obligatorio'
-        if (!formData.propertyType) newErrors.propertyType = 'Selecciona un tipo de propiedad'
-        break
-      case 2:
-        if (!formData.address.street.trim()) newErrors.street = 'La dirección es obligatoria'
-        if (!formData.address.city.trim()) newErrors.city = 'La ciudad es obligatoria'
-        if (!formData.address.state.trim()) newErrors.state = 'La provincia es obligatoria'
-        if (!formData.address.postalCode.trim()) newErrors.postalCode = 'El código postal es obligatorio'
-        break
-      case 3:
-        if (formData.price.amount <= 0) newErrors.price = 'El precio debe ser mayor que 0'
-        if (formData.features.squareMeters <= 0) newErrors.squareMeters = 'Los metros cuadrados son obligatorios'
-        break
-      case 4:
-        if (formData.images.length === 0) newErrors.images = 'Sube al menos una imagen'
-        break
-      case 5:
-        if (!formData.description.trim() || formData.description.length < 20) {
-          newErrors.description = 'La descripción debe tener al menos 20 caracteres'
-        }
-        break
+    if (step === 1) {
+      const schema = getSchemaByPropertyType(formData.propertyType)
+      const titleValidation = schema.extract('title').validate(formData.title)
+      if (titleValidation.error) {
+        newErrors.title = titleValidation.error.details[0].message
+      }
+      
+      if (!formData.propertyType) {
+        newErrors.propertyType = 'Selecciona un tipo de propiedad'
+      }
+    }
+
+    if (step === 2) {
+      const schema = getSchemaByPropertyType(formData.propertyType)
+      const addressValidation = schema.extract('address').validate(formData.address)
+      if (addressValidation.error) {
+        const errorDetail = addressValidation.error.details[0]
+        const fieldName = errorDetail.path[0]
+        newErrors[fieldName] = errorDetail.message
+      }
+    }
+
+    if (step === 3) {
+      const schema = getSchemaByPropertyType(formData.propertyType)
+      
+      const priceValidation = schema.extract('price').validate(formData.price)
+      if (priceValidation.error) {
+        newErrors.price = priceValidation.error.details[0].message
+      }
+      
+      const featuresValidation = schema.extract('features').validate(formData.features)
+      if (featuresValidation.error) {
+        const errorDetail = featuresValidation.error.details[0]
+        const fieldName = errorDetail.path[0]
+        newErrors[fieldName] = errorDetail.message
+      }
+    }
+
+    if (step === 4) {
+      const schema = getSchemaByPropertyType(formData.propertyType)
+      const imagesValidation = schema.extract('images').validate(formData.images)
+      if (imagesValidation.error) {
+        newErrors.images = imagesValidation.error.details[0].message
+      }
+    }
+
+    if (step === 5) {
+      const schema = getSchemaByPropertyType(formData.propertyType)
+      const descriptionValidation = schema.extract('description').validate(formData.description)
+      if (descriptionValidation.error) {
+        newErrors.description = descriptionValidation.error.details[0].message
+      }
     }
 
     setErrors(newErrors)
@@ -133,11 +163,16 @@ export default function PublishProperty() {
   }
 
   const nextStep = () => {
-    if (validateStep(currentStep)) {
-      setCurrentStep(prev => Math.min(prev + 1, steps.length))
-    } else {
-      showToast('Por favor completa todos los campos requeridos', 'warning')
+    const isValid = validateStep(currentStep)
+    
+    if (!isValid) {
+      const errorMessages = Object.values(errors)
+      const firstError = errorMessages[0]
+      showToast(firstError, 'error')
+      return
     }
+    
+    setCurrentStep(prev => Math.min(prev + 1, steps.length))
   }
 
   const prevStep = () => {
@@ -145,7 +180,15 @@ export default function PublishProperty() {
   }
 
   const handleSubmit = async () => {
-    if (!validateStep(5)) return
+    const schema = getSchemaByPropertyType(formData.propertyType)
+    const validation = schema.validate(formData)
+    
+    if (validation.error) {
+      const errorDetail = validation.error.details[0]
+      const errorMessage = errorDetail.message
+      showToast(errorMessage, 'error')
+      return
+    }
 
     setIsSubmitting(true)
     showToast('Publicando propiedad...', 'info')
@@ -159,18 +202,30 @@ export default function PublishProperty() {
 
       const result = await response.json()
 
-      if (result.success) {
-        setCurrentStep(6)
-        showToast('¡Propiedad publicada exitosamente!', 'success')
-        setTimeout(() => {
-          router.push(`/properties/${result.data.id}`)
-        }, 2000)
-      } else {
-        throw new Error(result.error || 'Error al crear la propiedad')
+      if (!response.ok) {
+        if (response.status === 400 && result.details) {
+          const firstError = result.details[0]
+          const errorMessage = `Error en ${firstError.path.join('.')}: ${firstError.message}`
+          showToast(errorMessage, 'error')
+        } else if (response.status === 401) {
+          showToast('No tienes permisos para publicar propiedades', 'error')
+        } else if (response.status === 500) {
+          showToast('Error del servidor. Por favor intenta más tarde', 'error')
+        } else {
+          showToast(result.error || 'Error al publicar la propiedad', 'error')
+        }
+        setIsSubmitting(false)
+        return
       }
+
+      setCurrentStep(6)
+      showToast('¡Propiedad publicada exitosamente!', 'success')
+      setTimeout(() => {
+        router.push(`/properties/${result.data.id}`)
+      }, 2000)
     } catch (error) {
       console.error('Submit error:', error)
-      showToast('Error al publicar la propiedad. Inténtalo de nuevo.', 'error')
+      showToast('Error de conexión. Verifica tu internet e intenta de nuevo', 'error')
     } finally {
       setIsSubmitting(false)
     }
@@ -406,15 +461,23 @@ export default function PublishProperty() {
                       <input
                         type="number"
                         value={formData.price.amount || ''}
-                        onChange={(e) => setFormData(prev => ({
-                          ...prev,
-                          price: { ...prev.price, amount: Number(e.target.value) }
-                        }))}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          // Limitar a 8 dígitos
+                          if (value.length <= 8) {
+                            setFormData(prev => ({
+                              ...prev,
+                              price: { ...prev.price, amount: Number(value) }
+                            }))
+                          }
+                        }}
+                        max="99999999"
                         className="w-full pl-12 pr-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                         placeholder="0"
                       />
                     </div>
                     {errors.price && <p className="text-red-400 text-sm mt-2">{errors.price}</p>}
+                    <p className="text-xs text-gray-500 mt-1">Máximo 8 dígitos (hasta 99,999,999)</p>
                   </div>
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -423,15 +486,21 @@ export default function PublishProperty() {
                         Habitaciones
                       </label>
                       <input
-                        type="number"
-                        min="0"
+                        type="text"
                         value={formData.features.bedrooms}
-                        onChange={(e) => setFormData(prev => ({
-                          ...prev,
-                          features: { ...prev.features, bedrooms: Number(e.target.value) }
-                        }))}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          if (/^\d*$/.test(value)) {
+                            setFormData(prev => ({
+                              ...prev,
+                              features: { ...prev.features, bedrooms: value === '' ? 0 : Number(value) }
+                            }))
+                          }
+                        }}
                         className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                        placeholder="Ej: 3"
                       />
+                      {errors.bedrooms && <p className="text-red-400 text-sm mt-2">{errors.bedrooms}</p>}
                     </div>
 
                     <div>
@@ -439,15 +508,21 @@ export default function PublishProperty() {
                         Baños
                       </label>
                       <input
-                        type="number"
-                        min="0"
+                        type="text"
                         value={formData.features.bathrooms}
-                        onChange={(e) => setFormData(prev => ({
-                          ...prev,
-                          features: { ...prev.features, bathrooms: Number(e.target.value) }
-                        }))}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          if (/^\d*$/.test(value)) {
+                            setFormData(prev => ({
+                              ...prev,
+                              features: { ...prev.features, bathrooms: value === '' ? 0 : Number(value) }
+                            }))
+                          }
+                        }}
                         className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                        placeholder="Ej: 2"
                       />
+                      {errors.bathrooms && <p className="text-red-400 text-sm mt-2">{errors.bathrooms}</p>}
                     </div>
 
                     <div>
@@ -455,14 +530,19 @@ export default function PublishProperty() {
                         M²
                       </label>
                       <input
-                        type="number"
-                        min="1"
+                        type="text"
                         value={formData.features.squareMeters}
-                        onChange={(e) => setFormData(prev => ({
-                          ...prev,
-                          features: { ...prev.features, squareMeters: Number(e.target.value) }
-                        }))}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          if (/^\d*$/.test(value)) {
+                            setFormData(prev => ({
+                              ...prev,
+                              features: { ...prev.features, squareMeters: value === '' ? 0 : Number(value) }
+                            }))
+                          }
+                        }}
                         className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                        placeholder="Ej: 120"
                       />
                       {errors.squareMeters && <p className="text-red-400 text-sm mt-2">{errors.squareMeters}</p>}
                     </div>
@@ -471,16 +551,25 @@ export default function PublishProperty() {
                       <label className="block text-sm font-medium mb-2 text-gray-700">
                         Parking
                       </label>
-                      <input
-                        type="number"
-                        min="0"
-                        value={formData.features.parking || ''}
-                        onChange={(e) => setFormData(prev => ({
-                          ...prev,
-                          features: { ...prev.features, parking: Number(e.target.value) || 0 }
-                        }))}
-                        className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
-                      />
+                      <select
+                        value={formData.features.parking === undefined ? 'na' : formData.features.parking}
+                        onChange={(e) => {
+                          const value = e.target.value === 'na' ? undefined : Number(e.target.value)
+                          setFormData(prev => ({
+                            ...prev,
+                            features: { ...prev.features, parking: value }
+                          }))
+                        }}
+                        className="w-full px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                      >
+                        <option value="na">N/A</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                      </select>
+                      {errors.parking && <p className="text-red-400 text-sm mt-2">{errors.parking}</p>}
                     </div>
                   </div>
 
@@ -504,6 +593,7 @@ export default function PublishProperty() {
                         </button>
                       ))}
                     </div>
+                    {errors.amenities && <p className="text-red-400 text-sm mt-2">{errors.amenities}</p>}
                   </div>
                 </div>
               )}

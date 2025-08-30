@@ -5,7 +5,7 @@ export const CreatePropertyDTOSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters').max(100, 'Title cannot exceed 100 characters'),
   description: z.string().min(20, 'Description must be at least 20 characters').max(2000, 'Description cannot exceed 2000 characters'),
   price: z.object({
-    amount: z.number().min(1, 'Price must be greater than 0'),
+    amount: z.number().min(1, 'Price must be greater than 0').max(99999999, 'Price cannot exceed 8 digits (99,999,999)'),
     currency: z.string().length(3, 'Currency must be 3 characters').default('EUR')
   }),
   propertyType: z.nativeEnum(PropertyTypeEnum, {

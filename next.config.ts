@@ -22,7 +22,19 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+    deviceSizes: [320, 420, 640, 768, 1024, 1200, 1920],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 31536000,
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;"
   },
+  compress: true,
+  experimental: {
+    optimizeCss: true,
+    optimizePackageImports: ['lucide-react', 'framer-motion']
+  }
 };
 
 export default nextConfig;

@@ -402,14 +402,22 @@ export default function EditProperty() {
                         <input
                           type="number"
                           value={property.price.amount}
-                          onChange={(e) => setProperty({
-                            ...property,
-                            price: { ...property.price, amount: Number(e.target.value) }
-                          })}
+                          onChange={(e) => {
+                            const value = e.target.value
+                            // Limitar a 8 dígitos
+                            if (value.length <= 8) {
+                              setProperty({
+                                ...property,
+                                price: { ...property.price, amount: Number(value) }
+                              })
+                            }
+                          }}
+                          max="99999999"
                           className="w-full pl-12 pr-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                           placeholder="0"
                         />
                       </div>
+                      <p className="text-xs text-gray-500 mt-1">Máximo 8 dígitos (hasta 99,999,999)</p>
                     </div>
                   </div>
                 </div>

@@ -63,11 +63,17 @@ export default function PropertyCard({
         <div className={`relative overflow-hidden rounded-2xl glass-icon-container h-full transition-all duration-300 ${
           isHighlightActive ? 'ring-4 ring-yellow-400 shadow-xl shadow-yellow-400/40 bg-gradient-to-br from-yellow-50/40 to-white/90' : ''
         }`}>
-          <div className="relative h-64 overflow-hidden rounded-t-xl">
+          <div className="relative h-48 md:h-64 overflow-hidden rounded-t-xl">
           <Image
             src={allImages[currentImageIndex] || image}
             alt={title}
             fill
+            loading="lazy"
+            priority={index === 0}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            quality={85}
+            placeholder="blur"
+            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bvKixzacqgAoqJccqgAoqJccqgAoqJccqgAoqJccqgAoqJccqgAoqJccqgAoqJccqgAoqJccqgAoqJccqgAoqJccqgAoqJccqgAoqJccqgAoqJccqgAoqJccqgAoqJccqgAoqJc="
             className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
           
@@ -151,10 +157,10 @@ export default function PropertyCard({
           )}
           </div>
 
-          <div className="p-6 bg-white/50 backdrop-blur-sm">
+          <div className="p-4 md:p-6 bg-white/50 backdrop-blur-sm">
             <div className="mb-3">
-              <h3 className="text-2xl font-light text-gray-900">
-                ${price}
+              <h3 className="text-xl md:text-2xl font-light text-gray-900">
+                ${typeof price === 'string' ? price : price.toLocaleString('es-MX')}
               </h3>
             </div>
             
@@ -182,7 +188,7 @@ export default function PropertyCard({
               </div>
             </div>
 
-            <h4 className="font-medium text-gray-900 mb-2 line-clamp-1">
+            <h4 className="text-sm md:text-base font-medium text-gray-900 mb-2 line-clamp-1">
               {title}
             </h4>
             

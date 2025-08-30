@@ -58,7 +58,7 @@ const AddressSchema = new Schema({
 }, { _id: false })
 
 const PriceSchema = new Schema({
-  amount: { type: Number, required: true, min: 0 },
+  amount: { type: Number, required: true, min: 0, max: 99999999 },
   currency: { type: String, required: true, length: 3, default: 'EUR' }
 }, { _id: false })
 

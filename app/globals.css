@@ -1,5 +1,18 @@
 @import "tailwindcss";
 
+/* Mobile-first optimizations */
+@media (max-width: 767px) {
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  body {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+}
+
 @theme {
   /* Modern Light Theme Colors - Zillow Inspired */
   --color-background: #ffffff;
@@ -308,13 +321,21 @@
     100% { background-position: 200% 0; }
   }
 
-  /* Glassmorphism Utilities */
+  /* Glassmorphism Utilities - Mobile optimized */
   .glass {
     background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.8);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+    box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.1);
+  }
+  
+  @media (min-width: 768px) {
+    .glass {
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+    }
   }
 
   .glass-dark {

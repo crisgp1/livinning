@@ -4,6 +4,7 @@ export class Price {
     public readonly currency: string = 'MXN'
   ) {
     if (amount < 0) throw new Error('Price amount cannot be negative')
+    if (amount > 99999999) throw new Error('Price amount cannot exceed 8 digits (99,999,999)')
     if (!currency.trim()) throw new Error('Currency is required')
     if (currency.length !== 3) throw new Error('Currency must be 3 characters')
   }
