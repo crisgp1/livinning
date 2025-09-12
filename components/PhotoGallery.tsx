@@ -2,8 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
-import { gsap } from 'gsap'
 import { ChevronLeft, ChevronRight, X, ZoomIn, Grid3X3 } from 'lucide-react'
+import { loadGSAP } from '@/lib/utils/dynamic-imports'
 
 interface PhotoGalleryProps {
   images: string[]
@@ -14,33 +14,45 @@ export default function PhotoGallery({ images, title }: PhotoGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isGridView, setIsGridView] = useState(false)
+  const [gsapLoaded, setGsapLoaded] = useState(false)
   
   const mainImageRef = useRef<HTMLDivElement>(null)
   const thumbnailsRef = useRef<HTMLDivElement>(null)
   const modalRef = useRef<HTMLDivElement>(null)
   const modalImageRef = useRef<HTMLDivElement>(null)
   const gridRef = useRef<HTMLDivElement>(null)
+  const gsapRef = useRef<any>(null)
 
   useEffect(() => {
-    if (mainImageRef.current) {
-      gsap.fromTo(mainImageRef.current,
-        { scale: 1.1, opacity: 0 },
-        { scale: 1, opacity: 1, duration: 1, ease: "power3.out" }
-      )
+    const initGSAP = async () => {
+      const gsapModule = await loadGSAP()
+      if (gsapModule) {
+        gsapRef.current = gsapModule.gsap
+        setGsapLoaded(true)
+        
+        if (mainImageRef.current) {
+          gsapModule.gsap.fromTo(mainImageRef.current,
+            { scale: 1.1, opacity: 0 },
+            { scale: 1, opacity: 1, duration: 1, ease: "power3.out" }
+          )
+        }
+        
+        if (thumbnailsRef.current) {
+          gsapModule.gsap.fromTo(thumbnailsRef.current.children,
+            { y: 20, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.6, stagger: 0.1, delay: 0.3, ease: "power2.out" }
+          )
+        }
+      }
     }
     
-    if (thumbnailsRef.current) {
-      gsap.fromTo(thumbnailsRef.current.children,
-        { y: 20, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.6, stagger: 0.1, delay: 0.3, ease: "power2.out" }
-      )
-    }
+    initGSAP()
   }, [])
 
   const changeImage = (index: number) => {
-    if (index === currentIndex) return
+    if (index === currentIndex || !gsapLoaded || !gsapRef.current) return
     
-    const tl = gsap.timeline()
+    const tl = gsapRef.current.timeline()
     
     tl.to(mainImageRef.current, {
       scale: 0.95,
@@ -59,51 +71,63 @@ export default function PhotoGallery({ images, title }: PhotoGalleryProps) {
 
   const openModal = () => {
     setIsModalOpen(true)
-    gsap.fromTo(modalRef.current,
-      { opacity: 0 },
-      { opacity: 1, duration: 0.3, ease: "power2.out" }
-    )
-    gsap.fromTo(modalImageRef.current,
-      { scale: 0.8, opacity: 0 },
-      { scale: 1, opacity: 1, duration: 0.4, delay: 0.1, ease: "back.out(1.7)" }
-    )
+    if (gsapLoaded && gsapRef.current) {
+      gsapRef.current.fromTo(modalRef.current,
+        { opacity: 0 },
+        { opacity: 1, duration: 0.3, ease: "power2.out" }
+      )
+      gsapRef.current.fromTo(modalImageRef.current,
+        { scale: 0.8, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.4, delay: 0.1, ease: "back.out(1.7)" }
+      )
+    }
   }
 
   const closeModal = () => {
-    const tl = gsap.timeline()
-    
-    tl.to(modalImageRef.current, {
-      scale: 0.8,
-      opacity: 0,
-      duration: 0.3,
-      ease: "power2.in"
-    })
-    .to(modalRef.current, {
-      opacity: 0,
-      duration: 0.2,
-      ease: "power2.in",
-      onComplete: () => setIsModalOpen(false)
-    })
+    if (gsapLoaded && gsapRef.current) {
+      const tl = gsapRef.current.timeline()
+      
+      tl.to(modalImageRef.current, {
+        scale: 0.8,
+        opacity: 0,
+        duration: 0.3,
+        ease: "power2.in"
+      })
+      .to(modalRef.current, {
+        opacity: 0,
+        duration: 0.2,
+        ease: "power2.in",
+        onComplete: () => setIsModalOpen(false)
+      })
+    } else {
+      setIsModalOpen(false)
+    }
   }
 
   const toggleGridView = () => {
     if (!isGridView) {
       setIsGridView(true)
-      gsap.fromTo(gridRef.current?.children || [],
-        { scale: 0.8, opacity: 0 },
-        { scale: 1, opacity: 1, duration: 0.4, stagger: 0.05, ease: "back.out(1.7)" }
-      )
+      if (gsapLoaded && gsapRef.current) {
+        gsapRef.current.fromTo(gridRef.current?.children || [],
+          { scale: 0.8, opacity: 0 },
+          { scale: 1, opacity: 1, duration: 0.4, stagger: 0.05, ease: "back.out(1.7)" }
+        )
+      }
     } else {
-      gsap.to(gridRef.current?.children || [],
-        { 
-          scale: 0.8, 
-          opacity: 0, 
-          duration: 0.3, 
-          stagger: 0.02,
-          ease: "power2.in",
-          onComplete: () => setIsGridView(false)
-        }
-      )
+      if (gsapLoaded && gsapRef.current) {
+        gsapRef.current.to(gridRef.current?.children || [],
+          { 
+            scale: 0.8, 
+            opacity: 0, 
+            duration: 0.3, 
+            stagger: 0.02,
+            ease: "power2.in",
+            onComplete: () => setIsGridView(false)
+          }
+        )
+      } else {
+        setIsGridView(false)
+      }
     }
   }
 

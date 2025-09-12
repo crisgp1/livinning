@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Bed, Bath, Square, Heart, MapPin, Camera, Star } from 'lucide-react'
+import { debounce } from '@/lib/utils/dynamic-imports'
 
 interface PropertyCardProps {
   id: string
@@ -52,6 +53,29 @@ export default function PropertyCard({
     setFavoriteState(isFavorite)
   }, [isFavorite])
 
+  const toggleFavorite = useCallback(
+    debounce(async (propertyId: string) => {
+      setFavoriteLoading(true)
+      try {
+        const response = await fetch('/api/favorites/toggle', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ propertyId })
+        })
+        if (response.ok) {
+          const data = await response.json()
+          setFavoriteState(data.data.isFavorite)
+          onFavoriteChange?.(data.data.isFavorite)
+        }
+      } catch (error) {
+        console.error('Error toggling favorite:', error)
+      } finally {
+        setFavoriteLoading(false)
+      }
+    }, 300),
+    [onFavoriteChange]
+  )
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -98,30 +122,10 @@ export default function PropertyCard({
           
           {showFavoriteButton && (
             <button 
-              onClick={async (e) => {
+              onClick={(e) => {
                 e.preventDefault()
                 if (favoriteLoading) return
-
-                setFavoriteLoading(true)
-                try {
-                  const response = await fetch('/api/favorites/toggle', {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ propertyId: id })
-                  })
-
-                  if (response.ok) {
-                    const data = await response.json()
-                    setFavoriteState(data.data.isFavorite)
-                    onFavoriteChange?.(data.data.isFavorite)
-                  }
-                } catch (error) {
-                  console.error('Error toggling favorite:', error)
-                } finally {
-                  setFavoriteLoading(false)
-                }
+                toggleFavorite(id)
               }}
               className="absolute top-3 right-3 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-110 disabled:opacity-50"
               disabled={favoriteLoading}

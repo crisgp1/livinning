@@ -10,7 +10,7 @@ import { ArrowLeft, Bed, Bath, Square, MapPin, Calendar, Heart, Share2 } from 'l
 import Link from 'next/link'
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
-import PhotoGallery from '@/components/PhotoGallery'
+import { PhotoGallery } from '@/lib/utils/dynamic-imports'
 import { useUser } from '@clerk/nextjs'
 
 gsap.registerPlugin(ScrollTrigger)

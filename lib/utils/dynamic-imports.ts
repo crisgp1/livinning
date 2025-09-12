@@ -1,6 +1,18 @@
 import dynamic from 'next/dynamic'
+import React from 'react'
 
-// Lazy load heavy dependencies
+// Heavy components dynamic loading  
+export const PhotoGallery = dynamic(() => import('@/components/PhotoGallery'), {
+  ssr: true,
+  loading: () => React.createElement('div', { className: 'w-full h-64 bg-gray-100 animate-pulse rounded-lg' })
+})
+
+export const ServiceModal = dynamic(() => import('@/components/ServiceModal'), {
+  ssr: false,
+  loading: () => null
+})
+
+// Heavy libraries lazy loading
 export const Html2CanvasLazy = dynamic(() => import('html2canvas'), {
   ssr: false,
   loading: () => null
@@ -11,29 +23,33 @@ export const JsPdfLazy = dynamic(() => import('jspdf'), {
   loading: () => null
 })
 
-// Lazy load motion components for mobile optimization
-export const MotionDiv = dynamic(
-  () => import('framer-motion').then((mod) => ({ default: mod.motion.div })),
-  { 
-    ssr: false,
-    loading: () => <div />
-  }
-)
-
-export const MotionSection = dynamic(
-  () => import('framer-motion').then((mod) => ({ default: mod.motion.section })),
-  {
-    ssr: false, 
-    loading: () => <section />
-  }
-)
-
 // Utility for conditional loading
 export const loadHeavyLibs = async () => {
   const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
     import('html2canvas'),
     import('jspdf')
   ])
-  
   return { html2canvas, jsPDF }
+}
+
+// Debounce utility
+export const debounce = (func: Function, delay: number) => {
+  let timeoutId: NodeJS.Timeout
+  return (...args: any[]) => {
+    clearTimeout(timeoutId)
+    timeoutId = setTimeout(() => func.apply(null, args), delay)
+  }
+}
+
+// GSAP lazy loading utility
+export const loadGSAP = async () => {
+  if (typeof window !== 'undefined') {
+    const [gsap, { ScrollTrigger }] = await Promise.all([
+      import('gsap'),
+      import('gsap/ScrollTrigger')
+    ])
+    gsap.default.registerPlugin(ScrollTrigger)
+    return { gsap: gsap.default, ScrollTrigger }
+  }
+  return null
 }

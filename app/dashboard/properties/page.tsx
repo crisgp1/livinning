@@ -2,7 +2,7 @@
 
 import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import {
   Building,
@@ -19,6 +19,7 @@ import {
   Sparkles,
   TrendingUp
 } from 'lucide-react'
+import { debounce } from '@/lib/utils/dynamic-imports'
 
 interface Property {
   id: string
@@ -45,6 +46,13 @@ export default function DashboardProperties() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
   const [showFilters, setShowFilters] = useState(false)
+
+  const debouncedSearch = useMemo(
+    () => debounce((term: string) => {
+      // Search logic will be handled in useEffect
+    }, 300),
+    []
+  )
 
   useEffect(() => {
     if (isLoaded && user) {
@@ -191,7 +199,10 @@ export default function DashboardProperties() {
                     type="text"
                     placeholder="Buscar propiedades..."
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value)
+                      debouncedSearch(e.target.value)
+                    }}
                     className="w-full pl-12 pr-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                   />
                 </div>
