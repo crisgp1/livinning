@@ -24,7 +24,7 @@ export default function OptimizedImage({
   className = '',
   priority = false,
   quality = 85,
-  sizes = '100vw'
+  sizes = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
 }: OptimizedImageProps) {
   const [isLoaded, setIsLoaded] = useState(false)
   const [hasError, setHasError] = useState(false)
@@ -54,7 +54,7 @@ export default function OptimizedImage({
         height={height}
         fill={fill}
         priority={priority}
-        quality={quality}
+        quality={priority ? 95 : quality}
         sizes={sizes}
         loading={priority ? 'eager' : 'lazy'}
         placeholder="blur"

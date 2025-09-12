@@ -1,14 +1,9 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import PropertyCard from './PropertyCard'
-import { motion } from 'framer-motion'
 import { ArrowRight, Sparkles, Home } from 'lucide-react'
 import Link from 'next/link'
-
-gsap.registerPlugin(ScrollTrigger)
 
 interface Property {
   id: string
@@ -95,20 +90,19 @@ export default function FeaturedProperties() {
   }, [])
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(titleRef.current, {
-        y: 30,
-        opacity: 0,
-        duration: 1,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: titleRef.current,
-          start: 'top bottom-=100'
+    if (!titleRef.current) return
+    
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          titleRef.current?.classList.add('animate-fadeInUp')
         }
-      })
-    }, sectionRef)
-
-    return () => ctx.revert()
+      },
+      { threshold: 0.1 }
+    )
+    
+    observer.observe(titleRef.current)
+    return () => observer.disconnect()
   }, [])
 
   return (
@@ -122,18 +116,12 @@ export default function FeaturedProperties() {
       <div className="section-container relative z-10">
         <div className="flex flex-col md:flex-row items-end justify-between mb-12">
           <div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2 mb-4"
-            >
+            <div className="inline-flex items-center gap-2 mb-4">
               <div className="p-2 rounded-lg glass">
                 <Sparkles className="w-5 h-5 text-primary" />
               </div>
               <span className="text-sm font-medium text-primary">Propiedades Premium</span>
-            </motion.div>
+            </div>
             <h2 ref={titleRef} className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
               Propiedades Destacadas
             </h2>
@@ -143,14 +131,10 @@ export default function FeaturedProperties() {
           </div>
           
           <Link href="/propiedades">
-            <motion.button
-              className="flex items-center gap-2 font-medium mt-6 md:mt-0 text-primary hover:text-primary-hover"
-              whileHover={{ x: 5 }}
-              transition={{ duration: 0.2 }}
-            >
+            <button className="flex items-center gap-2 font-medium mt-6 md:mt-0 text-primary hover:text-primary-hover transition-transform duration-200 hover:translate-x-1">
               Ver Todas las Propiedades
               <ArrowRight size={20} />
-            </motion.button>
+            </button>
           </Link>
         </div>
 
@@ -163,11 +147,7 @@ export default function FeaturedProperties() {
             </div>
           </div>
         ) : error ? (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-20"
-          >
+          <div className="text-center py-20">
             <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 bg-red-50 border border-red-200">
               <Home className="w-8 h-8 text-red-500" />
             </div>
@@ -175,7 +155,7 @@ export default function FeaturedProperties() {
               Error al cargar propiedades
             </h3>
             <p className="text-gray-600">{error}</p>
-          </motion.div>
+          </div>
         ) : properties.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {properties.slice(0, 6).map((property, index) => (
@@ -187,11 +167,7 @@ export default function FeaturedProperties() {
             ))}
           </div>
         ) : (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-20"
-          >
+          <div className="text-center py-20">
             <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 bg-gray-50 border border-gray-200">
               <Home className="w-8 h-8 text-gray-400" />
             </div>
@@ -199,7 +175,7 @@ export default function FeaturedProperties() {
               No hay propiedades destacadas
             </h3>
             <p className="text-gray-600">Las propiedades aparecerán aquí cuando estén disponibles</p>
-          </motion.div>
+          </div>
         )}
       </div>
     </section>

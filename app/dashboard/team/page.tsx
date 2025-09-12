@@ -225,7 +225,7 @@ export default function DashboardTeam() {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -395,7 +395,7 @@ export default function DashboardTeam() {
                 transition={{ delay: 0.5 }}
                 className="glass-icon-container rounded-2xl overflow-hidden"
               >
-                <div className="overflow-x-auto">
+                <div className="hidden md:block overflow-x-auto">
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-gray-100">
@@ -483,6 +483,68 @@ export default function DashboardTeam() {
                       ))}
                     </tbody>
                   </table>
+                </div>
+                
+                {/* Mobile Card Layout */}
+                <div className="md:hidden space-y-4">
+                  {filteredMembers.map((member, index) => (
+                    <div key={member.id} className="p-4 bg-white/50 rounded-xl border border-gray-100">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100">
+                            {member.avatar ? (
+                              <Image
+                                src={member.avatar}
+                                alt={`${member.firstName} ${member.lastName}`}
+                                width={48}
+                                height={48}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-blue-600">
+                                <span className="text-white font-medium">
+                                  {member.firstName[0]}{member.lastName[0]}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <div className="font-medium text-gray-900">
+                              {member.firstName} {member.lastName}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {member.email}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button className="p-2 rounded-lg bg-gray-50 text-gray-600">
+                            <Edit3 size={16} />
+                          </button>
+                          <button className="p-2 rounded-lg bg-red-50 text-red-600">
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex gap-2">
+                          <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${getRoleColor(member.role)}`}>
+                            {getRoleIcon(member.role)}
+                            <span className="hidden sm:inline">{member.role === 'admin' ? 'Admin' : member.role === 'agent' ? 'Agente' : 'Miembro'}</span>
+                          </div>
+                          <div className={`inline-flex px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(member.status)}`}>
+                            {member.status === 'active' ? 'Activo' : member.status === 'invited' ? 'Invitado' : 'Inactivo'}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 text-gray-500">
+                          <Calendar size={12} />
+                          <span className="text-xs">
+                            {new Date(member.joinedAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </motion.div>
             )}

@@ -166,17 +166,17 @@ export default function DashboardLayout({
         {/* Main Content */}
         <div className="flex-1 lg:ml-72 relative z-10">
           {/* Mobile Header */}
-          <div className="lg:hidden flex items-center justify-between py-6 px-4 sm:px-6 border-b border-gray-100">
+          <div className="lg:hidden flex items-center justify-between py-3 px-4 sm:px-6 border-b border-gray-100">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="p-2 rounded-lg glass-icon-container"
+              className="p-1.5 rounded-lg glass-icon-container"
             >
-              <Menu size={20} className="text-gray-700" />
+              <Menu size={18} className="text-gray-700" />
             </button>
-            <h1 className="text-xl font-medium text-gray-900">
+            <h1 className="text-lg font-medium text-gray-900">
               Dashboard
             </h1>
-            <div className="w-10"></div>
+            <div className="w-8"></div>
           </div>
           
           {/* Children Content */}

@@ -236,7 +236,7 @@ export default function DashboardProperties() {
             </motion.div>
 
             {/* Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -329,7 +329,7 @@ export default function DashboardProperties() {
                 transition={{ delay: 0.3 }}
                 className="glass-icon-container rounded-2xl overflow-hidden"
               >
-                <div className="overflow-x-auto">
+                <div className="hidden md:block overflow-x-auto">
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-gray-100">
@@ -440,6 +440,89 @@ export default function DashboardProperties() {
                       ))}
                     </tbody>
                   </table>
+                </div>
+                
+                {/* Mobile Card Layout */}
+                <div className="md:hidden space-y-4">
+                  {filteredProperties.map((property, index) => (
+                    <div key={property.id} className="p-4 bg-white/50 rounded-xl border border-gray-100">
+                      <div className="flex items-start gap-3 mb-3">
+                        <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                          {property.images.length > 0 ? (
+                            <img
+                              src={property.images[0]}
+                              alt={property.title}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Building className="w-8 h-8 text-gray-300" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium text-gray-900 line-clamp-2 mb-1">
+                            {property.title}
+                          </h3>
+                          <p className="text-sm text-gray-500 mb-2">
+                            {property.propertyType}
+                          </p>
+                          <div className="flex items-center gap-1 text-gray-600 mb-1">
+                            <MapPin size={12} />
+                            <span className="text-xs">
+                              {[property.address?.city, property.address?.state].filter(Boolean).join(', ') || 'Sin ubicación'}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1 text-gray-900">
+                            <DollarSign size={12} />
+                            <span className="text-sm font-medium">
+                              {typeof property.price === 'object' 
+                                ? property.price.amount?.toLocaleString() || '0'
+                                : property.price?.toLocaleString() || '0'
+                              }
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
+                            property.status === 'published' 
+                              ? 'bg-green-100 text-green-700 border border-green-200' 
+                              : 'bg-orange-100 text-orange-700 border border-orange-200'
+                          }`}>
+                            {property.status === 'published' ? 'Publicada' : 'Borrador'}
+                          </div>
+                          <div className="flex items-center gap-1 text-gray-500">
+                            <Calendar size={12} />
+                            <span className="text-xs">
+                              {new Date(property.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => router.push(`/properties/${property.id}`)}
+                            className="p-2 rounded-lg bg-blue-50 text-blue-600"
+                          >
+                            <Eye size={14} />
+                          </button>
+                          <button
+                            onClick={() => router.push(`/properties/${property.id}/edit`)}
+                            className="p-2 rounded-lg bg-gray-50 text-gray-600"
+                          >
+                            <Edit3 size={14} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteProperty(property.id)}
+                            className="p-2 rounded-lg bg-red-50 text-red-600"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </motion.div>
             )}

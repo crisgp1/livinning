@@ -68,7 +68,6 @@ export default function PropertyCard({
             src={allImages[currentImageIndex] || image}
             alt={title}
             fill
-            loading="lazy"
             priority={index === 0}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             quality={85}
