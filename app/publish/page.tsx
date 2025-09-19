@@ -18,7 +18,8 @@ const steps = [
   { id: 3, title: 'Detalles' },
   { id: 4, title: 'Fotos' },
   { id: 5, title: 'Descripción' },
-  { id: 6, title: 'Revisión' }
+  { id: 6, title: 'Revisión' },
+  { id: 7, title: 'Completado' }
 ]
 
 const propertyTypes = [
@@ -218,7 +219,7 @@ export default function PublishProperty() {
         return
       }
 
-      setCurrentStep(6)
+      setCurrentStep(7)
       showToast('¡Propiedad publicada exitosamente!', 'success')
       setTimeout(() => {
         router.push(`/properties/${result.data.id}`)
@@ -637,7 +638,77 @@ export default function PublishProperty() {
                 </div>
               )}
 
-              {currentStep === 6 && (
+  {currentStep === 6 && (
+    <div className="space-y-8">
+      <h2 className="text-2xl font-light text-gray-900 mb-6">
+        Revisión Final
+      </h2>
+
+      {/* Información Básica */}
+      <div className="bg-gray-50 rounded-xl p-6">
+        <h3 className="font-medium mb-4">Información Básica</h3>
+        <div className="space-y-2">
+          <p><span className="font-medium">Título:</span> {formData.title}</p>
+          <p><span className="font-medium">Tipo:</span> {propertyTypes.find(t => t.value === formData.propertyType)?.label}</p>
+          <p><span className="font-medium">Precio:</span> {formData.price.currency === 'USD' ? '$' :
+  'MX$'}{formData.price.amount?.toLocaleString()}</p>
+        </div>
+      </div>
+
+      {/* Ubicación */}
+      <div className="bg-gray-50 rounded-xl p-6">
+        <h3 className="font-medium mb-4">Ubicación</h3>
+        <p>{formData.address.street}, {formData.address.city}, {formData.address.state}</p>
+      </div>
+
+      {/* CARACTERÍSTICAS - ESTA ES LA PARTE CRÍTICA */}
+      <div className="bg-gray-50 rounded-xl p-6">
+        <h3 className="font-medium mb-4">Características</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+          <div>
+            <span className="text-sm text-gray-600">Habitaciones</span>
+            <p className="font-medium">{formData.features.bedrooms}</p>
+          </div>
+          <div>
+            <span className="text-sm text-gray-600">Baños</span>
+            <p className="font-medium">{formData.features.bathrooms}</p>
+          </div>
+          <div>
+            <span className="text-sm text-gray-600">M²</span>
+            <p className="font-medium">{formData.features.squareMeters}</p>
+          </div>
+          {formData.features.parking && (
+            <div>
+              <span className="text-sm text-gray-600">Parking</span>
+              <p className="font-medium">{formData.features.parking}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Amenidades */}
+        {formData.features.amenities.length > 0 && (
+          <div>
+            <span className="text-sm text-gray-600 block mb-2">Amenidades</span>
+            <div className="flex flex-wrap gap-2">
+              {formData.features.amenities.map((amenity, index) => (
+                <span key={index} className="px-3 py-1 bg-primary text-white rounded-full text-sm">
+                  {amenity}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Descripción */}
+      <div className="bg-gray-50 rounded-xl p-6">
+        <h3 className="font-medium mb-4">Descripción</h3>
+        <p className="text-gray-700">{formData.description}</p>
+      </div>
+    </div>
+  )}
+
+              {currentStep === 7 && (
                 <div className="text-center space-y-6">
                   <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto">
                     <div className="w-3 h-3 rounded-full bg-white"></div>
@@ -655,7 +726,7 @@ export default function PublishProperty() {
               )}
 
               {/* Navigation */}
-              {currentStep < 6 && (
+              {currentStep < 7 && (
                 <div className="flex justify-between pt-8 mt-8 border-t border-gray-200">
                   <button
                     type="button"
@@ -666,7 +737,7 @@ export default function PublishProperty() {
                     Anterior
                   </button>
 
-                  {currentStep < 5 ? (
+                  {currentStep < 6 ? (
                     <button
                       type="button"
                       onClick={nextStep}
@@ -674,7 +745,7 @@ export default function PublishProperty() {
                     >
                       Siguiente
                     </button>
-                  ) : (
+                  ) : currentStep === 6 ? (
                     <button
                       type="button"
                       onClick={handleSubmit}
@@ -687,10 +758,10 @@ export default function PublishProperty() {
                           Publicando...
                         </>
                       ) : (
-                        'Publicar'
+                        'Publicar Propiedad'
                       )}
                     </button>
-                  )}
+                  ) : null}
                 </div>
               )}
             </motion.div>

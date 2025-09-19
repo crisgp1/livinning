@@ -29,7 +29,10 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      data: property
+      data: {
+        ...property,
+        amenities: property.features.amenities
+      }
     })
   } catch (error) {
     console.error('Error fetching property:', error)
