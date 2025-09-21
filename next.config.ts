@@ -34,7 +34,31 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizeCss: true,
     optimizePackageImports: ['lucide-react', 'framer-motion']
-  }
+  },
+  webpack: (config, { dev, isServer }) => {
+    if (!dev && !isServer) {
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          default: {
+            minChunks: 2,
+            priority: -20,
+            reuseExistingChunk: true,
+          },
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendor',
+            priority: -10,
+          },
+          common: {
+            minChunks: 2,
+            priority: -5,
+          },
+        },
+      };
+    }
+    return config;
+  },
 };
 
 export default nextConfig;

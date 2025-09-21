@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import PropertyCard from './PropertyCard'
+import PropertyCardSkeleton from './skeletons/PropertyCardSkeleton'
 import { ArrowRight, Sparkles, Home } from 'lucide-react'
 import Link from 'next/link'
 
@@ -140,11 +141,10 @@ export default function FeaturedProperties() {
 
         {/* Loading State */}
         {loading ? (
-          <div className="flex justify-center items-center py-20">
-            <div className="text-center">
-              <div className="w-16 h-16 border-4 border-gray-200 border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-gray-600">Cargando propiedades destacadas...</p>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <PropertyCardSkeleton key={i} />
+            ))}
           </div>
         ) : error ? (
           <div className="text-center py-20">

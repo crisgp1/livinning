@@ -10,6 +10,7 @@ import { ArrowLeft, Bed, Bath, Square, MapPin, Calendar, Heart, Share2 } from 'l
 import Link from 'next/link'
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
+import PropertyDetailSkeleton from '@/components/skeletons/PropertyDetailSkeleton'
 import { PhotoGallery } from '@/lib/utils/dynamic-imports'
 import { useUser } from '@clerk/nextjs'
 
@@ -335,8 +336,12 @@ export default function PropertyDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-gray-200 border-t-primary rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-white">
+        <Navigation />
+        <div className="section-container py-8">
+          <PropertyDetailSkeleton />
+        </div>
+        <Footer />
       </div>
     )
   }

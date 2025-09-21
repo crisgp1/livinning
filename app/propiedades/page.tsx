@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import Navigation from '@/components/Navigation'
 import PropertyCard from '@/components/PropertyCard'
+import PropertyCardSkeleton from '@/components/skeletons/PropertyCardSkeleton'
 import { Search, SlidersHorizontal, MapPin, Home, DollarSign, Sparkles, Filter } from 'lucide-react'
 
 interface Property {
@@ -35,10 +36,10 @@ interface Property {
 
 export default function PropertiesPage() {
   const [properties, setProperties] = useState<Property[]>([])
-  const [filteredProperties, setFilteredProperties] = useState<Property[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
   const [filterType, setFilterType] = useState('todos')
   const [filterStatus, setFilterStatus] = useState('todos')
   const [priceRange, setPriceRange] = useState('todos')
@@ -107,16 +108,25 @@ export default function PropertiesPage() {
     fetchProperties()
   }, [])
 
-  // Filter properties
+  // Debounce search term
   useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm)
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [searchTerm])
+
+  // Filter properties with useMemo for performance
+  const filteredProperties = useMemo(() => {
     let filtered = properties
 
-    // Search filter
-    if (searchTerm) {
+    // Search filter with debounced term
+    if (debouncedSearchTerm) {
       filtered = filtered.filter(property => 
-        property.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        property.location.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        property.location.state.toLowerCase().includes(searchTerm.toLowerCase())
+        property.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        property.location.city.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        property.location.state.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
       )
     }
 
@@ -149,8 +159,8 @@ export default function PropertiesPage() {
       })
     }
 
-    setFilteredProperties(filtered)
-  }, [searchTerm, filterType, filterStatus, priceRange, properties])
+    return filtered
+  }, [debouncedSearchTerm, filterType, filterStatus, priceRange, properties])
 
   return (
     <div className="min-h-screen bg-white">
@@ -316,11 +326,10 @@ export default function PropertiesPage() {
 
           {/* Loading State */}
           {loading ? (
-            <div className="flex justify-center items-center py-20">
-              <div className="text-center">
-                <div className="w-16 h-16 border-4 border-white border-opacity-20 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
-                <p style={{ color: '#a3a3a3' }}>Cargando propiedades...</p>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {Array.from({ length: 9 }).map((_, i) => (
+                <PropertyCardSkeleton key={i} />
+              ))}
             </div>
           ) : error ? (
             <motion.div 

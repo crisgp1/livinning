@@ -12,14 +12,18 @@ import {
   Building2,
   MapPin
 } from 'lucide-react'
-import { loadStripe } from '@stripe/stripe-js'
-import { EmbeddedCheckoutProvider, EmbeddedCheckout } from '@stripe/react-stripe-js'
+import dynamic from 'next/dynamic'
 import Navigation from '@/components/Navigation'
 import { getStripePublishableKey } from '@/lib/utils/stripe-client'
 import { useToast } from '@/components/Toast'
 
-// Initialize Stripe
-const stripePromise = loadStripe(getStripePublishableKey())
+// Dynamic Stripe component
+const StripeCheckout = dynamic(() => import('../../StripeCheckout'), {
+  loading: () => <div className="flex items-center justify-center h-96">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ff385c]"></div>
+  </div>,
+  ssr: false
+})
 
 const highlightPlans = {
   'highlight-7': {
@@ -206,12 +210,7 @@ function HighlightCheckoutContent() {
                       <h2 className="text-2xl font-semibold text-gray-900">Información de Pago</h2>
                     </div>
 
-                    <EmbeddedCheckoutProvider
-                      stripe={stripePromise}
-                      options={{ clientSecret }}
-                    >
-                      <EmbeddedCheckout />
-                    </EmbeddedCheckoutProvider>
+                    <StripeCheckout clientSecret={clientSecret} />
                   </>
                 ) : (
                   <div className="flex items-center justify-center h-96">

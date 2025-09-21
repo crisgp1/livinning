@@ -18,8 +18,7 @@ import {
   Phone,
   Building2
 } from 'lucide-react'
-import { loadStripe } from '@stripe/stripe-js'
-import { EmbeddedCheckoutProvider, EmbeddedCheckout } from '@stripe/react-stripe-js'
+import dynamic from 'next/dynamic'
 import { getStripePublishableKey } from '@/lib/utils/stripe-client'
 import { useToast } from '@/components/Toast'
 import logger from '@/lib/utils/logger'
@@ -89,8 +88,13 @@ interface ServiceRequest {
   specialRequests: string
 }
 
-// Initialize Stripe
-const stripePromise = loadStripe(getStripePublishableKey())
+// Dynamic Stripe components
+const StripeCheckout = dynamic(() => import('../StripeCheckout'), {
+  loading: () => <div className="flex items-center justify-center h-96">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ff385c]"></div>
+  </div>,
+  ssr: false
+})
 
 function ServiceCheckoutContent() {
   const { user, isLoaded } = useUser()
@@ -355,12 +359,7 @@ function ServiceCheckoutContent() {
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ff385c]"></div>
                       </div>
                     ) : clientSecret ? (
-                      <EmbeddedCheckoutProvider
-                        stripe={stripePromise}
-                        options={{ clientSecret }}
-                      >
-                        <EmbeddedCheckout />
-                      </EmbeddedCheckoutProvider>
+                      <StripeCheckout clientSecret={clientSecret} />
                     ) : (
                       <div className="text-center py-12">
                         <p className="text-gray-600">Error al cargar el formulario de pago</p>
