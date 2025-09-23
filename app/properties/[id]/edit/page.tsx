@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import Navigation from '@/components/Navigation'
 import HighlightPropertyService from '@/components/HighlightPropertyService'
+import { PropertyLogger } from '@/lib/utils/property-logger'
 import { 
   Edit3, 
   Save, 
@@ -68,11 +69,21 @@ export default function EditProperty() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [uploadingImages, setUploadingImages] = useState(false)
+  const [originalProperty, setOriginalProperty] = useState<Property | null>(null)
+
+  // Helper function to log field changes
+  const logFieldChange = (fieldName: string, oldValue: any, newValue: any) => {
+    if (user && oldValue !== newValue) {
+      PropertyLogger.logPropertyFieldChange(user.id, propertyId, fieldName, oldValue, newValue)
+    }
+  }
 
   useEffect(() => {
     if (isLoaded && !user) {
       router.push('/sign-in')
     } else if (isLoaded && user && propertyId) {
+      // Log component mount and editing start
+      PropertyLogger.logComponentMount('EditProperty', { userId: user.id, propertyId })
       fetchProperty()
     }
   }, [user, isLoaded, router, propertyId])
@@ -80,15 +91,47 @@ export default function EditProperty() {
   const fetchProperty = async () => {
     try {
       setIsLoading(true)
+      const startTime = performance.now()
+
       const response = await fetch(`/api/properties/${propertyId}`)
+
+      const endTime = performance.now()
+      const duration = endTime - startTime
+
       if (response.ok) {
         const data = await response.json()
         setProperty(data.data)
+        setOriginalProperty(data.data) // Store original for comparison
+
+        // Log successful property fetch for editing
+        if (user) {
+          PropertyLogger.logPropertyEditStart(user.id, propertyId, data.data)
+          PropertyLogger.logPerformance('property_fetch_for_edit', duration, {
+            userId: user.id,
+            propertyId
+          })
+        }
       } else {
+        // Log fetch failure
+        if (user) {
+          PropertyLogger.logError(new Error(`Failed to fetch property: ${response.status}`), 'property_fetch_for_edit', {
+            userId: user.id,
+            propertyId,
+            responseStatus: response.status
+          })
+        }
         router.push('/dashboard/properties')
       }
     } catch (error) {
       console.error('Error fetching property:', error)
+
+      // Log fetch error
+      if (user) {
+        PropertyLogger.logError(error instanceof Error ? error : new Error('Unknown fetch error'), 'property_fetch_for_edit', {
+          userId: user.id,
+          propertyId
+        })
+      }
       router.push('/dashboard/properties')
     } finally {
       setIsLoading(false)
@@ -96,10 +139,27 @@ export default function EditProperty() {
   }
 
   const handleSave = async () => {
-    if (!property) return
+    if (!property || !user) return
+
+    // Calculate changed fields for logging
+    const changedFields: string[] = []
+    if (originalProperty) {
+      if (property.title !== originalProperty.title) changedFields.push('title')
+      if (property.description !== originalProperty.description) changedFields.push('description')
+      if (JSON.stringify(property.price) !== JSON.stringify(originalProperty.price)) changedFields.push('price')
+      if (property.propertyType !== originalProperty.propertyType) changedFields.push('propertyType')
+      if (property.status !== originalProperty.status) changedFields.push('status')
+      if (JSON.stringify(property.address) !== JSON.stringify(originalProperty.address)) changedFields.push('address')
+      if (JSON.stringify(property.features) !== JSON.stringify(originalProperty.features)) changedFields.push('features')
+      if (JSON.stringify(property.images) !== JSON.stringify(originalProperty.images)) changedFields.push('images')
+      if (JSON.stringify(property.amenities) !== JSON.stringify(originalProperty.amenities)) changedFields.push('amenities')
+    }
 
     setIsSaving(true)
+
     try {
+      const startTime = performance.now()
+
       // Format the data correctly for the API
       const updateData = {
         title: property.title,
@@ -137,12 +197,24 @@ export default function EditProperty() {
         body: JSON.stringify(updateData)
       })
 
+      const endTime = performance.now()
+      const duration = endTime - startTime
+
       console.log('Response status:', response.status)
       console.log('Response headers:', Object.fromEntries(response.headers.entries()))
 
       if (response.ok) {
         const successData = await response.json()
         console.log('Success response:', successData)
+
+        // Log successful save
+        PropertyLogger.logPropertySave(user.id, propertyId, changedFields, true)
+        PropertyLogger.logPerformance('property_save', duration, {
+          userId: user.id,
+          propertyId,
+          changedFieldsCount: changedFields.length
+        })
+
         router.push('/dashboard/properties')
       } else {
         let errorData
@@ -154,11 +226,32 @@ export default function EditProperty() {
         }
         console.error('Error response:', errorData)
         console.error('Full response:', response)
-        alert(`Error al guardar la propiedad: ${errorData.error || `HTTP ${response.status}`}`)
+
+        const errorMessage = `Error al guardar la propiedad: ${errorData.error || `HTTP ${response.status}`}`
+        alert(errorMessage)
+
+        // Log save failure
+        PropertyLogger.logPropertySave(user.id, propertyId, changedFields, false, {
+          status: response.status,
+          message: errorData.error || response.statusText,
+          duration
+        })
       }
     } catch (error) {
       console.error('Network/Request error:', error)
-      alert('Error de conexión al guardar la propiedad')
+      const errorMessage = 'Error de conexión al guardar la propiedad'
+      alert(errorMessage)
+
+      // Log network error
+      PropertyLogger.logPropertySave(user.id, propertyId, changedFields, false, {
+        type: 'network_error',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      })
+      PropertyLogger.logError(error instanceof Error ? error : new Error('Unknown save error'), 'property_save', {
+        userId: user.id,
+        propertyId,
+        changedFields
+      })
     } finally {
       setIsSaving(false)
     }
@@ -166,10 +259,14 @@ export default function EditProperty() {
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
-    if (!files || !property) return
+    if (!files || !property || !user) return
+
+    const uploadCount = files.length
 
     setUploadingImages(true)
     try {
+      const startTime = performance.now()
+
       const formData = new FormData()
       Array.from(files).forEach(file => {
         formData.append('images', file)
@@ -180,35 +277,85 @@ export default function EditProperty() {
         body: formData
       })
 
+      const endTime = performance.now()
+      const duration = endTime - startTime
+
       if (response.ok) {
         const data = await response.json()
         setProperty({
           ...property,
           images: [...property.images, ...data.urls]
         })
+
+        // Log successful image upload
+        PropertyLogger.logPropertyImageUpload(user.id, propertyId, uploadCount, true)
+        PropertyLogger.logPerformance('property_image_upload', duration, {
+          userId: user.id,
+          propertyId,
+          uploadCount,
+          totalImages: property.images.length + data.urls.length
+        })
+      } else {
+        const errorData = await response.json().catch(() => ({ error: 'Upload failed' }))
+
+        // Log failed image upload
+        PropertyLogger.logPropertyImageUpload(user.id, propertyId, uploadCount, false, {
+          status: response.status,
+          message: errorData.error || response.statusText,
+          duration
+        })
       }
     } catch (error) {
       console.error('Error uploading images:', error)
+
+      // Log upload error
+      PropertyLogger.logPropertyImageUpload(user.id, propertyId, uploadCount, false, {
+        type: 'network_error',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      })
+      PropertyLogger.logError(error instanceof Error ? error : new Error('Unknown upload error'), 'property_image_upload', {
+        userId: user.id,
+        propertyId,
+        uploadCount
+      })
     } finally {
       setUploadingImages(false)
     }
   }
 
   const removeImage = (index: number) => {
-    if (!property) return
+    if (!property || !user) return
+    const removedImageUrl = property.images[index]
     const newImages = property.images.filter((_, i) => i !== index)
     setProperty({ ...property, images: newImages })
+
+    // Log image removal
+    PropertyLogger.logUserInteraction('image_remove', `image-${index}`, {
+      userId: user.id,
+      propertyId,
+      imageIndex: index,
+      imageUrl: removedImageUrl?.substring(0, 100),
+      remainingImages: newImages.length
+    })
   }
 
   const toggleStatus = async () => {
-    if (!property) return
+    if (!property || !user) return
+
+    const oldStatus = property.status
+    const newStatus = property.status === 'draft' ? 'published' : 'draft'
 
     try {
       if (property.status === 'draft') {
         // Publish the property
+        const startTime = performance.now()
+
         const response = await fetch(`/api/properties/${propertyId}/publish`, {
           method: 'POST'
         })
+
+        const endTime = performance.now()
+        const duration = endTime - startTime
 
         if (response.ok) {
           const data = await response.json()
@@ -216,9 +363,24 @@ export default function EditProperty() {
             ...property,
             status: 'published'
           })
+
+          // Log successful status change
+          PropertyLogger.logPropertyStatusChange(user.id, propertyId, oldStatus, 'published', true)
+          PropertyLogger.logPerformance('property_publish', duration, {
+            userId: user.id,
+            propertyId
+          })
         } else {
           const error = await response.json()
-          alert(error.error || 'Error al publicar la propiedad')
+          const errorMessage = error.error || 'Error al publicar la propiedad'
+          alert(errorMessage)
+
+          // Log failed status change
+          PropertyLogger.logPropertyStatusChange(user.id, propertyId, oldStatus, 'published', false, {
+            status: response.status,
+            message: errorMessage,
+            duration
+          })
         }
       } else {
         // Change to draft
@@ -226,12 +388,29 @@ export default function EditProperty() {
           ...property,
           status: 'draft'
         })
+
+        // Log status change to draft
+        PropertyLogger.logPropertyStatusChange(user.id, propertyId, oldStatus, 'draft', true)
+
         // Save the change
         await handleSave()
       }
     } catch (error) {
       console.error('Error toggling status:', error)
-      alert('Error al cambiar el estado de la propiedad')
+      const errorMessage = 'Error al cambiar el estado de la propiedad'
+      alert(errorMessage)
+
+      // Log error
+      PropertyLogger.logPropertyStatusChange(user.id, propertyId, oldStatus, newStatus, false, {
+        type: 'network_error',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      })
+      PropertyLogger.logError(error instanceof Error ? error : new Error('Unknown status toggle error'), 'property_status_toggle', {
+        userId: user.id,
+        propertyId,
+        oldStatus,
+        newStatus
+      })
     }
   }
 

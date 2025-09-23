@@ -33,7 +33,9 @@ const nextConfig: NextConfig = {
   compress: true,
   experimental: {
     optimizeCss: true,
-    optimizePackageImports: ['lucide-react', 'framer-motion']
+    optimizePackageImports: ['lucide-react', 'framer-motion'],
+    // Ensure Winston and Pino can be imported correctly
+    serverComponentsExternalPackages: ['winston', 'winston-daily-rotate-file', 'pino', 'pino-pretty']
   },
   webpack: (config, { dev, isServer }) => {
     if (!dev && !isServer) {

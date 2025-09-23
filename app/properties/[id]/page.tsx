@@ -13,6 +13,7 @@ import Footer from '@/components/Footer'
 import PropertyDetailSkeleton from '@/components/skeletons/PropertyDetailSkeleton'
 import { PhotoGallery } from '@/lib/utils/dynamic-imports'
 import { useUser } from '@clerk/nextjs'
+import { PropertyLogger } from '@/lib/utils/property-logger'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -203,13 +204,28 @@ export default function PropertyDetail() {
   const [favoriteLoading, setFavoriteLoading] = useState(false)
   const galleryRef = useRef<HTMLDivElement>(null)
   const detailsRef = useRef<HTMLDivElement>(null)
+  const [viewStartTime, setViewStartTime] = useState<number>(0)
+  const [hasLoggedView, setHasLoggedView] = useState(false)
+  const [contactForm, setContactForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    message: ''
+  })
+  const [isSubmittingContact, setIsSubmittingContact] = useState(false)
 
   useEffect(() => {
     const fetchProperty = async () => {
       try {
+        const startTime = performance.now()
+        setViewStartTime(startTime)
+
         const response = await fetch(`/api/properties/${id}`)
         const result = await response.json()
-        
+
+        const endTime = performance.now()
+        const duration = endTime - startTime
+
         if (result.success && result.data) {
           // Map API response to expected format
           const apiProperty = result.data
@@ -224,7 +240,7 @@ export default function PropertyDetail() {
             images: apiProperty.images || [],
             amenities: apiProperty.amenities || [],
             // Backward compatibility fields
-            location: apiProperty.address ? 
+            location: apiProperty.address ?
               `${apiProperty.address.city || ''}, ${apiProperty.address.state || ''}`.replace(/^,\s*|,\s*$/g, '') :
               'Ubicación no disponible',
             beds: apiProperty.features?.bedrooms || 0,
@@ -234,7 +250,22 @@ export default function PropertyDetail() {
             lotSize: apiProperty.features?.lotSize || `${apiProperty.features?.squareMeters || 0} m²`
           }
           setProperty(mappedProperty)
-          
+
+          // Log property view
+          if (!hasLoggedView) {
+            PropertyLogger.logPropertyView(
+              id,
+              user?.id,
+              navigator.userAgent,
+              document.referrer
+            )
+            PropertyLogger.logPerformance('property_fetch_for_view', duration, {
+              userId: user?.id || 'anonymous',
+              propertyId: id
+            })
+            setHasLoggedView(true)
+          }
+
           // Check if property is favorited by user
           if (user) {
             checkFavoriteStatus(apiProperty.id || apiProperty._id)
@@ -244,16 +275,52 @@ export default function PropertyDetail() {
           const staticProperty = propertyData[id as keyof typeof propertyData]
           if (staticProperty) {
             setProperty(staticProperty)
+
+            // Log static property view
+            if (!hasLoggedView) {
+              PropertyLogger.logPropertyView(
+                id,
+                user?.id,
+                navigator.userAgent,
+                document.referrer
+              )
+              setHasLoggedView(true)
+            }
           } else {
             setProperty(null)
           }
+
+          // Log API failure
+          PropertyLogger.logError(new Error('Property API failed, using fallback'), 'property_view_fetch', {
+            userId: user?.id || 'anonymous',
+            propertyId: id,
+            apiResponse: result
+          })
         }
       } catch (error) {
         console.error('Error fetching property:', error)
+
+        // Log fetch error
+        PropertyLogger.logError(error instanceof Error ? error : new Error('Unknown fetch error'), 'property_view_fetch', {
+          userId: user?.id || 'anonymous',
+          propertyId: id
+        })
+
         // Fallback to static data
         const staticProperty = propertyData[id as keyof typeof propertyData]
         if (staticProperty) {
           setProperty(staticProperty)
+
+          // Log static property view
+          if (!hasLoggedView) {
+            PropertyLogger.logPropertyView(
+              id,
+              user?.id,
+              navigator.userAgent,
+              document.referrer
+            )
+            setHasLoggedView(true)
+          }
         } else {
           setProperty(null)
         }
@@ -263,7 +330,7 @@ export default function PropertyDetail() {
     }
 
     fetchProperty()
-  }, [id, user])
+  }, [id, user, hasLoggedView])
 
   const checkFavoriteStatus = async (propertyId: string) => {
     try {
@@ -285,8 +352,12 @@ export default function PropertyDetail() {
 
     if (favoriteLoading || !property) return
 
+    const previousFavoriteState = isFavorite
+
     setFavoriteLoading(true)
     try {
+      const startTime = performance.now()
+
       const response = await fetch('/api/favorites/toggle', {
         method: 'POST',
         headers: {
@@ -295,12 +366,43 @@ export default function PropertyDetail() {
         body: JSON.stringify({ propertyId: property.id })
       })
 
+      const endTime = performance.now()
+      const duration = endTime - startTime
+
       if (response.ok) {
         const data = await response.json()
         setIsFavorite(data.data.isFavorite)
+
+        // Log successful favorite toggle
+        PropertyLogger.logPropertyFavoriteToggle(property.id, user.id, data.data.isFavorite, true)
+        PropertyLogger.logPerformance('property_favorite_toggle', duration, {
+          userId: user.id,
+          propertyId: property.id,
+          newState: data.data.isFavorite
+        })
+      } else {
+        const errorData = await response.json().catch(() => ({ error: 'Toggle failed' }))
+
+        // Log failed favorite toggle
+        PropertyLogger.logPropertyFavoriteToggle(property.id, user.id, !previousFavoriteState, false, {
+          status: response.status,
+          message: errorData.error || response.statusText,
+          duration
+        })
       }
     } catch (error) {
       console.error('Error toggling favorite:', error)
+
+      // Log error
+      PropertyLogger.logPropertyFavoriteToggle(property.id, user.id, !previousFavoriteState, false, {
+        type: 'network_error',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      })
+      PropertyLogger.logError(error instanceof Error ? error : new Error('Unknown favorite toggle error'), 'property_favorite_toggle', {
+        userId: user.id,
+        propertyId: property.id,
+        previousState: previousFavoriteState
+      })
     } finally {
       setFavoriteLoading(false)
     }
@@ -333,6 +435,107 @@ export default function PropertyDetail() {
 
     return () => ctx.revert()
   }, [property])
+
+  // Add page unload tracking for view duration
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (viewStartTime && user && property) {
+        const duration = performance.now() - viewStartTime
+        PropertyLogger.logPerformance('property_view_duration', duration, {
+          userId: user.id,
+          propertyId: property.id,
+          propertyType: property.propertyType
+        })
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+      // Also log on component unmount
+      if (viewStartTime && user && property) {
+        const duration = performance.now() - viewStartTime
+        PropertyLogger.logPerformance('property_view_duration', duration, {
+          userId: user.id,
+          propertyId: property.id,
+          propertyType: property.propertyType
+        })
+      }
+    }
+  }, [viewStartTime, user, property])
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!user) {
+      alert('Debes iniciar sesión para solicitar una visita')
+      return
+    }
+
+    if (!property) return
+
+    setIsSubmittingContact(true)
+
+    try {
+      const startTime = performance.now()
+
+      // Simulate API call - replace with your actual contact API
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ...contactForm,
+          propertyId: property.id,
+          propertyTitle: property.title
+        })
+      })
+
+      const endTime = performance.now()
+      const duration = endTime - startTime
+
+      if (response.ok) {
+        // Log successful contact form submission
+        PropertyLogger.logPropertyContactForm(property.id, user.id, contactForm, true)
+        PropertyLogger.logPerformance('property_contact_form', duration, {
+          userId: user.id,
+          propertyId: property.id
+        })
+
+        alert('¡Solicitud enviada exitosamente! Te contactaremos pronto.')
+        setContactForm({ name: '', email: '', phone: '', message: '' })
+      } else {
+        const errorData = await response.json().catch(() => ({ error: 'Contact form failed' }))
+
+        // Log failed contact form submission
+        PropertyLogger.logPropertyContactForm(property.id, user.id, contactForm, false, {
+          status: response.status,
+          message: errorData.error || response.statusText,
+          duration
+        })
+
+        alert('Error al enviar la solicitud. Por favor intenta de nuevo.')
+      }
+    } catch (error) {
+      console.error('Error submitting contact form:', error)
+
+      // Log error
+      PropertyLogger.logPropertyContactForm(property.id, user.id, contactForm, false, {
+        type: 'network_error',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      })
+      PropertyLogger.logError(error instanceof Error ? error : new Error('Unknown contact form error'), 'property_contact_form', {
+        userId: user.id,
+        propertyId: property.id,
+        formData: contactForm
+      })
+
+      alert('Error de conexión. Por favor intenta de nuevo.')
+    } finally {
+      setIsSubmittingContact(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -380,9 +583,14 @@ export default function PropertyDetail() {
         </div>
 
         <div className="section-container">
-          <div ref={galleryRef} className="property-gallery">
-            <PhotoGallery 
-              images={property.images} 
+          <div ref={galleryRef} className="property-gallery" onClick={() => {
+            // Log gallery interaction when clicked
+            if (user && property) {
+              PropertyLogger.logPropertyGalleryInteraction(property.id, user.id, 'open')
+            }
+          }}>
+            <PhotoGallery
+              images={property.images}
               title={property.title}
             />
           </div>
@@ -520,29 +728,43 @@ export default function PropertyDetail() {
                   <h3 className="text-xl font-light mb-4 text-gray-900">
                     Programar Visita
                   </h3>
-                  <form className="space-y-4">
+                  <form className="space-y-4" onSubmit={handleContactSubmit}>
                     <input
                       type="text"
                       placeholder="Tu Nombre"
+                      value={contactForm.name}
+                      onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                      required
                       className="w-full px-4 py-3 rounded-lg bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                     />
                     <input
                       type="email"
                       placeholder="Correo Electrónico"
+                      value={contactForm.email}
+                      onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                      required
                       className="w-full px-4 py-3 rounded-lg bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                     />
                     <input
                       type="tel"
                       placeholder="Número de Teléfono"
+                      value={contactForm.phone}
+                      onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
                       className="w-full px-4 py-3 rounded-lg bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                     />
                     <textarea
                       placeholder="Mensaje (Opcional)"
                       rows={4}
+                      value={contactForm.message}
+                      onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
                       className="w-full px-4 py-3 rounded-lg bg-white/50 backdrop-blur-sm border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 resize-none"
                     />
-                    <button className="btn-primary w-full">
-                      Solicitar Visita
+                    <button
+                      type="submit"
+                      disabled={isSubmittingContact}
+                      className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isSubmittingContact ? 'Enviando...' : 'Solicitar Visita'}
                     </button>
                   </form>
                 </div>

@@ -15,7 +15,9 @@
       "WebFetch(domain:clerk.com)",
       "Bash(npm run build:*)",
       "Bash(find:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(tree:*)",
+      "WebSearch"
     ],
     "deny": []
   }

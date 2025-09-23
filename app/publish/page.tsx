@@ -11,6 +11,7 @@ import LocationAutocomplete from '@/components/LocationAutocomplete'
 import { PropertyTypeEnum } from '@/lib/domain/value-objects/PropertyType'
 import { useToast } from '@/components/Toast'
 import { getSchemaByPropertyType } from '@/lib/validations/property-schemas'
+import { PropertyLogger } from '@/lib/utils/property-logger'
 
 const steps = [
   { id: 1, title: 'Información' },
@@ -81,8 +82,20 @@ export default function PublishProperty() {
   useEffect(() => {
     if (isLoaded && !user) {
       router.push('/sign-in')
+    } else if (isLoaded && user) {
+      // Log component mount and property creation start
+      PropertyLogger.logComponentMount('PublishProperty', { userId: user.id })
+      PropertyLogger.logPropertyCreationStart(user.id, currentStep, formData)
     }
   }, [user, isLoaded, router])
+
+  // Log step changes
+  useEffect(() => {
+    if (user && currentStep > 0) {
+      const stepName = steps.find(s => s.id === currentStep)?.title || 'Unknown'
+      PropertyLogger.logPropertyCreationStep(user.id, currentStep, stepName, formData)
+    }
+  }, [currentStep, user])
 
   useEffect(() => {
     if (stepRef.current) {
@@ -111,7 +124,7 @@ export default function PublishProperty() {
       if (titleValidation.error) {
         newErrors.title = titleValidation.error.details[0].message
       }
-      
+
       if (!formData.propertyType) {
         newErrors.propertyType = 'Selecciona un tipo de propiedad'
       }
@@ -129,12 +142,12 @@ export default function PublishProperty() {
 
     if (step === 3) {
       const schema = getSchemaByPropertyType(formData.propertyType)
-      
+
       const priceValidation = schema.extract('price').validate(formData.price)
       if (priceValidation.error) {
         newErrors.price = priceValidation.error.details[0].message
       }
-      
+
       const featuresValidation = schema.extract('features').validate(formData.features)
       if (featuresValidation.error) {
         const errorDetail = featuresValidation.error.details[0]
@@ -159,20 +172,48 @@ export default function PublishProperty() {
       }
     }
 
+    // Log validation results
+    if (user) {
+      PropertyLogger.logPropertyCreationValidation(
+        user.id,
+        step,
+        Object.keys(newErrors).length === 0,
+        newErrors
+      )
+    }
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
   const nextStep = () => {
     const isValid = validateStep(currentStep)
-    
+
     if (!isValid) {
       const errorMessages = Object.values(errors)
       const firstError = errorMessages[0]
       showToast(firstError, 'error')
+
+      // Log navigation failure due to validation
+      if (user) {
+        PropertyLogger.logUserInteraction('step_navigation_failed', `step-${currentStep}`, {
+          userId: user.id,
+          currentStep,
+          validationErrors: errors
+        })
+      }
       return
     }
-    
+
+    // Log successful step navigation
+    if (user) {
+      PropertyLogger.logUserInteraction('step_navigation_success', `step-${currentStep}`, {
+        userId: user.id,
+        fromStep: currentStep,
+        toStep: currentStep + 1
+      })
+    }
+
     setCurrentStep(prev => Math.min(prev + 1, steps.length))
   }
 
@@ -183,40 +224,91 @@ export default function PublishProperty() {
   const handleSubmit = async () => {
     const schema = getSchemaByPropertyType(formData.propertyType)
     const validation = schema.validate(formData)
-    
+
     if (validation.error) {
       const errorDetail = validation.error.details[0]
       const errorMessage = errorDetail.message
       showToast(errorMessage, 'error')
+
+      // Log validation failure on final submit
+      if (user) {
+        PropertyLogger.logPropertyCreationSubmit(user.id, formData, false, {
+          type: 'validation_error',
+          message: errorMessage,
+          details: validation.error.details
+        })
+      }
       return
     }
 
     setIsSubmitting(true)
     showToast('Publicando propiedad...', 'info')
 
+    // Log submission attempt
+    if (user) {
+      PropertyLogger.logUserInteraction('property_submit_start', 'submit-button', {
+        userId: user.id,
+        formData: {
+          propertyType: formData.propertyType,
+          hasTitle: !!formData.title,
+          hasAddress: !!formData.address?.street,
+          hasPrice: !!formData.price?.amount,
+          imageCount: formData.images?.length || 0
+        }
+      })
+    }
+
     try {
+      const startTime = performance.now()
+
       const response = await fetch('/api/properties', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       })
 
+      const endTime = performance.now()
+      const duration = endTime - startTime
+
       const result = await response.json()
 
       if (!response.ok) {
+        let errorMessage = result.error || 'Error al publicar la propiedad'
+
         if (response.status === 400 && result.details) {
           const firstError = result.details[0]
-          const errorMessage = `Error en ${firstError.path.join('.')}: ${firstError.message}`
-          showToast(errorMessage, 'error')
+          errorMessage = `Error en ${firstError.path.join('.')}: ${firstError.message}`
         } else if (response.status === 401) {
-          showToast('No tienes permisos para publicar propiedades', 'error')
+          errorMessage = 'No tienes permisos para publicar propiedades'
         } else if (response.status === 500) {
-          showToast('Error del servidor. Por favor intenta más tarde', 'error')
-        } else {
-          showToast(result.error || 'Error al publicar la propiedad', 'error')
+          errorMessage = 'Error del servidor. Por favor intenta más tarde'
         }
+
+        showToast(errorMessage, 'error')
+
+        // Log submission failure
+        if (user) {
+          PropertyLogger.logPropertyCreationSubmit(user.id, formData, false, {
+            type: 'api_error',
+            status: response.status,
+            message: errorMessage,
+            duration,
+            details: result.details || null
+          })
+        }
+
         setIsSubmitting(false)
         return
+      }
+
+      // Log successful submission
+      if (user) {
+        PropertyLogger.logPropertyCreationSubmit(user.id, formData, true, null)
+        PropertyLogger.logPerformance('property_creation_submit', duration, {
+          userId: user.id,
+          propertyId: result.data.id,
+          propertyType: formData.propertyType
+        })
       }
 
       setCurrentStep(7)
@@ -226,13 +318,32 @@ export default function PublishProperty() {
       }, 2000)
     } catch (error) {
       console.error('Submit error:', error)
-      showToast('Error de conexión. Verifica tu internet e intenta de nuevo', 'error')
+      const errorMessage = 'Error de conexión. Verifica tu internet e intenta de nuevo'
+      showToast(errorMessage, 'error')
+
+      // Log network/connection error
+      if (user) {
+        PropertyLogger.logPropertyCreationSubmit(user.id, formData, false, {
+          type: 'network_error',
+          message: errorMessage,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        })
+        PropertyLogger.logError(error instanceof Error ? error : new Error('Unknown submit error'), 'property_creation_submit', {
+          userId: user.id,
+          formData: {
+            propertyType: formData.propertyType,
+            title: formData.title?.substring(0, 50)
+          }
+        })
+      }
     } finally {
       setIsSubmitting(false)
     }
   }
 
   const toggleAmenity = (amenity: string) => {
+    const wasSelected = formData.features.amenities.includes(amenity)
+
     setFormData(prev => ({
       ...prev,
       features: {
@@ -242,6 +353,18 @@ export default function PublishProperty() {
           : [...prev.features.amenities, amenity]
       }
     }))
+
+    // Log amenity selection
+    if (user) {
+      PropertyLogger.logUserInteraction('amenity_toggle', `amenity-${amenity}`, {
+        userId: user.id,
+        amenity,
+        action: wasSelected ? 'remove' : 'add',
+        totalAmenities: wasSelected
+          ? formData.features.amenities.length - 1
+          : formData.features.amenities.length + 1
+      })
+    }
   }
 
   if (!isLoaded || !user) {
