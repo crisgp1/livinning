@@ -17,7 +17,9 @@
       "Bash(find:*)",
       "Bash(npx tsc:*)",
       "Bash(tree:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(npm run lint)",
+      "Bash(pkill:*)"
     ],
     "deny": []
   }

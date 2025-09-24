@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { MapPin, Search, Loader2 } from 'lucide-react'
 import Radar from 'radar-sdk-js'
-import { gsap } from 'gsap'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface LocationAutocompleteProps {
   onLocationSelect: (location: {
@@ -38,14 +38,7 @@ export default function LocationAutocomplete({
     Radar.initialize(process.env.NEXT_PUBLIC_RADAR_TEST_PUBLISHABLE_KEY || '')
   }, [])
 
-  useEffect(() => {
-    if (showSuggestions && suggestionsRef.current) {
-      gsap.fromTo(suggestionsRef.current,
-        { opacity: 0, y: -10 },
-        { opacity: 1, y: 0, duration: 0.2, ease: "power2.out" }
-      )
-    }
-  }, [showSuggestions])
+  // Animation now handled by Framer Motion AnimatePresence
 
   const searchLocation = async (searchQuery: string) => {
     if (searchQuery.length < 3) {
@@ -105,20 +98,7 @@ export default function LocationAutocomplete({
     setShowSuggestions(false)
     onLocationSelect(location)
 
-    // Animate selection
-    if (inputRef.current) {
-      gsap.to(inputRef.current, {
-        borderColor: '#10b981',
-        duration: 0.3,
-        onComplete: () => {
-          gsap.to(inputRef.current, {
-            borderColor: '#d1d5db',
-            duration: 0.3,
-            delay: 0.5
-          })
-        }
-      })
-    }
+    // Selection animation removed - handled by CSS transitions
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

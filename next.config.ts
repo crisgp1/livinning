@@ -32,11 +32,10 @@ const nextConfig: NextConfig = {
   },
   compress: true,
   experimental: {
-    optimizeCss: true,
-    optimizePackageImports: ['lucide-react', 'framer-motion'],
-    // Ensure Winston and Pino can be imported correctly
-    serverComponentsExternalPackages: ['winston', 'winston-daily-rotate-file', 'pino', 'pino-pretty']
+    optimizePackageImports: ['lucide-react', 'framer-motion']
   },
+  // Move serverExternalPackages out of experimental
+  serverExternalPackages: ['winston', 'winston-daily-rotate-file', 'pino', 'pino-pretty'],
   webpack: (config, { dev, isServer }) => {
     if (!dev && !isServer) {
       config.optimization.splitChunks = {

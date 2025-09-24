@@ -1,9 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { motion } from 'framer-motion'
 import { Building2, Search, TrendingUp, Headphones, Sparkles } from 'lucide-react'
 import Navigation from '@/components/Navigation'
@@ -12,8 +9,6 @@ import FeaturedProperties from '@/components/FeaturedProperties'
 import AuthenticatedContent from '@/components/AuthenticatedContent'
 import CTA from '@/components/CTA'
 import Footer from '@/components/Footer'
-
-gsap.registerPlugin(ScrollTrigger)
 
 const services = [
   {
@@ -44,41 +39,6 @@ const services = [
 
 export default function Home() {
   const router = useRouter()
-  const sectionRef = useRef<HTMLElement>(null)
-  const cardsRef = useRef<HTMLDivElement[]>([])
-
-  useEffect(() => {
-    // Initialize smooth scroll behavior
-    gsap.config({ nullTargetWarn: false })
-    
-    // Services section animations
-    const ctx = gsap.context(() => {
-      cardsRef.current.forEach((card, index) => {
-        if (card) {
-          gsap.from(card, {
-            y: 60,
-            opacity: 0,
-            duration: 0.8,
-            delay: index * 0.1,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: card,
-              start: 'top bottom-=100'
-            }
-          })
-
-        }
-      })
-    }, sectionRef)
-    
-    // Refresh ScrollTrigger on load
-    ScrollTrigger.refresh()
-    
-    return () => {
-      ctx.revert()
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill())
-    }
-  }, [])
 
   const handleServiceClick = () => {
     router.push('/servicios')
@@ -92,7 +52,7 @@ export default function Home() {
       <AuthenticatedContent />
       
       {/* Services Section */}
-      <section ref={sectionRef} className="py-20 relative overflow-hidden" style={{ background: 'var(--color-background-secondary)' }}>
+      <section className="py-20 relative overflow-hidden" style={{ background: 'var(--color-background-secondary)' }}>
         {/* Background decoration */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute top-0 left-0 w-96 h-96 bg-primary rounded-full filter blur-3xl"></div>
@@ -124,13 +84,17 @@ export default function Home() {
               return (
                 <motion.div
                   key={service.title}
-                  ref={(el) => {
-                    if (el) cardsRef.current[index] = el
-                  }}
                   className="relative group cursor-pointer"
+                  initial={{ y: 60, opacity: 0 }}
+                  whileInView={{ y: 0, opacity: 1 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                  transition={{
+                    duration: 0.8,
+                    delay: index * 0.1,
+                    ease: "easeOut"
+                  }}
                   whileHover={{ scale: 1.05, y: -8 }}
                   whileTap={{ scale: 0.95 }}
-                  transition={{ duration: 0.3, ease: "easeOut" }}
                   onClick={handleServiceClick}
                 >
                   {/* Glassmorphism card */}

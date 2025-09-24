@@ -4,7 +4,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
-import { gsap } from 'gsap'
+// GSAP removed - using Framer Motion for animations
 import { motion } from 'framer-motion'
 import ImageUpload from '@/components/ImageUpload'
 import LocationAutocomplete from '@/components/LocationAutocomplete'
@@ -99,19 +99,13 @@ export default function PublishProperty() {
 
   useEffect(() => {
     if (stepRef.current) {
-      gsap.fromTo(stepRef.current,
-        { x: 50, opacity: 0 },
-        { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" }
-      )
+      // Step animations handled by Framer Motion now
     }
 
     if (progressRef.current) {
       const progress = (currentStep / steps.length) * 100
-      gsap.to(progressRef.current, {
-        width: `${progress}%`,
-        duration: 0.5,
-        ease: "power2.out"
-      })
+      // Progress bar animations handled by CSS transitions now
+      progressRef.current.style.width = `${progress}%`
     }
   }, [currentStep])
 

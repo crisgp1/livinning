@@ -1,4 +1,6 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Mobile-first optimizations */
 @media (max-width: 767px) {
@@ -13,7 +15,7 @@
   }
 }
 
-@theme {
+:root {
   /* Modern Light Theme Colors - Zillow Inspired */
   --color-background: #ffffff;
   --color-background-secondary: #f8f9fa;

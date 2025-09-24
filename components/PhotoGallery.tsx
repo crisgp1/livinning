@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import { ChevronLeft, ChevronRight, X, ZoomIn, Grid3X3 } from 'lucide-react'
-import { loadGSAP } from '@/lib/utils/dynamic-imports'
+import { motion, AnimatePresence, useMotionValue } from 'framer-motion'
 
 interface PhotoGalleryProps {
   images: string[]
@@ -14,121 +14,41 @@ export default function PhotoGallery({ images, title }: PhotoGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isGridView, setIsGridView] = useState(false)
-  const [gsapLoaded, setGsapLoaded] = useState(false)
-  
-  const mainImageRef = useRef<HTMLDivElement>(null)
-  const thumbnailsRef = useRef<HTMLDivElement>(null)
-  const modalRef = useRef<HTMLDivElement>(null)
-  const modalImageRef = useRef<HTMLDivElement>(null)
-  const gridRef = useRef<HTMLDivElement>(null)
-  const gsapRef = useRef<any>(null)
 
-  useEffect(() => {
-    const initGSAP = async () => {
-      const gsapModule = await loadGSAP()
-      if (gsapModule) {
-        gsapRef.current = gsapModule.gsap
-        setGsapLoaded(true)
-        
-        if (mainImageRef.current) {
-          gsapModule.gsap.fromTo(mainImageRef.current,
-            { scale: 1.1, opacity: 0 },
-            { scale: 1, opacity: 1, duration: 1, ease: "power3.out" }
-          )
-        }
-        
-        if (thumbnailsRef.current) {
-          gsapModule.gsap.fromTo(thumbnailsRef.current.children,
-            { y: 20, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.6, stagger: 0.1, delay: 0.3, ease: "power2.out" }
-          )
-        }
+  // Animation variants for Framer Motion
+  const mainImageVariants = {
+    initial: { scale: 1.1, opacity: 0 },
+    animate: { scale: 1, opacity: 1 },
+    exit: { scale: 0.95, opacity: 0 }
+  }
+
+  const thumbnailVariants = {
+    initial: { y: 20, opacity: 0 },
+    animate: (i: number) => ({
+      y: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.6,
+        delay: 0.3 + i * 0.1
       }
-    }
-    
-    initGSAP()
-  }, [])
+    })
+  }
 
   const changeImage = (index: number) => {
-    if (index === currentIndex || !gsapLoaded || !gsapRef.current) return
-    
-    const tl = gsapRef.current.timeline()
-    
-    tl.to(mainImageRef.current, {
-      scale: 0.95,
-      opacity: 0,
-      duration: 0.3,
-      ease: "power2.in"
-    })
-    .call(() => setCurrentIndex(index))
-    .to(mainImageRef.current, {
-      scale: 1,
-      opacity: 1,
-      duration: 0.4,
-      ease: "back.out(1.7)"
-    })
+    if (index === currentIndex) return
+    setCurrentIndex(index)
   }
 
   const openModal = () => {
     setIsModalOpen(true)
-    if (gsapLoaded && gsapRef.current) {
-      gsapRef.current.fromTo(modalRef.current,
-        { opacity: 0 },
-        { opacity: 1, duration: 0.3, ease: "power2.out" }
-      )
-      gsapRef.current.fromTo(modalImageRef.current,
-        { scale: 0.8, opacity: 0 },
-        { scale: 1, opacity: 1, duration: 0.4, delay: 0.1, ease: "back.out(1.7)" }
-      )
-    }
   }
 
   const closeModal = () => {
-    if (gsapLoaded && gsapRef.current) {
-      const tl = gsapRef.current.timeline()
-      
-      tl.to(modalImageRef.current, {
-        scale: 0.8,
-        opacity: 0,
-        duration: 0.3,
-        ease: "power2.in"
-      })
-      .to(modalRef.current, {
-        opacity: 0,
-        duration: 0.2,
-        ease: "power2.in",
-        onComplete: () => setIsModalOpen(false)
-      })
-    } else {
-      setIsModalOpen(false)
-    }
+    setIsModalOpen(false)
   }
 
   const toggleGridView = () => {
-    if (!isGridView) {
-      setIsGridView(true)
-      if (gsapLoaded && gsapRef.current) {
-        gsapRef.current.fromTo(gridRef.current?.children || [],
-          { scale: 0.8, opacity: 0 },
-          { scale: 1, opacity: 1, duration: 0.4, stagger: 0.05, ease: "back.out(1.7)" }
-        )
-      }
-    } else {
-      if (gsapLoaded && gsapRef.current) {
-        gsapRef.current.to(gridRef.current?.children || [],
-          { 
-            scale: 0.8, 
-            opacity: 0, 
-            duration: 0.3, 
-            stagger: 0.02,
-            ease: "power2.in",
-            onComplete: () => setIsGridView(false)
-          }
-        )
-      } else {
-        setIsGridView(false)
-      }
-    }
+    setIsGridView(!isGridView)
   }
 
   const nextImage = () => {
@@ -159,9 +79,12 @@ export default function PhotoGallery({ images, title }: PhotoGalleryProps) {
       <div className="space-y-4">
         {/* Main Image */}
         <div className="relative">
-          <div 
-            ref={mainImageRef}
+          <motion.div
             className="relative h-[70vh] rounded-xl overflow-hidden cursor-pointer group"
+            variants={mainImageVariants}
+            initial="initial"
+            animate="animate"
+            transition={{ duration: 1, ease: "easeOut" }}
             onClick={openModal}
           >
             <Image
@@ -209,7 +132,7 @@ export default function PhotoGallery({ images, title }: PhotoGalleryProps) {
             <div className="absolute bottom-4 right-4 bg-black/50 backdrop-blur-sm rounded-full px-4 py-2 text-white text-sm">
               {currentIndex + 1} / {images.length}
             </div>
-          </div>
+          </motion.div>
 
           {/* Gallery Controls */}
           <div className="absolute top-4 right-4 flex gap-2">
@@ -223,47 +146,70 @@ export default function PhotoGallery({ images, title }: PhotoGalleryProps) {
         </div>
 
         {/* Thumbnails */}
-        {!isGridView && (
-          <div 
-            ref={thumbnailsRef}
-            className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide"
-          >
-            {images.map((image, index) => (
-              <div
-                key={index}
-                className={`relative h-20 w-32 flex-shrink-0 rounded-lg overflow-hidden cursor-pointer transition-all duration-300 ${
-                  index === currentIndex 
-                    ? 'ring-2 ring-white scale-105' 
-                    : 'hover:scale-105 opacity-70 hover:opacity-100'
-                }`}
-                onClick={() => changeImage(index)}
-              >
+        <AnimatePresence>
+          {!isGridView && (
+            <motion.div
+              className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.3 }}
+            >
+              {images.map((image, index) => (
+                <motion.div
+                  key={index}
+                  custom={index}
+                  variants={thumbnailVariants}
+                  initial="initial"
+                  animate="animate"
+                  className={`relative h-20 w-32 flex-shrink-0 rounded-lg overflow-hidden cursor-pointer transition-all duration-300 ${
+                    index === currentIndex
+                      ? 'ring-2 ring-white scale-105'
+                      : 'hover:scale-105 opacity-70 hover:opacity-100'
+                  }`}
+                  onClick={() => changeImage(index)}
+                >
                 <Image
                   src={image}
                   alt={`${title} thumbnail ${index + 1}`}
                   fill
                   className="object-cover"
                 />
-              </div>
-            ))}
-          </div>
-        )}
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Grid View */}
-        {isGridView && (
-          <div 
-            ref={gridRef}
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
-          >
-            {images.map((image, index) => (
-              <div
-                key={index}
-                className="relative aspect-square rounded-lg overflow-hidden cursor-pointer group"
-                onClick={() => {
-                  changeImage(index)
-                  toggleGridView()
-                }}
-              >
+        <AnimatePresence>
+          {isGridView && (
+            <motion.div
+              className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              {images.map((image, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.8, opacity: 0 }}
+                  transition={{
+                    duration: 0.4,
+                    delay: index * 0.05,
+                    type: "spring",
+                    stiffness: 400,
+                    damping: 30
+                  }}
+                  className="relative aspect-square rounded-lg overflow-hidden cursor-pointer group"
+                  onClick={() => {
+                    changeImage(index)
+                    toggleGridView()
+                  }}
+                >
                 <Image
                   src={image}
                   alt={`${title} grid ${index + 1}`}
@@ -271,24 +217,38 @@ export default function PhotoGallery({ images, title }: PhotoGalleryProps) {
                   className="object-cover transition-transform duration-300 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              </div>
-            ))}
-          </div>
-        )}
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Modal */}
-      {isModalOpen && (
-        <div 
-          ref={modalRef}
-          className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          onClick={closeModal}
-        >
-          <div 
-            ref={modalImageRef}
-            className="relative max-w-7xl max-h-full"
-            onClick={(e) => e.stopPropagation()}
+      <AnimatePresence>
+        {isModalOpen && (
+          <motion.div
+            className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            onClick={closeModal}
           >
+            <motion.div
+              className="relative max-w-7xl max-h-full"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{
+                duration: 0.4,
+                delay: 0.1,
+                type: "spring",
+                stiffness: 400,
+                damping: 30
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
             <Image
               src={images[currentIndex]}
               alt={`${title} - Full size ${currentIndex + 1}`}
@@ -324,9 +284,10 @@ export default function PhotoGallery({ images, title }: PhotoGalleryProps) {
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur-sm rounded-full px-6 py-3 text-white">
               {currentIndex + 1} / {images.length}
             </div>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   )
 }

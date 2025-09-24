@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
-import { gsap } from 'gsap'
+import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion'
 import { Upload, X, Image as ImageIcon } from 'lucide-react'
 import Image from 'next/image'
 import logger from '@/lib/utils/logger'
@@ -12,18 +12,20 @@ interface ImageUploadProps {
   existingImages?: string[]
 }
 
-export default function ImageUpload({ 
-  onImagesChange, 
-  maxImages = 10, 
-  existingImages = [] 
+export default function ImageUpload({
+  onImagesChange,
+  maxImages = 10,
+  existingImages = []
 }: ImageUploadProps) {
   const [images, setImages] = useState<string[]>(existingImages)
   const [uploading, setUploading] = useState(false)
   const [dragActive, setDragActive] = useState(false)
-  
-  const dropRef = useRef<HTMLDivElement>(null)
+
   const inputRef = useRef<HTMLInputElement>(null)
-  const gridRef = useRef<HTMLDivElement>(null)
+
+  // Framer Motion values for drag interactions
+  const scale = useMotionValue(1)
+  const borderColorOpacity = useMotionValue(0)
 
   const uploadFiles = async (files: File[]) => {
     if (files.length === 0) return
@@ -61,21 +63,12 @@ export default function ImageUpload({
         const newImages = [...images, ...result.data.files].slice(0, maxImages)
         setImages(newImages)
         onImagesChange(newImages)
-        
+
         logger.info('ImageUpload', 'Upload successful', {
           uploadedCount: result.data.files.length,
           totalImages: newImages.length,
           uploadedFiles: result.data.files
         })
-
-        // Animate new images
-        const newImageElements = gridRef.current?.querySelectorAll('.image-item:nth-last-child(-n+' + result.data.files.length + ')')
-        if (newImageElements) {
-          gsap.fromTo(newImageElements,
-            { scale: 0, opacity: 0, rotation: 10 },
-            { scale: 1, opacity: 1, rotation: 0, duration: 0.5, stagger: 0.1, ease: "back.out(1.7)" }
-          )
-        }
       } else {
         logger.error('ImageUpload', 'Upload failed', { error: result.error })
         throw new Error(result.error || 'Upload failed')
@@ -101,57 +94,33 @@ export default function ImageUpload({
     e.preventDefault()
     e.stopPropagation()
     setDragActive(true)
-
-    if (dropRef.current) {
-      gsap.to(dropRef.current, {
-        scale: 1.02,
-        borderColor: 'var(--color-primary)',
-        backgroundColor: 'var(--color-surface-hover)',
-        duration: 0.2,
-        ease: "power2.out"
-      })
-    }
-  }, [])
+    scale.set(1.02)
+    borderColorOpacity.set(1)
+  }, [scale, borderColorOpacity])
 
   const handleDragOut = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
     setDragActive(false)
-
-    if (dropRef.current) {
-      gsap.to(dropRef.current, {
-        scale: 1,
-        borderColor: 'var(--color-border)',
-        backgroundColor: 'var(--color-surface)',
-        duration: 0.2,
-        ease: "power2.out"
-      })
-    }
-  }, [])
+    scale.set(1)
+    borderColorOpacity.set(0)
+  }, [scale, borderColorOpacity])
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
     setDragActive(false)
+    scale.set(1)
+    borderColorOpacity.set(0)
 
-    if (dropRef.current) {
-      gsap.to(dropRef.current, {
-        scale: 1,
-        borderColor: 'var(--color-border)',
-        backgroundColor: 'var(--color-surface)',
-        duration: 0.2,
-        ease: "power2.out"
-      })
-    }
-
-    const files = Array.from(e.dataTransfer.files).filter(file => 
+    const files = Array.from(e.dataTransfer.files).filter(file =>
       file.type.startsWith('image/')
     )
 
     if (files.length > 0) {
       uploadFiles(files)
     }
-  }, [images, maxImages])
+  }, [scale, borderColorOpacity])
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
@@ -161,41 +130,23 @@ export default function ImageUpload({
   }
 
   const removeImage = (index: number) => {
-    const imageElement = gridRef.current?.children[index] as HTMLElement
-    
-    if (imageElement) {
-      gsap.to(imageElement, {
-        scale: 0,
-        opacity: 0,
-        rotation: -10,
-        duration: 0.3,
-        ease: "power2.in",
-        onComplete: () => {
-          const newImages = images.filter((_, i) => i !== index)
-          setImages(newImages)
-          onImagesChange(newImages)
-        }
-      })
-    }
+    const newImages = images.filter((_, i) => i !== index)
+    setImages(newImages)
+    onImagesChange(newImages)
   }
 
   return (
     <div className="space-y-4">
-      <div
-        ref={dropRef}
-        className="border-2 border-dashed rounded-xl p-8 text-center transition-colors duration-200 cursor-pointer"
-        style={{ 
-          borderColor: 'var(--color-border)',
-          background: 'var(--color-surface)'
+      <motion.div
+        className="border-2 border-dashed rounded-xl p-8 text-center cursor-pointer"
+        style={{
+          scale,
+          borderColor: useTransform(borderColorOpacity, [0, 1], ['rgb(229 231 235)', 'rgb(59 130 246)']),
+          backgroundColor: useTransform(borderColorOpacity, [0, 1], ['rgb(248 250 252)', 'rgb(239 246 255)'])
         }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.borderColor = 'var(--color-primary)'
-          e.currentTarget.style.background = 'var(--color-surface-hover)'
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.borderColor = 'var(--color-border)'
-          e.currentTarget.style.background = 'var(--color-surface)'
-        }}
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.98 }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
         onDragEnter={handleDragIn}
         onDragLeave={handleDragOut}
         onDragOver={handleDrag}
@@ -232,7 +183,7 @@ export default function ImageUpload({
             </p>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {images.length > 0 && (
         <div>
@@ -240,15 +191,23 @@ export default function ImageUpload({
             Imágenes subidas ({images.length}/{maxImages})
           </h4>
           
-          <div 
-            ref={gridRef}
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
-          >
-            {images.map((image, index) => (
-              <div
-                key={index}
-                className="image-item relative group aspect-square rounded-lg overflow-hidden" style={{ background: 'rgba(17, 17, 17, 0.8)' }}
-              >
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <AnimatePresence>
+              {images.map((image, index) => (
+                <motion.div
+                  key={image}
+                  layout
+                  initial={{ scale: 0, opacity: 0, rotate: 10 }}
+                  animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                  exit={{ scale: 0, opacity: 0, rotate: -10 }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 400,
+                    damping: 30,
+                    delay: index * 0.1
+                  }}
+                  className="relative group aspect-square rounded-lg overflow-hidden bg-gray-900"
+                >
                 <Image
                   src={image}
                   alt={`Property image ${index + 1}`}
@@ -278,8 +237,9 @@ export default function ImageUpload({
                     Principal
                   </div>
                 )}
-              </div>
-            ))}
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
         </div>
       )}

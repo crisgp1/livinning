@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import gsap from 'gsap'
+// TODO: Convert this component from GSAP to Framer Motion for consistency
 
 interface ImpersonationTransitionProps {
   isActive: boolean
@@ -16,6 +16,9 @@ export default function ImpersonationTransition({ isActive, type, onComplete }: 
 
   useEffect(() => {
     if (isActive && overlayRef.current && textRef.current && circleRef.current) {
+      // GSAP code commented out - needs migration to Framer Motion
+      if (onComplete) onComplete()
+      /*
       const tl = gsap.timeline({
         onComplete: () => {
           if (onComplete) onComplete()
@@ -26,34 +29,9 @@ export default function ImpersonationTransition({ isActive, type, onComplete }: 
       gsap.set(overlayRef.current, { display: 'flex' })
       gsap.set(circleRef.current, { scale: 0, opacity: 0 })
       gsap.set(textRef.current, { opacity: 0, y: 20 })
+      */
 
-      // Animation sequence
-      tl.to(circleRef.current, {
-        scale: 50,
-        opacity: 1,
-        duration: 0.8,
-        ease: 'power2.inOut'
-      })
-      .to(textRef.current, {
-        opacity: 1,
-        y: 0,
-        duration: 0.5,
-        ease: 'power2.out'
-      }, '-=0.4')
-      .to(textRef.current, {
-        opacity: 0,
-        y: -20,
-        duration: 0.4,
-        ease: 'power2.in',
-        delay: 0.8
-      })
-      .to(circleRef.current, {
-        scale: 100,
-        opacity: 0,
-        duration: 0.6,
-        ease: 'power2.in'
-      }, '-=0.2')
-      .set(overlayRef.current, { display: 'none' })
+      // Animation sequence removed - needs Framer Motion conversion
     }
   }, [isActive, type, onComplete])
 

@@ -23,7 +23,6 @@
     "@vercel/speed-insights": "^1.2.0",
     "dotenv": "^17.2.0",
     "framer-motion": "^12.23.5",
-    "gsap": "^3.13.0",
     "html2canvas": "^1.4.1",
     "joi": "^17.13.3",
     "jspdf": "^3.0.1",
@@ -46,13 +45,13 @@
     "zustand": "^5.0.7"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/winston": "^2.4.4",
-    "lightningcss": "^1.30.1",
-    "tailwindcss": "^4",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.14",
     "typescript": "^5"
   }
 }

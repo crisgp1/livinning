@@ -1,49 +1,26 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { motion } from 'framer-motion'
 import { Calendar, Home, Users, Headphones } from 'lucide-react'
 import { SignInButton, SignUpButton, SignedIn, SignedOut } from '@clerk/nextjs'
 
-gsap.registerPlugin(ScrollTrigger)
-
 export default function CTA() {
-  const sectionRef = useRef<HTMLElement>(null)
-  const contentRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(contentRef.current, {
-        scale: 0.9,
-        opacity: 0,
-        duration: 1,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top bottom-=100'
-        }
-      })
-
-      gsap.to('.cta-bg', {
-        yPercent: -20,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top bottom',
-          end: 'bottom top',
-          scrub: true
-        }
-      })
-    }, sectionRef)
-
-    return () => ctx.revert()
-  }, [])
 
   return (
-    <section ref={sectionRef} className="relative py-24">
-      <div className="cta-bg absolute inset-0 z-0">
+    <motion.section
+      className="relative py-24"
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: 0.8 }}
+    >
+      <motion.div
+        className="absolute inset-0 z-0"
+        initial={{ y: 50 }}
+        whileInView={{ y: 0 }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 1, ease: "easeOut" }}
+      >
         <div className="absolute inset-0 bg-gradient-to-br from-primary to-blue-600" />
         <div className="absolute inset-0 opacity-10">
           <div className="h-full w-full" style={{
@@ -51,10 +28,16 @@ export default function CTA() {
             backgroundSize: '60px 60px'
           }} />
         </div>
-      </div>
+      </motion.div>
 
       <div className="relative z-10 section-container">
-        <div ref={contentRef} className="text-center max-w-3xl mx-auto">
+        <motion.div
+          className="text-center max-w-3xl mx-auto"
+          initial={{ scale: 0.9, opacity: 0 }}
+          whileInView={{ scale: 1, opacity: 1 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 1, ease: "easeOut" }}
+        >
           <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
             ¿Listo para Encontrar tu <span className="text-white">Hogar Ideal</span>?
           </h2>
@@ -171,8 +154,8 @@ export default function CTA() {
               <p className="text-white/80">Soporte Dedicado</p>
             </motion.div>
           </div>
-        </div>
+        </motion.div>
       </div>
-    </section>
+    </motion.section>
   )
 }

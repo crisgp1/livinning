@@ -3,8 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Image from 'next/image'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+// GSAP removed - using Framer Motion for animations
 import { motion } from 'framer-motion'
 import { ArrowLeft, Bed, Bath, Square, MapPin, Calendar, Heart, Share2 } from 'lucide-react'
 import Link from 'next/link'
@@ -14,8 +13,6 @@ import PropertyDetailSkeleton from '@/components/skeletons/PropertyDetailSkeleto
 import { PhotoGallery } from '@/lib/utils/dynamic-imports'
 import { useUser } from '@clerk/nextjs'
 import { PropertyLogger } from '@/lib/utils/property-logger'
-
-gsap.registerPlugin(ScrollTrigger)
 
 const propertyData = {
   '1': {
@@ -411,29 +408,7 @@ export default function PropertyDetail() {
   useEffect(() => {
     if (!property) return
 
-    const ctx = gsap.context(() => {
-      gsap.from('.property-info > *', {
-        y: 30,
-        opacity: 0,
-        duration: 0.8,
-        stagger: 0.1,
-        ease: 'power3.out',
-        delay: 0.5
-      })
-
-      gsap.from('.feature-item', {
-        x: -20,
-        opacity: 0,
-        duration: 0.6,
-        stagger: 0.1,
-        scrollTrigger: {
-          trigger: '.features-list',
-          start: 'top bottom-=100'
-        }
-      })
-    })
-
-    return () => ctx.revert()
+    // Animations now handled by Framer Motion in the JSX
   }, [property])
 
   // Add page unload tracking for view duration

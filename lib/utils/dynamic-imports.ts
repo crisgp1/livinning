@@ -12,16 +12,7 @@ export const ServiceModal = dynamic(() => import('@/components/ServiceModal'), {
   loading: () => null
 })
 
-// Heavy libraries lazy loading
-export const Html2CanvasLazy = dynamic(() => import('html2canvas'), {
-  ssr: false,
-  loading: () => null
-})
-
-export const JsPdfLazy = dynamic(() => import('jspdf'), {
-  ssr: false,
-  loading: () => null
-})
+// Heavy libraries lazy loading - removed dynamic imports due to type conflicts
 
 // Utility for conditional loading
 export const loadHeavyLibs = async () => {
@@ -41,15 +32,4 @@ export const debounce = (func: Function, delay: number) => {
   }
 }
 
-// GSAP lazy loading utility
-export const loadGSAP = async () => {
-  if (typeof window !== 'undefined') {
-    const [gsap, { ScrollTrigger }] = await Promise.all([
-      import('gsap'),
-      import('gsap/ScrollTrigger')
-    ])
-    gsap.default.registerPlugin(ScrollTrigger)
-    return { gsap: gsap.default, ScrollTrigger }
-  }
-  return null
-}
+// GSAP removed - using Framer Motion instead

@@ -21,22 +21,33 @@ export default function Navigation() {
   const [isProvider, setIsProvider] = useState(false)
 
   useEffect(() => {
-    let ticking = false
-    
-    const handleScroll = () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          setIsScrolled(window.scrollY > 20)
-          ticking = false
-        })
-        ticking = true
+    // Use Intersection Observer for better performance
+    // Create a sentinel element at the top of the page
+    const sentinel = document.createElement('div')
+    sentinel.style.position = 'absolute'
+    sentinel.style.top = '0'
+    sentinel.style.height = '20px'
+    sentinel.style.pointerEvents = 'none'
+    document.body.insertBefore(sentinel, document.body.firstChild)
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // When sentinel is not intersecting, we're scrolled down
+        setIsScrolled(!entry.isIntersecting)
+      },
+      {
+        rootMargin: '0px',
+        threshold: [0, 1]
       }
-    }
-    
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    
+    )
+
+    observer.observe(sentinel)
+
     return () => {
-      window.removeEventListener('scroll', handleScroll)
+      observer.disconnect()
+      if (sentinel.parentNode) {
+        sentinel.parentNode.removeChild(sentinel)
+      }
     }
   }, [])
 

@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { gsap } from 'gsap'
+// GSAP removed - using Framer Motion for animations
 import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 import { 
   ArrowLeft, 
