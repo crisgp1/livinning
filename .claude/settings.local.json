@@ -19,7 +19,12 @@
       "Bash(tree:*)",
       "WebSearch",
       "Bash(npm run lint)",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "Bash(npm audit:*)",
+      "Bash(npx next build:*)",
+      "Bash(curl:*)",
+      "Bash(chmod:*)",
+      "Bash(node:*)"
     ],
     "deny": []
   }

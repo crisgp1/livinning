@@ -50,14 +50,64 @@
   --glass-border: transparent;
   --glass-backdrop: none;
   
-  /* Fonts */
-  --font-family-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Typography Scale */
+  --font-family-sans: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Font Sizes */
+  --font-size-xs: 0.75rem;     /* 12px */
+  --font-size-sm: 0.875rem;    /* 14px */
+  --font-size-base: 1rem;      /* 16px */
+  --font-size-lg: 1.125rem;    /* 18px */
+  --font-size-xl: 1.25rem;     /* 20px */
+  --font-size-2xl: 1.5rem;     /* 24px */
+  --font-size-3xl: 1.875rem;   /* 30px */
+  --font-size-4xl: 2.25rem;    /* 36px */
+  --font-size-5xl: 3rem;       /* 48px */
+
+  /* Line Heights */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.4;
+  --line-height-relaxed: 1.6;
+
+  /* Font Weights */
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
   
-  /* Modern Shadows */
+  /* Spacing Scale */
+  --space-0: 0;
+  --space-1: 0.25rem;    /* 4px */
+  --space-2: 0.5rem;     /* 8px */
+  --space-3: 0.75rem;    /* 12px */
+  --space-4: 1rem;       /* 16px */
+  --space-5: 1.25rem;    /* 20px */
+  --space-6: 1.5rem;     /* 24px */
+  --space-8: 2rem;       /* 32px */
+  --space-10: 2.5rem;    /* 40px */
+  --space-12: 3rem;      /* 48px */
+  --space-16: 4rem;      /* 64px */
+  --space-20: 5rem;      /* 80px */
+  --space-24: 6rem;      /* 96px */
+
+  /* Border Radius Scale */
+  --radius-none: 0;
+  --radius-sm: 0.25rem;   /* 4px */
+  --radius-base: 0.5rem;  /* 8px */
+  --radius-md: 0.75rem;   /* 12px */
+  --radius-lg: 1rem;      /* 16px */
+  --radius-xl: 1.5rem;    /* 24px */
+  --radius-2xl: 2rem;     /* 32px */
+  --radius-full: 9999px;
+
+  /* Shadow System */
   --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   
   /* Remove Gradients */
   --gradient-primary: none;
@@ -72,10 +122,10 @@
   }
 
   body {
-    background: var(--color-background) !important;
-    color: var(--color-text) !important;
+    background: var(--color-background);
+    color: var(--color-text);
     font-family: var(--font-family-sans);
-    line-height: 1.6;
+    line-height: var(--line-height-relaxed);
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -356,10 +406,11 @@
   }
 
   .glass-icon-container {
-    background: white !important;
-    color: #1e293b !important;
-    border: 1px solid #e5e7eb !important;
-    box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.15);
+    background: var(--color-surface);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-lg);
+    border-radius: 1rem;
   }
   
   @media (min-width: 768px) {
@@ -371,11 +422,11 @@
   }
 
   .glass-icon-container h3 {
-    color: #1e293b !important;
+    color: var(--color-text);
   }
 
   .glass-icon-container p {
-    color: #64748b !important;
+    color: var(--color-text-secondary);
   }
 
   .glass-hover {
@@ -416,35 +467,23 @@
     }
   }
 
-  /* Glassmorphism Overlay Styles */
+  /* Simplified Glassmorphism Overlay Styles */
   .glassmorphism-overlay {
     background: linear-gradient(
       135deg,
       rgba(255, 255, 255, 0.1) 0%,
       rgba(255, 255, 255, 0.05) 50%,
       rgba(255, 255, 255, 0.1) 100%
-    ) !important;
-    backdrop-filter: blur(12px) saturate(1.5) !important;
-    -webkit-backdrop-filter: blur(12px) saturate(1.5) !important;
+    );
+    backdrop-filter: blur(12px) saturate(1.5);
+    -webkit-backdrop-filter: blur(12px) saturate(1.5);
   }
 
-  /* Override default dark overlay with glassmorphism */
-  .fixed.inset-0.bg-black.bg-opacity-50 {
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.1) 0%,
-      rgba(255, 255, 255, 0.05) 50%,
-      rgba(255, 255, 255, 0.1) 100%
-    ) !important;
-    backdrop-filter: blur(12px) saturate(1.5) !important;
-    -webkit-backdrop-filter: blur(12px) saturate(1.5) !important;
-  }
-
-  /* Optional: Dark overlay utility for when glassmorphism is disabled */
+  /* Dark overlay utility */
   .dark-overlay {
-    background: rgba(0, 0, 0, 0.5) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 
   /* CSS-only animations for better performance */

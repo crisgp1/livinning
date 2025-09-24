@@ -9,7 +9,7 @@ export default function Hero() {
   const [activeTab, setActiveTab] = useState<'buy' | 'rent' | 'sell'>('buy')
 
   return (
-    <section className="relative pt-20 pb-12 bg-gradient-to-b from-blue-50 to-white overflow-hidden">
+    <section className="relative pt-32 pb-16 bg-gradient-to-b from-blue-50 to-white overflow-hidden">
       {/* Background decorations */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-40 left-10 w-72 h-72 bg-blue-300 rounded-full filter blur-3xl"></div>

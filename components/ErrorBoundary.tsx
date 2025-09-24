@@ -24,11 +24,24 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    const isServerActionError = error.message.includes('fetchServerAction') ||
+                               error.message.includes('unexpected response')
+
     logger.error('ErrorBoundary', 'React error boundary caught error', {
       error: error.message,
       stack: error.stack,
-      componentStack: errorInfo.componentStack
+      componentStack: errorInfo.componentStack,
+      isServerActionError,
+      errorType: isServerActionError ? 'server_action' : 'react'
     })
+
+    // If it's a server action error, also log it separately for monitoring
+    if (isServerActionError) {
+      logger.error('ServerAction', 'fetchServerAction error detected', {
+        error: error.message,
+        userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'unknown'
+      })
+    }
   }
 
   render() {

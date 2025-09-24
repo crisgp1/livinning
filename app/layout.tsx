@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Lexend } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -9,10 +8,6 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import RouterLoggerWrapper from "@/components/RouterLoggerWrapper";
 import "./globals.css";
 
-const lexend = Lexend({
-  subsets: ["latin"],
-  variable: "--font-lexend",
-});
 
 export const metadata: Metadata = {
   title: "Livinning - Encuentra tu Hogar Ideal",
@@ -27,7 +22,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="es">
-        <body className={`${lexend.variable} antialiased`}>
+        <body className="antialiased">
           <ErrorBoundary>
             <RouterLoggerWrapper />
             <ToastProvider>

@@ -32,34 +32,21 @@ const nextConfig: NextConfig = {
   },
   compress: true,
   experimental: {
-    optimizePackageImports: ['lucide-react', 'framer-motion']
-  },
-  // Move serverExternalPackages out of experimental
-  serverExternalPackages: ['winston', 'winston-daily-rotate-file', 'pino', 'pino-pretty'],
-  webpack: (config, { dev, isServer }) => {
-    if (!dev && !isServer) {
-      config.optimization.splitChunks = {
-        chunks: 'all',
-        cacheGroups: {
-          default: {
-            minChunks: 2,
-            priority: -20,
-            reuseExistingChunk: true,
-          },
-          vendor: {
-            test: /[\\/]node_modules[\\/]/,
-            name: 'vendor',
-            priority: -10,
-          },
-          common: {
-            minChunks: 2,
-            priority: -5,
-          },
-        },
-      };
+    optimizePackageImports: ['lucide-react', 'framer-motion'],
+    serverActions: {
+      allowedOrigins: ['localhost:3000', '127.0.0.1:3000'],
+      bodySizeLimit: '2mb'
     }
-    return config;
   },
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
+      },
+    },
+  },
+  serverExternalPackages: ['winston', 'winston-daily-rotate-file', 'pino', 'pino-pretty'],
 };
 
 export default nextConfig;
