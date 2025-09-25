@@ -6,6 +6,7 @@ import { ToastProvider } from "@/components/Toast";
 import UpgradeNotification from "@/components/UpgradeNotification";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import RouterLoggerWrapper from "@/components/RouterLoggerWrapper";
+import Footer from "@/components/Footer";
 import "./globals.css";
 
 
@@ -22,11 +23,14 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="es">
-        <body className="antialiased">
+        <body className="antialiased min-h-screen flex flex-col">
           <ErrorBoundary>
             <RouterLoggerWrapper />
             <ToastProvider>
-              {children}
+              <div className="flex-1">
+                {children}
+              </div>
+              <Footer />
               <UpgradeNotification />
               <Analytics />
               <SpeedInsights />

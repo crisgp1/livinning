@@ -8,7 +8,6 @@ import Hero from '@/components/Hero'
 import FeaturedProperties from '@/components/FeaturedProperties'
 import AuthenticatedContent from '@/components/AuthenticatedContent'
 import CTA from '@/components/CTA'
-import Footer from '@/components/Footer'
 
 const services = [
   {
@@ -143,9 +142,8 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
-      
+
       <CTA />
-      <Footer />
     </div>
   )
 }

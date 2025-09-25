@@ -25,7 +25,8 @@
       "Bash(curl:*)",
       "Bash(chmod:*)",
       "Bash(node:*)",
-      "Bash(sort:*)"
+      "Bash(sort:*)",
+      "Bash(npm run dev:*)"
     ],
     "deny": []
   }

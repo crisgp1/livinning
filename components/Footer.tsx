@@ -12,23 +12,6 @@ export default function Footer() {
             <p className="text-gray-600 mb-4 text-sm">
               La plataforma líder de bienes raíces en México. Encuentra tu hogar ideal con nosotros.
             </p>
-            {/* App Download Buttons */}
-            <div className="flex gap-3 mb-4">
-              <Link href="#" className="inline-block">
-                <img 
-                  src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" 
-                  alt="Google Play" 
-                  className="h-10"
-                />
-              </Link>
-              <Link href="#" className="inline-block">
-                <img 
-                  src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" 
-                  alt="App Store" 
-                  className="h-10"
-                />
-              </Link>
-            </div>
           </div>
 
           {/* Company Links */}
@@ -148,7 +131,7 @@ export default function Footer() {
           {/* Bottom Bar */}
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-8 pt-8 border-t border-gray-200">
             <p className="text-sm text-gray-600">
-              © 2024 Livinning. Todos los derechos reservados.
+              © 2025 Livinning. Todos los derechos reservados.
             </p>
             <div className="flex gap-6 text-sm">
               <Link href="/privacy" className="text-gray-600 hover:text-primary transition-colors">

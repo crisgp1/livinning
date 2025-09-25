@@ -83,7 +83,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="bg-white">
       <Navigation />
       
       <div className="pt-20 flex relative">

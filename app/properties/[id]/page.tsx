@@ -8,7 +8,6 @@ import { motion } from 'framer-motion'
 import { ArrowLeft, Bed, Bath, Square, MapPin, Calendar, Heart, Share2 } from 'lucide-react'
 import Link from 'next/link'
 import Navigation from '@/components/Navigation'
-import Footer from '@/components/Footer'
 import PropertyDetailSkeleton from '@/components/skeletons/PropertyDetailSkeleton'
 import { PhotoGallery } from '@/lib/utils/dynamic-imports'
 import { useUser } from '@clerk/nextjs'
@@ -345,7 +344,6 @@ export default function PropertyDetail() {
         <div className="section-container py-8">
           <PropertyDetailSkeleton />
         </div>
-        <Footer />
       </div>
     )
   }
@@ -600,8 +598,6 @@ export default function PropertyDetail() {
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   )
 }

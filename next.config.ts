@@ -38,13 +38,14 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '2mb'
     }
   },
-  turbopack: {
-    rules: {
-      '*.svg': {
-        loaders: ['@svgr/webpack'],
-        as: '*.js',
-      },
-    },
+  webpack: (config, { dev, isServer }) => {
+    // SVG handling for regular webpack
+    config.module.rules.push({
+      test: /\.svg$/,
+      use: ['@svgr/webpack'],
+    });
+
+    return config;
   },
   serverExternalPackages: ['winston', 'winston-daily-rotate-file', 'pino', 'pino-pretty'],
 };
