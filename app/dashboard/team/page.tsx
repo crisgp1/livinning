@@ -63,39 +63,13 @@ export default function DashboardTeam() {
   const fetchTeamMembers = async () => {
     try {
       setIsLoading(true)
-      // Mock data - replace with actual API call
-      const mockTeamMembers: TeamMember[] = [
-        {
-          id: '1',
-          firstName: 'María',
-          lastName: 'García',
-          email: 'maria.garcia@example.com',
-          role: 'admin',
-          status: 'active',
-          joinedAt: '2024-01-15',
-          avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150'
-        },
-        {
-          id: '2',
-          firstName: 'Carlos',
-          lastName: 'López',
-          email: 'carlos.lopez@example.com',
-          role: 'agent',
-          status: 'active',
-          joinedAt: '2024-02-01',
-          avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150'
-        },
-        {
-          id: '3',
-          firstName: 'Ana',
-          lastName: 'Martínez',
-          email: 'ana.martinez@example.com',
-          role: 'member',
-          status: 'invited',
-          joinedAt: '2024-03-10'
-        }
-      ]
-      setTeamMembers(mockTeamMembers)
+      const response = await fetch('/api/dashboard/team')
+      if (response.ok) {
+        const data = await response.json()
+        setTeamMembers(data.data || [])
+      } else {
+        setTeamMembers([])
+      }
     } catch (error) {
       console.error('Error fetching team members:', error)
     } finally {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -203,10 +203,31 @@ export default function Services() {
   const [showModal, setShowModal] = useState(false)
   const [showProviders, setShowProviders] = useState(false)
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | undefined>()
+  const [servicesWithPricing, setServicesWithPricing] = useState<Service[]>(services)
 
-  const filteredServices = selectedCategory === 'all' 
-    ? services 
-    : services.filter(s => s.category === selectedCategory)
+  useEffect(() => {
+    const loadServicePricing = async () => {
+      try {
+        const response = await fetch('/api/services/pricing')
+        if (response.ok) {
+          const pricingData = await response.json()
+          const updatedServices = services.map(service => {
+            const pricing = pricingData.data?.find((p: any) => p.serviceType === service.serviceType)
+            return pricing ? { ...service, price: pricing.price, currency: pricing.currency } : service
+          })
+          setServicesWithPricing(updatedServices)
+        }
+      } catch (error) {
+        console.error('Error loading service pricing:', error)
+        setServicesWithPricing(services)
+      }
+    }
+    loadServicePricing()
+  }, [])
+
+  const filteredServices = selectedCategory === 'all'
+    ? servicesWithPricing
+    : servicesWithPricing.filter(s => s.category === selectedCategory)
 
   const handleServiceSelect = (service: Service) => {
     if (!user) {

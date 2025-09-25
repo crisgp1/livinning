@@ -168,12 +168,12 @@ export default function SettingsPage() {
           firstName: user.firstName || '',
           lastName: user.lastName || '',
           email: user.primaryEmailAddress?.emailAddress || '',
-          bio: 'Proveedor profesional de servicios con experiencia en múltiples áreas.',
-          phone: '+52 55 1234 5678',
-          address: 'Ciudad de México, México',
-          specialties: ['Limpieza', 'Mantenimiento', 'Jardinería'],
-          experienceYears: 5,
-          hourlyRate: 250
+          bio: '',
+          phone: '',
+          address: '',
+          specialties: [],
+          experienceYears: 0,
+          hourlyRate: 0
         }))
       }
     } catch (error) {

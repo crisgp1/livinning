@@ -114,121 +114,13 @@ export default function ClientsPage() {
 
   const fetchClients = async () => {
     try {
-      // Simulated clients data - in real app this would be from an API
-      const mockClients: Client[] = [
-        {
-          id: '1',
-          name: 'Ana López Martínez',
-          email: 'ana.lopez@email.com',
-          phone: '+52 55 1111 2222',
-          address: 'Calle Reforma 789, Polanco, CDMX',
-          avatar: '/api/placeholder/100/100',
-          joinDate: '2023-08-15',
-          totalServices: 8,
-          totalSpent: 12450,
-          averageRating: 4.8,
-          lastServiceDate: '2024-01-10',
-          status: 'active',
-          preferredServices: ['Limpieza Residencial', 'Limpieza Profunda'],
-          notes: 'Cliente VIP, siempre muy puntual con los pagos. Prefiere productos ecológicos.',
-          serviceHistory: [
-            {
-              id: 'h1',
-              serviceName: 'Limpieza Profunda Residencial',
-              date: '2024-01-10',
-              amount: 1800,
-              rating: 5,
-              status: 'completed'
-            },
-            {
-              id: 'h2',
-              serviceName: 'Limpieza Semanal',
-              date: '2023-12-28',
-              amount: 1200,
-              rating: 5,
-              status: 'completed'
-            }
-          ]
-        },
-        {
-          id: '2',
-          name: 'Roberto Sánchez Díaz',
-          email: 'roberto.sanchez@email.com',
-          phone: '+52 55 3333 4444',
-          address: 'Av. Universidad 456, Coyoacán, CDMX',
-          avatar: '/api/placeholder/100/100',
-          joinDate: '2023-09-22',
-          totalServices: 5,
-          totalSpent: 8900,
-          averageRating: 4.2,
-          lastServiceDate: '2024-01-08',
-          status: 'active',
-          preferredServices: ['Mantenimiento de Jardín', 'Poda de Árboles'],
-          notes: 'Tiene mascotas en el jardín. Requiere cuidado especial con las plantas.',
-          serviceHistory: [
-            {
-              id: 'h3',
-              serviceName: 'Mantenimiento de Jardín Completo',
-              date: '2024-01-08',
-              amount: 2200,
-              rating: 4,
-              status: 'completed'
-            }
-          ]
-        },
-        {
-          id: '3',
-          name: 'Carmen Herrera Vega',
-          email: 'carmen.herrera@email.com',
-          phone: '+52 55 5555 6666',
-          address: 'Calle Insurgentes 321, Roma Norte, CDMX',
-          joinDate: '2023-11-05',
-          totalServices: 3,
-          totalSpent: 2850,
-          averageRating: 5.0,
-          lastServiceDate: '2024-01-05',
-          status: 'active',
-          preferredServices: ['Plomería', 'Reparaciones Menores'],
-          notes: 'Muy detallista, aprecia la explicación técnica de los trabajos realizados.',
-          serviceHistory: [
-            {
-              id: 'h4',
-              serviceName: 'Reparación de Plomería',
-              date: '2024-01-05',
-              amount: 850,
-              rating: 5,
-              status: 'completed'
-            }
-          ]
-        },
-        {
-          id: '4',
-          name: 'Miguel Torres Ruiz',
-          email: 'miguel.torres@email.com',
-          phone: '+52 55 7777 8888',
-          address: 'Av. Revolución 654, San Ángel, CDMX',
-          joinDate: '2023-07-12',
-          totalServices: 2,
-          totalSpent: 1600,
-          averageRating: 3.5,
-          lastServiceDate: '2023-12-20',
-          status: 'inactive',
-          preferredServices: ['Electricidad', 'Instalaciones'],
-          notes: 'Cliente ocasional, contactar para servicios de mantenimiento preventivo.',
-          serviceHistory: [
-            {
-              id: 'h5',
-              serviceName: 'Instalación Eléctrica',
-              date: '2023-12-20',
-              amount: 950,
-              rating: 4,
-              status: 'completed'
-            }
-          ]
-        }
-      ]
-      setClients(mockClients)
-      setFilteredClients(mockClients)
+      const response = await fetch('/api/provider/clients')
+      if (response.ok) {
+        const data = await response.json()
+        setClients(data.data || [])
+      } else {
+        setClients([])
+      }
     } catch (error) {
       console.error('Error fetching clients:', error)
     }

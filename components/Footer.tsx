@@ -122,9 +122,9 @@ export default function Footer() {
                 <Mail size={16} />
                 contacto@livinning.com
               </a>
-              <a href="tel:+525512345678" className="flex items-center gap-2 hover:text-primary transition-colors">
+              <a href="tel:+525555555555" className="flex items-center gap-2 hover:text-primary transition-colors">
                 <Phone size={16} />
-                +52 55 1234 5678
+                Contacto
               </a>
             </div>
 

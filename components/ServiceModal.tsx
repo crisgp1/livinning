@@ -26,17 +26,17 @@ const getServiceIcon = (iconName: string) => {
   }
 }
 
-const getServicePrice = (serviceType: ServiceType): Price => {
-  switch (serviceType) {
-    case ServiceType.PHOTOGRAPHY:
-      return new Price(2499, 'MXN')
-    case ServiceType.LEGAL:
-      return new Price(1999, 'MXN')
-    case ServiceType.VIRTUAL_TOUR:
-      return new Price(3499, 'MXN')
-    default:
-      return new Price(2499, 'MXN')
+const getServicePrice = async (serviceType: ServiceType): Promise<Price> => {
+  try {
+    const response = await fetch(`/api/services/pricing?type=${serviceType}`)
+    if (response.ok) {
+      const data = await response.json()
+      return new Price(data.price || 0, data.currency || 'MXN')
+    }
+  } catch (error) {
+    console.error('Error fetching service price:', error)
   }
+  return new Price(0, 'MXN')
 }
 
 const getServiceInfo = (serviceType: ServiceType): ServiceInfo => {

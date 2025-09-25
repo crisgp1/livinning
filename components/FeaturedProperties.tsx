@@ -69,7 +69,7 @@ export default function FeaturedProperties() {
             beds: prop.features.bedrooms,
             baths: prop.features.bathrooms,
             sqft: prop.features.squareMeters,
-            image: prop.images[0] || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800',
+            image: prop.images[0] || '/images/property-placeholder.jpg',
             badge: prop.status === 'published' ? 'Destacado' : 'Nuevo'
           }))
           setProperties(mappedProperties)
