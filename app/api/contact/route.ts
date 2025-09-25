@@ -99,8 +99,8 @@ export async function POST(request: Request) {
 
 function generateTicketId(): string {
   const timestamp = Date.now().toString(36)
-  const random = Math.random().toString(36).substr(2, 5)
-  return `LIV-${timestamp}-${random}`.toUpperCase()
+  const uuid = crypto.randomUUID().slice(0, 8)
+  return `LIV-${timestamp}-${uuid}`.toUpperCase()
 }
 
 function getResponseTime(userPlan: string): string {

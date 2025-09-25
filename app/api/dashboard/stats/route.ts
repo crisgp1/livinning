@@ -7,6 +7,16 @@ import { getOrganizationContext } from '@/lib/utils/organizationContext'
 const propertyRepository = new MongoPropertyRepository()
 const propertyService = new PropertyService(propertyRepository)
 
+async function getPropertyViews(userId: string): Promise<number> {
+  // TODO: Query analytics table for property views
+  return 0
+}
+
+async function getPropertyInquiries(userId: string): Promise<number> {
+  // TODO: Query inquiries/messages table for property inquiries
+  return 0
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { userId, organization } = await getOrganizationContext()
@@ -26,10 +36,9 @@ export async function GET(request: NextRequest) {
     const publishedProperties = allProperties.properties.filter(p => p.status === 'published').length
     const draftProperties = allProperties.properties.filter(p => p.status === 'draft').length
     
-    // For now, we'll use mock data for views and inquiries
-    // In a real app, you'd track these in separate collections
-    const totalViews = Math.floor(Math.random() * 1000) + publishedProperties * 50
-    const totalInquiries = Math.floor(Math.random() * 50) + publishedProperties * 3
+    // TODO: Implement proper analytics tracking in future iterations
+    const totalViews = await getPropertyViews(userId) || 0
+    const totalInquiries = await getPropertyInquiries(userId) || 0
 
     const stats = {
       totalProperties,

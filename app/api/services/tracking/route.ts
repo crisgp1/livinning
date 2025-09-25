@@ -65,7 +65,7 @@ export async function GET(request: Request) {
       const getProgressPercentage = (status: string) => {
         switch (status) {
           case 'not_started': return 0
-          case 'in_progress': return Math.floor(Math.random() * 70) + 10 // 10-80%
+          case 'in_progress': return order.progressPercentage || 25 // Default to 25% if not set
           case 'completed': return 100
           case 'cancelled': return 0
           default: return 0
@@ -113,8 +113,8 @@ export async function GET(request: Request) {
           lastUpdated: order.updatedAt || order.createdAt
         },
         communications: {
-          unreadByProvider: Math.floor(Math.random() * 3), // Simulate unread messages
-          lastMessageAt: order.updatedAt
+          unreadByProvider: order.unreadMessages || 0,
+          lastMessageAt: order.lastMessageAt || order.updatedAt
         },
         metadata: {
           lastActivityAt: order.updatedAt || order.createdAt,
@@ -122,8 +122,8 @@ export async function GET(request: Request) {
         },
         estimatedCompletionDate: getEstimatedCompletion(order.createdAt, order.serviceType),
         qualityMetrics: {
-          totalIssues: Math.floor(Math.random() * 2), // Simulate issues
-          issuesResolved: Math.floor(Math.random() * 2)
+          totalIssues: order.qualityIssues?.length || 0,
+          issuesResolved: order.qualityIssues?.filter((issue: any) => issue.resolved).length || 0
         }
       }
     })
