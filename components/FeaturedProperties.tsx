@@ -5,6 +5,7 @@ import PropertyCard from './PropertyCard'
 import PropertyCardSkeleton from './skeletons/PropertyCardSkeleton'
 import { ArrowRight, Sparkles, Home } from 'lucide-react'
 import Link from 'next/link'
+import { formatPrice } from '@/lib/utils/formatPrice'
 
 interface Property {
   id: string
@@ -64,9 +65,7 @@ export default function FeaturedProperties() {
             id: prop.id,
             title: prop.title,
             location: `${prop.address.city}, ${prop.address.state}`,
-            price: prop.price.currency === 'MXN'
-              ? `$${prop.price.amount.toLocaleString()}`
-              : `$${prop.price.amount.toLocaleString()} ${prop.price.currency}`,
+            price: formatPrice(prop.price),
             beds: prop.features.bedrooms,
             baths: prop.features.bathrooms,
             sqft: prop.features.squareMeters,

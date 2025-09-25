@@ -925,7 +925,7 @@ export default function SuperAdminDashboard() {
                           <td className="px-6 py-4">
                             <div className="flex flex-wrap gap-1">
                               {provider.serviceCapabilities.slice(0, 2).map((service, index) => (
-                                <span key={index} className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-700 border border-blue-200">
+                                <span key={`${provider.id}-${service.serviceType}-${index}`} className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-700 border border-blue-200">
                                   {service.serviceType}
                                 </span>
                               ))}
@@ -1069,7 +1069,7 @@ export default function SuperAdminDashboard() {
                       </div>
                       <div className="flex flex-wrap gap-1 mt-3">
                         {provider.serviceCapabilities.slice(0, 3).map((service, index) => (
-                          <span key={index} className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-700 border border-blue-200">
+                          <span key={`${provider.id}-card-${service.serviceType}-${index}`} className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-700 border border-blue-200">
                             {service.serviceType}
                           </span>
                         ))}

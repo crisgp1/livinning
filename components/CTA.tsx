@@ -113,47 +113,7 @@ export default function CTA() {
             </motion.button>
           </SignedIn>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
-            <motion.div 
-              className="text-center"
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-            >
-              <div className="inline-flex p-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 mb-4">
-                <Home className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-3xl font-bold mb-2 text-white">1000+</h3>
-              <p className="text-white/80">Propiedades</p>
-            </motion.div>
-            <motion.div 
-              className="text-center"
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <div className="inline-flex p-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 mb-4">
-                <Users className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-3xl font-bold mb-2 text-white">98%</h3>
-              <p className="text-white/80">Satisfacción del Cliente</p>
-            </motion.div>
-            <motion.div 
-              className="text-center"
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-            >
-              <div className="inline-flex p-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 mb-4">
-                <Headphones className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-3xl font-bold mb-2 text-white">24/7</h3>
-              <p className="text-white/80">Soporte Dedicado</p>
-            </motion.div>
-          </div>
+          {/* Stats eliminados - eran datos falsos */}
         </motion.div>
       </div>
     </motion.section>

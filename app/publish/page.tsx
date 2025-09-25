@@ -595,7 +595,7 @@ export default function PublishProperty() {
                       />
                     </div>
                     {errors.price && <p className="text-red-400 text-sm mt-2">{errors.price}</p>}
-                    <p className="text-xs text-gray-500 mt-1">Máximo 8 dígitos (hasta 99,999,999)</p>
+                    <p className="text-xs text-gray-500 mt-1">Ingresa el precio en tu moneda local</p>
                   </div>
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

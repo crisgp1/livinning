@@ -163,7 +163,7 @@ export default function PropertyCard({
           <div className="p-4 md:p-6 bg-white/50 backdrop-blur-sm">
             <div className="mb-3">
               <h3 className="text-xl md:text-2xl font-light text-gray-900">
-                ${price}
+                {price}
               </h3>
             </div>
             

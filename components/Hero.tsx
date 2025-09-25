@@ -141,30 +141,7 @@ export default function Hero() {
           </motion.div>
         </div>
 
-        {/* Feature Stats with Glassmorphism */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto"
-        >
-          <div className="text-center p-6 glass rounded-xl glass-hover">
-            <div className="text-3xl font-bold text-primary">10K+</div>
-            <div className="text-gray-600 mt-1">Propiedades activas</div>
-          </div>
-          <div className="text-center p-6 glass rounded-xl glass-hover">
-            <div className="text-3xl font-bold text-primary">5K+</div>
-            <div className="text-gray-600 mt-1">Propiedades vendidas</div>
-          </div>
-          <div className="text-center p-6 glass rounded-xl glass-hover">
-            <div className="text-3xl font-bold text-primary">1K+</div>
-            <div className="text-gray-600 mt-1">Agentes verificados</div>
-          </div>
-          <div className="text-center p-6 glass rounded-xl glass-hover">
-            <div className="text-3xl font-bold text-primary">50+</div>
-            <div className="text-gray-600 mt-1">Ciudades</div>
-          </div>
-        </motion.div>
+        {/* Feature Stats - DATOS FALSOS ELIMINADOS */}
       </div>
     </section>
   )

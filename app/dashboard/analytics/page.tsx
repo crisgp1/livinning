@@ -79,101 +79,16 @@ export default function DashboardAnalytics() {
   const fetchAnalytics = async () => {
     try {
       setIsLoading(true)
-      
-      // Mock data - replace with actual API call
-      const mockAnalytics: AnalyticsData = {
-        overview: {
-          totalViews: 12547,
-          totalInquiries: 342,
-          conversionRate: 2.7,
-          avgTimeOnListing: '3m 24s'
-        },
-        propertyPerformance: [
-          {
-            id: '1',
-            title: 'Villa Moderna Costera',
-            views: 2847,
-            inquiries: 89,
-            favorites: 156,
-            conversionRate: 3.1,
-            trend: 'up'
-          },
-          {
-            id: '2',
-            title: 'Penthouse en el Centro',
-            views: 1923,
-            inquiries: 54,
-            favorites: 98,
-            conversionRate: 2.8,
-            trend: 'up'
-          },
-          {
-            id: '3',
-            title: 'Casa Mediterránea',
-            views: 1654,
-            inquiries: 41,
-            favorites: 72,
-            conversionRate: 2.5,
-            trend: 'stable'
-          },
-          {
-            id: '4',
-            title: 'Apartamento Frente al Mar',
-            views: 987,
-            inquiries: 23,
-            favorites: 45,
-            conversionRate: 2.3,
-            trend: 'down'
-          }
-        ],
-        timeBasedData: {
-          daily: [],
-          weekly: [
-            { week: 'Sem 1', views: 2847, inquiries: 89 },
-            { week: 'Sem 2', views: 3120, inquiries: 95 },
-            { week: 'Sem 3', views: 2956, inquiries: 78 },
-            { week: 'Sem 4', views: 3624, inquiries: 102 }
-          ],
-          monthly: []
-        },
-        demographics: {
-          ageGroups: [
-            { range: '25-34', percentage: 35 },
-            { range: '35-44', percentage: 28 },
-            { range: '45-54', percentage: 22 },
-            { range: '55+', percentage: 15 }
-          ],
-          locations: [
-            { city: 'Madrid', percentage: 45 },
-            { city: 'Barcelona', percentage: 23 },
-            { city: 'Valencia', percentage: 18 },
-            { city: 'Sevilla', percentage: 14 }
-          ],
-          deviceTypes: [
-            { device: 'Móvil', percentage: 65 },
-            { device: 'Desktop', percentage: 28 },
-            { device: 'Tablet', percentage: 7 }
-          ]
-        },
-        inquiryAnalysis: {
-          responseTime: '2h 15m',
-          inquiryTypes: [
-            { type: 'Visita', count: 156 },
-            { type: 'Información', count: 98 },
-            { type: 'Precio', count: 67 },
-            { type: 'Disponibilidad', count: 21 }
-          ],
-          peakHours: [
-            { hour: '09:00', count: 23 },
-            { hour: '12:00', count: 45 },
-            { hour: '15:00', count: 67 },
-            { hour: '18:00', count: 89 },
-            { hour: '21:00', count: 34 }
-          ]
-        }
+
+      // Fetch real analytics data from API
+      const response = await fetch('/api/dashboard/analytics')
+      if (response.ok) {
+        const data = await response.json()
+        setAnalytics(data.data || null)
+      } else {
+        console.error('Failed to fetch analytics data')
+        setAnalytics(null)
       }
-      
-      setAnalytics(mockAnalytics)
     } catch (error) {
       console.error('Error fetching analytics:', error)
     } finally {

@@ -47,7 +47,7 @@ export default function AuthenticatedContent() {
                   <h3 className="text-lg font-semibold mb-2 text-gray-900">
                     Favoritos
                   </h3>
-                  <p className="text-2xl font-bold text-gray-900">12</p>
+                  <p className="text-2xl font-bold text-gray-900">0</p>
                   <p className="text-sm text-gray-600">Propiedades guardadas</p>
                 </div>
               </motion.div>
@@ -66,7 +66,7 @@ export default function AuthenticatedContent() {
                   <h3 className="text-lg font-semibold mb-2 text-gray-900">
                     Búsquedas
                   </h3>
-                  <p className="text-2xl font-bold text-gray-900">5</p>
+                  <p className="text-2xl font-bold text-gray-900">0</p>
                   <p className="text-sm text-gray-600">Búsquedas guardadas</p>
                 </div>
               </motion.div>
@@ -85,7 +85,7 @@ export default function AuthenticatedContent() {
                   <h3 className="text-lg font-semibold mb-2 text-gray-900">
                     Mis Propiedades
                   </h3>
-                  <p className="text-2xl font-bold text-gray-900">2</p>
+                  <p className="text-2xl font-bold text-gray-900">0</p>
                   <p className="text-sm text-gray-600">Propiedades publicadas</p>
                 </div>
               </motion.div>
@@ -104,7 +104,7 @@ export default function AuthenticatedContent() {
                   <h3 className="text-lg font-semibold mb-2 text-gray-900">
                     Alertas
                   </h3>
-                  <p className="text-2xl font-bold text-gray-900">8</p>
+                  <p className="text-2xl font-bold text-gray-900">0</p>
                   <p className="text-sm text-gray-600">Notificaciones nuevas</p>
                 </div>
               </motion.div>

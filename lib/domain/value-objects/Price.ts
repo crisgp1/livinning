@@ -3,14 +3,31 @@ export class Price {
     public readonly amount: number,
     public readonly currency: string = 'MXN'
   ) {
+    // VALIDACIONES SÚPER FLEXIBLES - PERMITE CUALQUIER PRECIO
     if (amount < 0) throw new Error('Price amount cannot be negative')
-    if (amount > 99999999) throw new Error('Price amount cannot exceed 8 digits (99,999,999)')
-    if (!currency.trim()) throw new Error('Currency is required')
-    if (currency.length !== 3) throw new Error('Currency must be 3 characters')
+    if (!currency || !currency.trim()) throw new Error('Currency is required')
   }
 
   getFormattedPrice(): string {
     const locale = this.currency === 'MXN' ? 'es-MX' : 'es-ES';
+
+    // Formateo inteligente para números grandes
+    if (this.amount >= 1e15) {
+      return `${this.getCurrencySymbol()} ${(this.amount / 1e12).toFixed(1)}T`;
+    }
+    if (this.amount >= 1e12) {
+      return `${this.getCurrencySymbol()} ${(this.amount / 1e12).toFixed(1)}T`;
+    }
+    if (this.amount >= 1e9) {
+      return `${this.getCurrencySymbol()} ${(this.amount / 1e9).toFixed(1)}B`;
+    }
+    if (this.amount >= 1e6) {
+      return `${this.getCurrencySymbol()} ${(this.amount / 1e6).toFixed(1)}M`;
+    }
+    if (this.amount >= 1e3) {
+      return `${this.getCurrencySymbol()} ${(this.amount / 1e3).toFixed(1)}K`;
+    }
+
     const formatter = new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: this.currency,
@@ -22,6 +39,24 @@ export class Price {
 
   getFormattedAmount(): string {
     const locale = this.currency === 'MXN' ? 'es-MX' : 'es-ES';
+
+    // Formateo inteligente para números grandes
+    if (this.amount >= 1e15) {
+      return `${(this.amount / 1e12).toFixed(1)}T`;
+    }
+    if (this.amount >= 1e12) {
+      return `${(this.amount / 1e12).toFixed(1)}T`;
+    }
+    if (this.amount >= 1e9) {
+      return `${(this.amount / 1e9).toFixed(1)}B`;
+    }
+    if (this.amount >= 1e6) {
+      return `${(this.amount / 1e6).toFixed(1)}M`;
+    }
+    if (this.amount >= 1e3) {
+      return `${(this.amount / 1e3).toFixed(1)}K`;
+    }
+
     return new Intl.NumberFormat(locale).format(this.amount);
   }
 

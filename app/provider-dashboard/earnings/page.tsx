@@ -119,82 +119,38 @@ export default function EarningsPage() {
 
   const fetchEarningsData = async () => {
     try {
-      // Simulated earnings data - in real app this would be from an API
-      const mockEarningsData: EarningsData = {
-        totalEarnings: 45750,
-        thisMonth: 12450,
-        lastMonth: 8900,
-        thisWeek: 3200,
-        pendingPayments: 2850,
-        completedJobs: 23,
-        averageJobValue: 1989,
-        topService: 'Limpieza Profunda'
+      // Obtener datos reales desde la API
+      const response = await fetch('/api/provider/earnings')
+      const data = await response.json()
+
+      if (data.success) {
+        setEarningsData(data.earnings || {
+          totalEarnings: 0,
+          thisMonth: 0,
+          lastMonth: 0,
+          thisWeek: 0,
+          pendingPayments: 0,
+          completedJobs: 0,
+          averageJobValue: 0,
+          topService: 'N/A'
+        })
+        setTransactions(data.transactions || [])
+        setMonthlyEarnings(data.monthlyEarnings || [])
+      } else {
+        // Si no hay datos reales, mostrar valores en cero
+        setEarningsData({
+          totalEarnings: 0,
+          thisMonth: 0,
+          lastMonth: 0,
+          thisWeek: 0,
+          pendingPayments: 0,
+          completedJobs: 0,
+          averageJobValue: 0,
+          topService: 'N/A'
+        })
+        setTransactions([])
+        setMonthlyEarnings([])
       }
-
-      const mockTransactions: Transaction[] = [
-        {
-          id: '1',
-          type: 'payment',
-          description: 'Pago por servicio completado',
-          amount: 1800,
-          date: '2024-01-15T14:30:00',
-          status: 'completed',
-          clientName: 'Ana López',
-          serviceName: 'Limpieza Profunda Residencial',
-          invoiceId: 'INV-001'
-        },
-        {
-          id: '2',
-          type: 'payment',
-          description: 'Pago por servicio completado',
-          amount: 2200,
-          date: '2024-01-12T11:15:00',
-          status: 'completed',
-          clientName: 'Roberto Sánchez',
-          serviceName: 'Mantenimiento de Jardín',
-          invoiceId: 'INV-002'
-        },
-        {
-          id: '3',
-          type: 'fee',
-          description: 'Comisión de plataforma (5%)',
-          amount: -110,
-          date: '2024-01-12T11:16:00',
-          status: 'completed'
-        },
-        {
-          id: '4',
-          type: 'payment',
-          description: 'Pago pendiente',
-          amount: 850,
-          date: '2024-01-10T16:45:00',
-          status: 'pending',
-          clientName: 'Carmen Herrera',
-          serviceName: 'Reparación de Plomería',
-          invoiceId: 'INV-003'
-        },
-        {
-          id: '5',
-          type: 'withdrawal',
-          description: 'Retiro a cuenta bancaria',
-          amount: -5000,
-          date: '2024-01-08T09:00:00',
-          status: 'completed'
-        }
-      ]
-
-      const mockMonthlyEarnings: MonthlyEarning[] = [
-        { month: 'Ene 2024', amount: 12450, jobs: 8 },
-        { month: 'Dic 2023', amount: 8900, jobs: 6 },
-        { month: 'Nov 2023', amount: 15200, jobs: 9 },
-        { month: 'Oct 2023', amount: 9400, jobs: 5 },
-        { month: 'Sep 2023', amount: 11800, jobs: 7 },
-        { month: 'Ago 2023', amount: 7650, jobs: 4 }
-      ]
-
-      setEarningsData(mockEarningsData)
-      setTransactions(mockTransactions)
-      setMonthlyEarnings(mockMonthlyEarnings)
     } catch (error) {
       console.error('Error fetching earnings data:', error)
     }

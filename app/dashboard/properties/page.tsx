@@ -4,6 +4,7 @@ import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
+import { formatPrice } from '@/lib/utils/formatPrice'
 import {
   Building,
   Search,
@@ -398,9 +399,9 @@ export default function DashboardProperties() {
                             <div className="flex items-center gap-1 text-gray-900">
                               <DollarSign size={14} />
                               <span className="font-medium">
-                                {typeof property.price === 'object' 
-                                  ? property.price.amount?.toLocaleString() || '0'
-                                  : property.price?.toLocaleString() || '0'
+                                {typeof property.price === 'object'
+                                  ? formatPrice(property.price)
+                                  : `$${property.price?.toLocaleString() || '0'}`
                                 }
                               </span>
                             </div>
@@ -487,9 +488,9 @@ export default function DashboardProperties() {
                           <div className="flex items-center gap-1 text-gray-900">
                             <DollarSign size={12} />
                             <span className="text-sm font-medium">
-                              {typeof property.price === 'object' 
-                                ? property.price.amount?.toLocaleString() || '0'
-                                : property.price?.toLocaleString() || '0'
+                              {typeof property.price === 'object'
+                                ? formatPrice(property.price)
+                                : `$${property.price?.toLocaleString() || '0'}`
                               }
                             </span>
                           </div>
