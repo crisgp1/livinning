@@ -73,117 +73,18 @@ interface AvailableProvider {
   lastActive: Date
 }
 
-const services: Service[] = [
-  {
-    id: 'photography',
-    title: 'Fotografía Profesional',
-    description: 'Sesión fotográfica profesional para tu propiedad con equipo de alta calidad',
-    icon: Camera,
-    category: 'visual',
-    serviceType: ServiceType.PHOTOGRAPHY,
-    features: [
-      '20-30 fotos profesionales editadas',
-      'Fotografía con dron incluida',
-      'Edición profesional HDR',
-      'Entrega en 48 horas',
-      'Licencia comercial completa'
-    ],
-    price: 2499,
-    currency: 'MXN',
-    duration: 'por sesión',
-    popular: true
-  },
-  {
-    id: 'legal',
-    title: 'Asesoría Legal',
-    description: 'Revisión completa de contratos y documentación legal por abogados especializados',
-    icon: Scale,
-    category: 'legal',
-    serviceType: ServiceType.LEGAL,
-    features: [
-      'Revisión de contratos de compraventa',
-      'Verificación de documentos de propiedad',
-      'Asesoría en procesos legales',
-      'Consultas ilimitadas por 30 días',
-      'Certificación notarial'
-    ],
-    price: 4999,
-    currency: 'MXN',
-    duration: 'por caso'
-  },
-  {
-    id: 'virtual-tour',
-    title: 'Tour Virtual 360°',
-    description: 'Recorrido virtual interactivo de alta calidad para tus propiedades',
-    icon: Video,
-    category: 'visual',
-    serviceType: ServiceType.VIRTUAL_TOUR,
-    features: [
-      'Tour virtual 360° completo',
-      'Compatible con VR',
-      'Hosting por 1 año incluido',
-      'Integración con tu sitio web',
-      'Estadísticas de visualización'
-    ],
-    price: 3499,
-    currency: 'MXN',
-    duration: 'por propiedad'
-  },
-  {
-    id: 'home-staging',
-    title: 'Home Staging',
-    description: 'Diseño y decoración profesional para maximizar el atractivo de tu propiedad',
-    icon: Home,
-    category: 'staging',
-    serviceType: ServiceType.HOME_STAGING,
-    features: [
-      'Consultoría de diseño interior',
-      'Plan de staging personalizado',
-      'Mobiliario y decoración',
-      'Sesión fotográfica incluida',
-      'Aumento promedio 15% en precio de venta'
-    ],
-    price: 8999,
-    currency: 'MXN',
-    duration: 'por proyecto'
-  },
-  {
-    id: 'market-analysis',
-    title: 'Análisis de Mercado',
-    description: 'Estudio detallado del mercado inmobiliario para optimizar tu estrategia',
-    icon: Briefcase,
-    category: 'consulting',
-    serviceType: ServiceType.MARKET_ANALYSIS,
-    features: [
-      'Análisis comparativo de mercado',
-      'Valuación profesional',
-      'Reporte detallado de 20+ páginas',
-      'Estrategia de pricing',
-      'Actualización trimestral'
-    ],
-    price: 2999,
-    currency: 'MXN',
-    duration: 'por reporte'
-  },
-  {
-    id: 'documentation',
-    title: 'Gestión Documental',
-    description: 'Organización y digitalización completa de documentación inmobiliaria',
-    icon: FileText,
-    category: 'legal',
-    serviceType: ServiceType.DOCUMENTATION,
-    features: [
-      'Digitalización de documentos',
-      'Organización en nube segura',
-      'Verificación de autenticidad',
-      'Acceso 24/7 a documentos',
-      'Respaldo certificado'
-    ],
-    price: 1999,
-    currency: 'MXN',
-    duration: 'por propiedad'
+// Category icon mapping
+const getCategoryIcon = (category: string) => {
+  switch (category) {
+    case 'visual': return Camera
+    case 'legal': return Scale
+    case 'staging': return Home
+    case 'consulting': return Briefcase
+    case 'documentation': return FileText
+    case 'marketing': return Video
+    default: return Shield
   }
-]
+}
 
 const categories = [
   { id: 'all', name: 'Todos', icon: Shield },
@@ -203,31 +104,37 @@ export default function Services() {
   const [showModal, setShowModal] = useState(false)
   const [showProviders, setShowProviders] = useState(false)
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | undefined>()
-  const [servicesWithPricing, setServicesWithPricing] = useState<Service[]>(services)
+  const [services, setServices] = useState<Service[]>([])
+  const [isLoadingServices, setIsLoadingServices] = useState(true)
 
   useEffect(() => {
-    const loadServicePricing = async () => {
+    const loadServices = async () => {
       try {
-        const response = await fetch('/api/services/pricing')
+        setIsLoadingServices(true)
+        const response = await fetch(`/api/services/active?category=${selectedCategory}`)
         if (response.ok) {
-          const pricingData = await response.json()
-          const updatedServices = services.map(service => {
-            const pricing = pricingData.data?.find((p: any) => p.serviceType === service.serviceType)
-            return pricing ? { ...service, price: pricing.price, currency: pricing.currency } : service
-          })
-          setServicesWithPricing(updatedServices)
+          const data = await response.json()
+          const transformedServices = data.data.map((service: any) => ({
+            ...service,
+            icon: getCategoryIcon(service.category),
+            serviceType: service.id // Use service ID as serviceType for compatibility
+          }))
+          setServices(transformedServices)
+        } else {
+          setServices([])
         }
       } catch (error) {
-        console.error('Error loading service pricing:', error)
-        setServicesWithPricing(services)
+        console.error('Error loading services:', error)
+        setServices([])
+      } finally {
+        setIsLoadingServices(false)
       }
     }
-    loadServicePricing()
-  }, [])
 
-  const filteredServices = selectedCategory === 'all'
-    ? servicesWithPricing
-    : servicesWithPricing.filter(s => s.category === selectedCategory)
+    loadServices()
+  }, [selectedCategory])
+
+  const filteredServices = services
 
   const handleServiceSelect = (service: Service) => {
     if (!user) {
@@ -358,8 +265,28 @@ export default function Services() {
           </div>
 
           {/* Services Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredServices.map((service, index) => {
+          {isLoadingServices ? (
+            <div className="flex items-center justify-center py-16">
+              <div className="flex flex-col items-center gap-4">
+                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-gray-600">Cargando servicios...</p>
+              </div>
+            </div>
+          ) : filteredServices.length === 0 ? (
+            <div className="text-center py-16 glass-icon-container rounded-2xl">
+              <div className="w-16 h-16 mx-auto mb-6 glass rounded-2xl flex items-center justify-center">
+                <Shield className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium mb-2 text-gray-900">
+                No hay servicios disponibles
+              </h3>
+              <p className="text-gray-600">
+                Los servicios se agregarán pronto en esta categoría
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredServices.map((service, index) => {
               const Icon = service.icon
               return (
                 <motion.div
@@ -435,7 +362,8 @@ export default function Services() {
                 </motion.div>
               )
             })}
-          </div>
+            </div>
+          )}
 
           {/* Trust Section */}
           <div className="mt-20 glass-icon-container rounded-2xl p-12">
