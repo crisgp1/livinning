@@ -30,7 +30,8 @@
       "Bash(git rebase:*)",
       "Bash(git config:*)",
       "Read(//tmp/claude/**)",
-      "Read(//private/tmp/claude/**)"
+      "Read(//private/tmp/claude/**)",
+      "Bash(timeout 30 npm run build:*)"
     ],
     "deny": []
   }
