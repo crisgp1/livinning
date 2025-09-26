@@ -26,7 +26,8 @@
       "Bash(chmod:*)",
       "Bash(node:*)",
       "Bash(sort:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(git rebase:*)"
     ],
     "deny": []
   }
