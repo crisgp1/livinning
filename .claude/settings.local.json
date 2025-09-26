@@ -28,7 +28,9 @@
       "Bash(sort:*)",
       "Bash(npm run dev:*)",
       "Bash(git rebase:*)",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "Read(//tmp/claude/**)",
+      "Read(//private/tmp/claude/**)"
     ],
     "deny": []
   }
