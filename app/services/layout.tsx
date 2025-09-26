@@ -79,12 +79,20 @@ export default function ServicesLayout({
   }
 
   // Si no hay usuario, mostrar solo el contenido sin sidebar
+  // Footer will be rendered by the root layout
   if (!user) {
-    return children
+    return (
+      <div className="bg-white flex flex-col">
+        <Navigation />
+        <div className="flex-1 pt-20">
+          {children}
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="bg-white">
       <Navigation />
       
       <div className="pt-20 flex relative">

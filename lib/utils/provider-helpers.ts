@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { UserResource } from '@clerk/types'
 import { isSuperAdmin } from './superadmin-client'
 
@@ -95,4 +96,99 @@ export function getProviderDisplayName(user: UserResource | null | undefined): s
   }
 
   return email || 'Proveedor'
+=======
+import { UserResource } from '@clerk/types'
+
+export interface ProviderAccess {
+  isProvider: boolean
+  hasProviderAccess: boolean
+  providerType?: string
+  permissions?: string[]
+}
+
+export function checkProviderAccess(user: UserResource | null | undefined): ProviderAccess {
+  if (!user) {
+    return {
+      isProvider: false,
+      hasProviderAccess: false
+    }
+  }
+
+  const userRole = user.publicMetadata?.role as string
+  const providerAccess = user.publicMetadata?.providerAccess as boolean
+  const providerType = user.publicMetadata?.providerType as string
+  const permissions = user.publicMetadata?.permissions as string[]
+
+  // Check if user is explicitly marked as provider
+  const isProvider = userRole === 'provider' || providerAccess === true
+
+  return {
+    isProvider,
+    hasProviderAccess: isProvider,
+    providerType,
+    permissions
+  }
+}
+
+export function getProviderServiceTypes(user: UserResource | null | undefined): string[] {
+  if (!user) return []
+
+  const providerType = user.publicMetadata?.providerType as string
+  const serviceTypes = user.publicMetadata?.serviceTypes as string[]
+
+  if (serviceTypes?.length) {
+    return serviceTypes
+  }
+
+  // Default service types based on provider type
+  switch (providerType) {
+    case 'photographer':
+      return ['photography', 'virtual-tour']
+    case 'lawyer':
+      return ['legal', 'documentation']
+    case 'home-staging':
+      return ['home-staging']
+    case 'market-analyst':
+      return ['market-analysis']
+    default:
+      return []
+  }
+}
+
+export function canAccessProviderDashboard(user: UserResource | null | undefined): boolean {
+  if (!user) return false
+
+  const userRole = user.publicMetadata?.role as string
+  const providerAccess = user.publicMetadata?.providerAccess as boolean
+  
+  // Check if user was invited as a provider via Clerk Invitations
+  const isInvitedProvider = user.publicMetadata?.invitedAsProvider as boolean
+  
+  // Allow access for:
+  // 1. Users with 'supplier' or 'provider' role
+  // 2. Users with explicit provider access flag
+  // 3. Users invited as providers via Clerk Invitations
+  return userRole === 'supplier' || 
+         userRole === 'provider' || 
+         providerAccess === true ||
+         isInvitedProvider === true
+}
+
+export function getProviderDisplayName(user: UserResource | null | undefined): string {
+  if (!user) return 'Proveedor'
+
+  const firstName = user.firstName
+  const lastName = user.lastName
+  const email = user.emailAddresses?.[0]?.emailAddress
+
+  if (firstName && lastName) {
+    return `${firstName} ${lastName}`
+  }
+
+  if (firstName) {
+    return firstName
+  }
+
+  return email || 'Proveedor'
+>>>>>>> 58f1e799c779b3a7fa2d1b6374712fd44597bda3
 }

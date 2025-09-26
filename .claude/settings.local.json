@@ -27,7 +27,8 @@
       "Bash(node:*)",
       "Bash(sort:*)",
       "Bash(npm run dev:*)",
-      "Bash(git rebase:*)"
+      "Bash(git rebase:*)",
+      "Bash(git config:*)"
     ],
     "deny": []
   }
