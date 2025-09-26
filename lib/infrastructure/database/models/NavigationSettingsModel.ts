@@ -1,0 +1,1 @@
+export { NavigationSettingsModel as default } from '../schemas/NavigationSettingsSchema'

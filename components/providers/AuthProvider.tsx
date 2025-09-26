@@ -2,6 +2,7 @@
 
 import { useUser } from '@clerk/nextjs'
 import { createContext, useContext, ReactNode, useEffect, useState } from 'react'
+import { HighlightUserIdentification } from '@/components/HighlightUserIdentification'
 
 export type UserRole = 'user' | 'agent' | 'provider' | 'supplier' | 'superadmin' | 'helpdesk'
 
@@ -115,6 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isLoaded,
       ...authData
     }}>
+      <HighlightUserIdentification />
       {children}
     </AuthContext.Provider>
   )

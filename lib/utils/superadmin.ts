@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // Note: clerkClient is only imported when needed in server context
 
 // Define superadmin user IDs or emails here
@@ -15,22 +14,22 @@ const SUPERADMIN_EMAILS: string[] = [
 
 export function isSuperAdmin(user: any): boolean {
   if (!user) return false
-  
+
   // Primary check: user metadata for superadmin status (dynamic)
   if (user.publicMetadata?.isSuperAdmin === true) {
     return true
   }
-  
+
   // Secondary check: role-based superadmin (dynamic)
   if (user.publicMetadata?.role === 'superadmin') {
     return true
   }
-  
+
   // Fallback: hardcoded lists (only as emergency access)
   if (SUPERADMIN_USER_IDS.includes(user.id)) {
     return true
   }
-  
+
   const userEmails = user.emailAddresses?.map((email: any) => email.emailAddress) || []
   return SUPERADMIN_EMAILS.some(adminEmail => userEmails.includes(adminEmail))
 }
@@ -59,9 +58,10 @@ export function checkSuperAdminAccess(user: any) {
   if (!user) {
     return { authorized: false, reason: 'Not authenticated' }
   }
-  
+
   if (!isSuperAdmin(user)) {
     return { authorized: false, reason: 'Insufficient permissions' }
   }
-  
+
   return { authorized: true }
+}

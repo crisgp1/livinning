@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { withHighlightApiAuth } from '@/lib/utils/highlight-api-wrapper'
 
-export async function POST(request: Request) {
+async function contactHandler(request: Request) {
   try {
-    const { userId } = await auth()
+    // Note: auth() is handled by the wrapper, but we can get it again if needed
+    const { auth } = await import('@clerk/nextjs/server');
+    const { userId } = await auth();
 
     const {
       name,
@@ -60,3 +62,9 @@ export async function POST(request: Request) {
     )
   }
 }
+
+// Export the wrapped handler
+export const POST = withHighlightApiAuth(contactHandler, {
+  operationName: 'contact_form_submission',
+  requireAuth: false // Contact form doesn't require authentication
+});

@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withHighlightConfig } from "@highlight-run/next/config";
 
 const nextConfig: NextConfig = {
   images: {
@@ -47,7 +48,7 @@ const nextConfig: NextConfig = {
 
     return config;
   },
-  serverExternalPackages: ['winston', 'winston-daily-rotate-file', 'pino', 'pino-pretty'],
+  serverExternalPackages: ['winston', 'winston-daily-rotate-file', 'pino', 'pino-pretty', '@highlight-run/node', 'require-in-the-middle'],
 };
 
-export default nextConfig;
+export default withHighlightConfig(nextConfig);

@@ -1,0 +1,1 @@
+export { SiteSettingsModel as default } from '../schemas/SiteSettingsSchema'

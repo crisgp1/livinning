@@ -1,0 +1,1 @@
+export { ServiceSettingsModel as default } from '../schemas/ServiceSettingsSchema'

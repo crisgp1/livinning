@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { FavoriteService } from '@/lib/application/services/FavoriteService'
 import { MongoFavoriteRepository } from '@/lib/infrastructure/repositories/MongoFavoriteRepository'
 import { getOrganizationContext } from '@/lib/utils/organizationContext'
+import { withHighlightApiAuth } from '@/lib/utils/highlight-api-wrapper'
 
 const favoriteRepository = new MongoFavoriteRepository()
 const favoriteService = new FavoriteService(favoriteRepository)
 
-export async function GET(request: NextRequest) {
+async function getFavorites(request: NextRequest) {
   try {
     const { userId } = await getOrganizationContext()
     const { searchParams } = new URL(request.url)
@@ -87,7 +88,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+async function addFavorite(request: NextRequest) {
   try {
     const { userId } = await getOrganizationContext()
     const body = await request.json()
@@ -122,7 +123,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function DELETE(request: NextRequest) {
+async function removeFavorite(request: NextRequest) {
   try {
     const { userId } = await getOrganizationContext()
     const { searchParams } = new URL(request.url)
@@ -147,11 +148,27 @@ export async function DELETE(request: NextRequest) {
   } catch (error) {
     console.error('Error removing favorite:', error)
     return NextResponse.json(
-      { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to remove favorite' 
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to remove favorite'
       },
       { status: error instanceof Error && error.message.includes('not found') ? 404 : 500 }
     )
   }
 }
+
+// Export the wrapped handlers
+export const GET = withHighlightApiAuth(getFavorites, {
+  operationName: 'get_user_favorites',
+  requireAuth: true
+});
+
+export const POST = withHighlightApiAuth(addFavorite, {
+  operationName: 'add_favorite',
+  requireAuth: true
+});
+
+export const DELETE = withHighlightApiAuth(removeFavorite, {
+  operationName: 'remove_favorite',
+  requireAuth: true
+});

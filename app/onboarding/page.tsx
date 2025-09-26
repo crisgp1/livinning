@@ -31,8 +31,12 @@ export default function OnboardingPage() {
       if (response.ok) {
         // Refresh user data
         await user.reload()
-        // Redirect to dashboard
-        router.push('/dashboard')
+        // Redirect based on role - agents go to property management dashboard
+        if (selectedRole === 'agent') {
+          router.push('/dashboard/property-management')
+        } else {
+          router.push('/dashboard')
+        }
       } else {
         console.error('Failed to update user role')
       }

@@ -1,0 +1,1 @@
+export { FooterSettingsModel as default } from '../schemas/FooterSettingsSchema'

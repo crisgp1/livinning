@@ -149,7 +149,6 @@ export const universalPropertySchema = Joi.object({
       }),
     amenities: Joi.array()
       .items(Joi.string())
-      .allow(null, [])
       .optional()
       .messages({
         'array.base': 'Las características deben ser una lista válida'

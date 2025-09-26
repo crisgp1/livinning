@@ -1,5 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
+import { highlightMiddleware } from "@highlight-run/next/server";
 
 const isProtectedRoute = createRouteMatcher([
   '/dashboard(.*)',
@@ -19,7 +20,11 @@ const isServerAction = (req: NextRequest) => {
   );
 };
 
+// Combined middleware for authentication and monitoring
 export default clerkMiddleware(async (auth, req) => {
+  // Initialize Highlight middleware for session tracking
+  await highlightMiddleware(req);
+
   // Don't intercept server actions - let them handle auth internally
   if (isServerAction(req)) {
     return NextResponse.next();

@@ -13,13 +13,23 @@ import {
   Heart
 } from 'lucide-react'
 import { useAuthContext } from '@/components/providers/AuthProvider'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 
 export default function UserDashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const { isAgent } = useAuthContext()
+  const { isAgent, isLoaded } = useAuthContext()
+  const router = useRouter()
+
+  // Redirect agents to property management dashboard
+  useEffect(() => {
+    if (isLoaded && isAgent) {
+      router.push('/dashboard/property-management')
+    }
+  }, [isAgent, isLoaded, router])
 
   const sidebarItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3, href: '/dashboard' },

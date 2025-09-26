@@ -32,7 +32,10 @@
       "Read(//tmp/claude/**)",
       "Read(//private/tmp/claude/**)",
       "Bash(timeout 30 npm run build:*)",
-      "Bash(git fetch:*)"
+      "Bash(git fetch:*)",
+      "Bash(git checkout:*)",
+      "WebFetch(domain:localhost)",
+      "WebFetch(domain:www.highlight.io)"
     ],
     "deny": []
   }
