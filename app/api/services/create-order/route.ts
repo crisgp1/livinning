@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid'
 import connectDB from '@/lib/infrastructure/database/connection'
 import ServiceOrderModel from '@/lib/infrastructure/database/models/ServiceOrderModel'
 import { ServiceOrderStatus, ServiceType } from '@/lib/domain/entities/ServiceOrder'
+import { NotificationService } from '@/lib/application/services/NotificationService'
 import logger from '@/lib/utils/logger'
 
 export async function POST(request: Request) {
@@ -79,6 +80,46 @@ export async function POST(request: Request) {
     await serviceOrder.save()
 
     console.log(`Created service order ${serviceOrder._id} for user ${userId}${providerId ? ` assigned to provider ${providerId}` : ''}`)
+
+    // Send notifications asynchronously
+    try {
+      if (providerId) {
+        // Notify the assigned provider
+        await NotificationService.notifyProviderOfNewOrder(
+          providerId,
+          serviceOrder._id,
+          customerName || customerEmail || 'Cliente sin nombre',
+          serviceType,
+          amount,
+          currency || 'MXN'
+        )
+
+        // Notify provider of confirmed payment
+        if (stripePaymentIntentId) {
+          await NotificationService.notifyProviderOfPaymentReceived(
+            providerId,
+            serviceOrder._id,
+            amount,
+            currency || 'MXN'
+          )
+        }
+      }
+
+      // Notify admins of new order
+      await NotificationService.notifyAdminOfNewOrder(
+        serviceOrder._id,
+        customerName || customerEmail || 'Cliente sin nombre',
+        serviceType,
+        amount
+      )
+
+    } catch (notificationError) {
+      // Log notification errors but don't fail the order creation
+      logger.error('ServiceOrderAPI', 'Failed to send notifications', notificationError, {
+        orderId: serviceOrder._id,
+        providerId
+      })
+    }
 
     return NextResponse.json({
       success: true,

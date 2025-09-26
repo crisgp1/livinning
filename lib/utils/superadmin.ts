@@ -1,4 +1,4 @@
-import { clerkClient } from '@clerk/nextjs/server'
+// Note: clerkClient is only imported when needed in server context
 
 // Define superadmin user IDs or emails here
 const SUPERADMIN_USER_IDS: string[] = [
@@ -36,6 +36,8 @@ export function isSuperAdmin(user: any): boolean {
 
 export async function isSuperAdminById(userId: string): Promise<boolean> {
   try {
+    // Dynamic import to avoid client-side import issues
+    const { clerkClient } = await import('@clerk/nextjs/server')
     const client = await clerkClient()
     const user = await client.users.getUser(userId)
     return isSuperAdmin(user)

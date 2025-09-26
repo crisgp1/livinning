@@ -1,4 +1,5 @@
 import { UserResource } from '@clerk/types'
+import { isSuperAdmin } from './superadmin-client'
 
 export interface ProviderAccess {
   isProvider: boolean
@@ -61,16 +62,19 @@ export function canAccessProviderDashboard(user: UserResource | null | undefined
 
   const userRole = user.publicMetadata?.role as string
   const providerAccess = user.publicMetadata?.providerAccess as boolean
-  
+  const isSuperAdminUser = isSuperAdmin(user)
+
   // Check if user was invited as a provider via Clerk Invitations
   const isInvitedProvider = user.publicMetadata?.invitedAsProvider as boolean
-  
+
   // Allow access for:
-  // 1. Users with 'supplier' or 'provider' role
-  // 2. Users with explicit provider access flag
-  // 3. Users invited as providers via Clerk Invitations
-  return userRole === 'supplier' || 
-         userRole === 'provider' || 
+  // 1. SuperAdmins (can access all views for supervision)
+  // 2. Users with 'supplier' or 'provider' role
+  // 3. Users with explicit provider access flag
+  // 4. Users invited as providers via Clerk Invitations
+  return isSuperAdminUser ||
+         userRole === 'supplier' ||
+         userRole === 'provider' ||
          providerAccess === true ||
          isInvitedProvider === true
 }

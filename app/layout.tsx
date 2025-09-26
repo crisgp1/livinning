@@ -3,6 +3,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ToastProvider } from "@/components/Toast";
+import { AuthProvider } from "@/components/providers/AuthProvider";
 import UpgradeNotification from "@/components/UpgradeNotification";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import RouterLoggerWrapper from "@/components/RouterLoggerWrapper";
@@ -25,12 +26,14 @@ export default function RootLayout({
         <body className="antialiased">
           <ErrorBoundary>
             <RouterLoggerWrapper />
-            <ToastProvider>
-              {children}
-              <UpgradeNotification />
-              <Analytics />
-              <SpeedInsights />
-            </ToastProvider>
+            <AuthProvider>
+              <ToastProvider>
+                {children}
+                <UpgradeNotification />
+                <Analytics />
+                <SpeedInsights />
+              </ToastProvider>
+            </AuthProvider>
           </ErrorBoundary>
         </body>
       </html>

@@ -237,11 +237,8 @@ chore: update dependencies
 git status
 
 # Editar cada archivo con conflicto:
-<<<<<<< HEAD (tu código)
 const apiUrl = 'http://localhost:3000'
-=======
 const apiUrl = 'https://api.livinning.com' (código de main)
->>>>>>> main
 
 # Decidir qué código mantener o combinar ambos
 const apiUrl = process.env.NODE_ENV === 'production'

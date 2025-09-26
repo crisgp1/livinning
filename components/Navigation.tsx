@@ -3,11 +3,32 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Menu, X, Home, Building2, Phone, User2, Shield, Package, Wrench } from 'lucide-react'
+import { Menu, X, Home, Building2, Phone, User2, Shield, Package, Headphones } from 'lucide-react'
 import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
 import { useUser } from '@clerk/nextjs'
 import logger from '@/lib/utils/logger'
+// Removed external import to avoid runtime errors
 import { useLogger, useUserInteractionLogger } from '@/hooks/useLogger'
+import NotificationCenter from './NotificationCenter'
+
+// Local superadmin check function to avoid import issues
+const isSuperAdmin = (user: any): boolean => {
+  if (!user) return false
+
+  // Primary check: user metadata for superadmin status (dynamic)
+  if (user.publicMetadata?.isSuperAdmin === true) {
+    return true
+  }
+
+  // Secondary check: role-based superadmin (dynamic)
+  if (user.publicMetadata?.role === 'superadmin') {
+    return true
+  }
+
+  // Fallback: hardcoded email check
+  const userEmails = user.emailAddresses?.map((email: any) => email.emailAddress) || []
+  return userEmails.includes('cristiangp2001@gmail.com')
+}
 
 export default function Navigation() {
   const { user } = useUser()
@@ -15,10 +36,11 @@ export default function Navigation() {
   const { logClick, logNavigation } = useUserInteractionLogger('Navigation')
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isSuperAdmin, setIsSuperAdmin] = useState(false)
+  const [isSuperAdminUser, setIsSuperAdminUser] = useState(false)
   const [isAgency, setIsAgency] = useState(false)
   const [isSupplier, setIsSupplier] = useState(false)
   const [isProvider, setIsProvider] = useState(false)
+  const [isHelpdesk, setIsHelpdesk] = useState(false)
 
   useEffect(() => {
     // Use Intersection Observer for better performance
@@ -55,19 +77,19 @@ export default function Navigation() {
     if (user) {
       const metadata = user.publicMetadata as any
       
-      // Dynamic superadmin check (same logic as utility function)
-      const superAdminStatus = metadata?.isSuperAdmin === true ||
-        metadata?.role === 'superadmin' ||
-        user.emailAddresses?.some(email => email.emailAddress === 'cristiangp2001@gmail.com')
-      
+      // Use centralized superadmin check
+      const superAdminStatus = isSuperAdmin(user)
+
       const agencyStatus = metadata?.isAgency === true
       const supplierStatus = metadata?.role === 'supplier'
       const providerStatus = metadata?.role === 'provider' || metadata?.providerAccess === true
-      
-      setIsSuperAdmin(superAdminStatus)
+      const helpdeskStatus = metadata?.role === 'helpdesk'
+
+      setIsSuperAdminUser(superAdminStatus)
       setIsAgency(agencyStatus)
       setIsSupplier(supplierStatus)
       setIsProvider(providerStatus)
+      setIsHelpdesk(helpdeskStatus)
       
       logger.debug('Navigation', 'User role detection', {
         userId: user.id,
@@ -76,6 +98,7 @@ export default function Navigation() {
         isAgency: agencyStatus,
         isSupplier: supplierStatus,
         isProvider: providerStatus,
+        isHelpdesk: helpdeskStatus,
         role: metadata?.role
       })
     }
@@ -157,13 +180,22 @@ export default function Navigation() {
                   Dashboard
                 </Link>
               )}
-              {isSuperAdmin && (
+              {isSuperAdminUser && (
                 <Link
                   href="/superadmin"
                   className="flex items-center space-x-1 font-medium text-gray-700 hover:text-primary transition-colors duration-200"
                 >
                   <Shield size={16} />
                   <span>Admin</span>
+                </Link>
+              )}
+              {(isHelpdesk || isSuperAdminUser) && (
+                <Link
+                  href="/helpdesk"
+                  className="flex items-center space-x-1 font-medium text-gray-700 hover:text-primary transition-colors duration-200"
+                >
+                  <Headphones size={16} />
+                  <span>Helpdesk</span>
                 </Link>
               )}
               {(isSupplier || isProvider) && (
@@ -180,6 +212,7 @@ export default function Navigation() {
                   Publicar Propiedad
                 </Link>
               )}
+              <NotificationCenter />
               <UserButton />
             </SignedIn>
           </div>
@@ -197,7 +230,7 @@ export default function Navigation() {
       <motion.div
         initial={false}
         animate={{ height: isMobileMenuOpen ? 'auto' : 0 }}
-        className="md:hidden overflow-hidden bg-white border-t border-gray-200"
+        className="md:hidden overflow-hidden bg-white"
       >
         <div className="px-4 py-6 space-y-4">
           {filteredNavItems.map((item) => (
@@ -247,7 +280,7 @@ export default function Navigation() {
                   Dashboard
                 </Link>
               )}
-              {isSuperAdmin && (
+              {isSuperAdminUser && (
                 <Link
                   href="/superadmin"
                   className="flex items-center justify-center space-x-2 py-3 px-4 font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200"
@@ -255,6 +288,16 @@ export default function Navigation() {
                 >
                   <Shield size={16} />
                   <span>Admin</span>
+                </Link>
+              )}
+              {(isHelpdesk || isSuperAdminUser) && (
+                <Link
+                  href="/helpdesk"
+                  className="flex items-center justify-center space-x-2 py-3 px-4 font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Headphones size={16} />
+                  <span>Helpdesk</span>
                 </Link>
               )}
               {(isSupplier || isProvider) && (
@@ -276,7 +319,8 @@ export default function Navigation() {
                   Publicar Propiedad
                 </Link>
               )}
-              <div className="flex justify-center pt-2">
+              <div className="flex justify-center items-center gap-4 pt-2">
+                <NotificationCenter />
                 <UserButton />
               </div>
             </SignedIn>

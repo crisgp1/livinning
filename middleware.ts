@@ -4,6 +4,11 @@ import { NextRequest, NextResponse } from "next/server";
 const isProtectedRoute = createRouteMatcher([
   '/dashboard(.*)',
   '/api/admin(.*)',
+  '/helpdesk(.*)',
+  '/api/helpdesk(.*)',
+  '/provider-dashboard(.*)',
+  '/superadmin(.*)',
+  '/api/superadmin(.*)',
 ]);
 
 const isServerAction = (req: NextRequest) => {
@@ -35,5 +40,11 @@ export const config = {
     "/(api|trpc)(.*)",
     // Protected dashboard routes
     "/dashboard/(.*)",
+    // Protected helpdesk routes
+    "/helpdesk/(.*)",
+    // Protected provider dashboard routes
+    "/provider-dashboard/(.*)",
+    // Protected superadmin routes
+    "/superadmin/(.*)",
   ],
 };
