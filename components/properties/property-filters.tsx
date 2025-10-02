@@ -75,81 +75,65 @@ export function PropertyFilters({
   };
 
   return (
-    <section className="bg-gradient-to-br from-primary/10 via-white to-primary/5 border-b border-neutral-200">
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <div className="text-center space-y-2">
-            <h1 className="text-4xl md:text-5xl font-bold text-neutral-900">
-              Encuentra tu Hogar Ideal
-            </h1>
-            <p className="text-lg text-neutral-600">
-              Miles de propiedades en venta y renta en todo México
-            </p>
-          </div>
-
-          {/* Barra de Búsqueda */}
-          <div className="bg-white rounded-2xl shadow-lg p-4 border border-neutral-200">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-              <div className="md:col-span-5">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400" />
-                  <Input
-                    placeholder="Buscar por ciudad, colonia o código postal..."
-                    className="pl-10 border-neutral-200"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                  />
-                </div>
-              </div>
-
-              <div className="md:col-span-3">
-                <Select
-                  value={transactionType || 'all'}
-                  onValueChange={setTransactionType}
-                >
-                  <SelectTrigger className="border-neutral-200">
-                    <SelectValue placeholder="Tipo de operación" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas</SelectItem>
-                    <SelectItem value="sale">Venta</SelectItem>
-                    <SelectItem value="rent">Renta</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="md:col-span-2">
-                <Select
-                  value={propertyType || 'all'}
-                  onValueChange={setPropertyType}
-                >
-                  <SelectTrigger className="border-neutral-200">
-                    <SelectValue placeholder="Tipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos</SelectItem>
-                    <SelectItem value="house">Casa</SelectItem>
-                    <SelectItem value="apartment">Departamento</SelectItem>
-                    <SelectItem value="land">Terreno</SelectItem>
-                    <SelectItem value="commercial">Comercial</SelectItem>
-                    <SelectItem value="office">Oficina</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="md:col-span-2">
-                <Button
-                  className="w-full bg-primary hover:bg-primary/90"
-                  onClick={handleSearch}
-                >
-                  Buscar
-                </Button>
-              </div>
+    <div className="bg-white border-b border-neutral-200 sticky top-0 z-10 shadow-sm">
+      <div className="container mx-auto px-4 py-3">
+        <div className="flex items-center gap-3">
+          {/* Búsqueda por Ciudad */}
+          <div className="flex-1 max-w-md">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+              <Input
+                placeholder="Ciudad, colonia o código postal..."
+                className="pl-9 h-10"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                onKeyDown={handleKeyDown}
+              />
             </div>
           </div>
+
+          {/* Tipo de Operación */}
+          <Select
+            value={transactionType || 'all'}
+            onValueChange={setTransactionType}
+          >
+            <SelectTrigger className="w-40 h-10">
+              <SelectValue placeholder="Operación" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas</SelectItem>
+              <SelectItem value="sale">Venta</SelectItem>
+              <SelectItem value="rent">Renta</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Tipo de Propiedad */}
+          <Select
+            value={propertyType || 'all'}
+            onValueChange={setPropertyType}
+          >
+            <SelectTrigger className="w-40 h-10">
+              <SelectValue placeholder="Tipo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos</SelectItem>
+              <SelectItem value="house">Casa</SelectItem>
+              <SelectItem value="apartment">Departamento</SelectItem>
+              <SelectItem value="land">Terreno</SelectItem>
+              <SelectItem value="commercial">Comercial</SelectItem>
+              <SelectItem value="office">Oficina</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Botón Buscar */}
+          <Button
+            className="bg-primary hover:bg-primary/90 h-10 px-6"
+            onClick={handleSearch}
+          >
+            Buscar
+          </Button>
         </div>
       </div>
-    </section>
+    </div>
   );
 }

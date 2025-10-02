@@ -10,16 +10,17 @@ import Link from 'next/link';
 import { Property } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { Bed, Bath, Maximize } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Bed, Bath, Maximize, Crosshair, Loader2 } from 'lucide-react';
+import { GeolocationService } from '@/lib/services/geolocation.service';
+import { toast } from 'sonner';
 
 interface PropertyMapProps {
   properties: Property[];
+  onBoundsChanged?: (bounds: google.maps.LatLngBounds) => void;
+  className?: string;
+  height?: string;
 }
-
-const mapContainerStyle = {
-  width: '100%',
-  height: '600px',
-};
 
 // Centro de México por defecto
 const defaultCenter = {
@@ -33,11 +34,52 @@ const defaultZoom = 5;
  * Mapa de propiedades con Google Maps
  * Principio de Responsabilidad Única: Solo maneja la visualización de propiedades en mapa
  */
-export function PropertyMap({ properties }: PropertyMapProps) {
+export function PropertyMap({
+  properties,
+  onBoundsChanged,
+  className = '',
+  height = '600px',
+}: PropertyMapProps) {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
+
+  /**
+   * Obtiene la ubicación actual del usuario y centra el mapa
+   */
+  const handleGetUserLocation = useCallback(async () => {
+    if (!map) {
+      toast.error('El mapa aún no está cargado');
+      return;
+    }
+
+    setIsLoadingLocation(true);
+
+    try {
+      const location = await GeolocationService.getCurrentPosition();
+
+      setUserLocation(location);
+
+      // Centrar mapa en la ubicación del usuario
+      map.setCenter(location);
+      map.setZoom(13); // Zoom cercano para ver el área local
+
+      toast.success('Ubicación obtenida exitosamente');
+    } catch (error: any) {
+      console.error('Geolocation error:', error);
+      toast.error(error.message || 'No se pudo obtener tu ubicación');
+    } finally {
+      setIsLoadingLocation(false);
+    }
+  }, [map]);
+
+  const mapContainerStyle = {
+    width: '100%',
+    height,
+  };
 
   // Filtrar propiedades que tienen coordenadas
   const propertiesWithCoordinates = useMemo(() => {
@@ -86,7 +128,23 @@ export function PropertyMap({ properties }: PropertyMapProps) {
       });
       map.fitBounds(bounds);
     }
-  }, [propertiesWithCoordinates]);
+
+    // Listener para cuando cambian los bounds (usuario mueve/zoom mapa)
+    if (onBoundsChanged) {
+      const boundsChangedListener = map.addListener('bounds_changed', () => {
+        const newBounds = map.getBounds();
+        if (newBounds) {
+          onBoundsChanged(newBounds);
+        }
+      });
+
+      // Llamar inicialmente
+      const initialBounds = map.getBounds();
+      if (initialBounds) {
+        onBoundsChanged(initialBounds);
+      }
+    }
+  }, [propertiesWithCoordinates, onBoundsChanged]);
 
   const onUnmount = useCallback(() => {
     setMap(null);
@@ -102,7 +160,7 @@ export function PropertyMap({ properties }: PropertyMapProps) {
 
   if (!apiKey) {
     return (
-      <div className="w-full h-[600px] bg-neutral-100 rounded-lg flex items-center justify-center">
+      <div className={`w-full bg-neutral-100 rounded-lg flex items-center justify-center ${className}`} style={{ height }}>
         <p className="text-neutral-500">
           Error: API key de Google Maps no configurada
         </p>
@@ -112,7 +170,7 @@ export function PropertyMap({ properties }: PropertyMapProps) {
 
   if (propertiesWithCoordinates.length === 0) {
     return (
-      <div className="w-full h-[600px] bg-neutral-100 rounded-lg flex items-center justify-center">
+      <div className={`w-full bg-neutral-100 rounded-lg flex items-center justify-center ${className}`} style={{ height }}>
         <div className="text-center space-y-2">
           <p className="text-neutral-900 font-semibold">
             No hay propiedades con ubicación disponible
@@ -126,13 +184,14 @@ export function PropertyMap({ properties }: PropertyMapProps) {
   }
 
   return (
-    <LoadScript googleMapsApiKey={apiKey}>
-      <GoogleMap
-        mapContainerStyle={mapContainerStyle}
-        center={mapCenter}
-        zoom={defaultZoom}
-        onLoad={onLoad}
-        onUnmount={onUnmount}
+    <div className={`relative ${className}`}>
+      <LoadScript googleMapsApiKey={apiKey}>
+        <GoogleMap
+          mapContainerStyle={mapContainerStyle}
+          center={mapCenter}
+          zoom={defaultZoom}
+          onLoad={onLoad}
+          onUnmount={onUnmount}
         options={{
           streetViewControl: false,
           mapTypeControl: true,
@@ -140,6 +199,7 @@ export function PropertyMap({ properties }: PropertyMapProps) {
           zoomControl: true,
         }}
       >
+        {/* Marcadores de propiedades */}
         {propertiesWithCoordinates.map((property) => (
           <Marker
             key={property.id}
@@ -155,6 +215,17 @@ export function PropertyMap({ properties }: PropertyMapProps) {
             }}
           />
         ))}
+
+        {/* Marcador de ubicación del usuario */}
+        {userLocation && (
+          <Marker
+            position={userLocation}
+            icon={{
+              url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+            }}
+            title="Tu ubicación"
+          />
+        )}
 
         {selectedProperty && selectedProperty.coordinates && (
           <InfoWindow
@@ -235,5 +306,23 @@ export function PropertyMap({ properties }: PropertyMapProps) {
         )}
       </GoogleMap>
     </LoadScript>
+
+    {/* Botón flotante para obtener ubicación del usuario */}
+    <div className="absolute bottom-6 right-6">
+      <Button
+        onClick={handleGetUserLocation}
+        disabled={isLoadingLocation || !map}
+        className="shadow-lg bg-white hover:bg-neutral-50 text-neutral-700 border border-neutral-200"
+        size="icon"
+        title="Obtener mi ubicación"
+      >
+        {isLoadingLocation ? (
+          <Loader2 className="h-5 w-5 animate-spin" />
+        ) : (
+          <Crosshair className="h-5 w-5" />
+        )}
+      </Button>
+    </div>
+    </div>
   );
 }
