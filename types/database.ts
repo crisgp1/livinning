@@ -321,3 +321,90 @@ export interface ReportDocument {
   createdAt: Date;
   updatedAt: Date;
 }
+
+// --- Service Order Document ---
+export interface ServiceOrderDocument {
+  _id: ObjectId;
+  orderNumber: string;
+
+  // Cliente
+  customerId: string;
+  customerName: string;
+  customerEmail: string;
+  customerPhone?: string;
+
+  // Servicio
+  serviceType: string;
+  description: string;
+  urgency: 'low' | 'medium' | 'high' | 'urgent';
+
+  // Ubicación
+  address: string;
+  city: string;
+  state: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
+
+  // Partner
+  partnerId?: string;
+  partnerName?: string;
+  assignedAt?: Date;
+  assignedBy?: string;
+
+  // Estado
+  status: string;
+
+  // Pago
+  amount: number;
+  currency: string;
+  paymentStatus: string;
+  paymentId?: string;
+  paidAt?: Date;
+  releasedAt?: Date;
+
+  // Fechas
+  scheduledDate?: Date;
+  completedAt?: Date;
+  cancelledAt?: Date;
+
+  // Evidencia
+  beforePhotos?: string[];
+  afterPhotos?: string[];
+  partnerNotes?: string;
+
+  // Monitoreo HELPDESK
+  helpdeskNotes?: string;
+  lastContactedAt?: Date;
+  contactedBy?: string;
+
+  // Calificación
+  rating?: number;
+  customerReview?: string;
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// --- Partner Credit Document ---
+export interface PartnerCreditDocument {
+  _id: ObjectId;
+  partnerId: string;
+  partnerName: string;
+
+  amount: number;
+  reason: string;
+  notes?: string;
+
+  grantedBy: string;
+  grantedByName: string;
+  grantedAt: Date;
+
+  used: boolean;
+  usedAt?: Date;
+  usedForOrderId?: string;
+
+  expiresAt?: Date;
+  createdAt: Date;
+}

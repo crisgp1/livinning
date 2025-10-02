@@ -39,7 +39,7 @@ export function VerificationAlert({ status, isVerified, rejectionReason }: Verif
           description: 'Tu cuenta de agencia necesita ser verificada para publicar propiedades ilimitadas.',
           actionText: 'Completar Verificación',
           actionHref: '/dashboard/agency/verificacion',
-          badge: { text: 'Acción Requerida', variant: 'warning' as const },
+          badge: { text: 'Acción Requerida', variant: 'destructive' as const },
         };
 
       case 'in_review':

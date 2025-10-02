@@ -157,7 +157,6 @@ export async function POST(request: NextRequest) {
       parkingSpaces,
       images,
       coordinates,
-      amenities,
     } = body;
 
     // Validaciones básicas
@@ -262,7 +261,6 @@ export async function POST(request: NextRequest) {
       parkingSpaces: parkingSpaces ? parseInt(parkingSpaces) : undefined,
       images: images || [],
       videos: [],
-      amenities: amenities || [],
       ownerId: userId, // Clerk user ID (string)
       ownerType: userRole === 'AGENCY' ? 'AGENCY' : 'USER',
       ownerName: user.fullName || user.firstName || user.emailAddresses[0]?.emailAddress || 'Usuario',

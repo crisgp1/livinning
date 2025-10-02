@@ -654,19 +654,21 @@ export default function UsersManagementPage() {
                 <ScrollArea className="h-[400px] pr-4">
                   <div className="space-y-3">
                     {notificationHistory.map((notification: any) => {
-                      const typeConfig = {
+                      const typeConfigMap: Record<string, { icon: any; color: string }> = {
                         warning: { icon: AlertTriangle, color: 'text-yellow-600 bg-yellow-50 border-yellow-200' },
                         violation: { icon: XCircle, color: 'text-orange-600 bg-orange-50 border-orange-200' },
                         suspension: { icon: Ban, color: 'text-red-600 bg-red-50 border-red-200' },
                         info: { icon: Info, color: 'text-blue-600 bg-blue-50 border-blue-200' },
-                      }[notification.type] || { icon: Bell, color: 'text-gray-600 bg-gray-50 border-gray-200' };
+                      };
+                      const typeConfig = typeConfigMap[notification.type] || { icon: Bell, color: 'text-gray-600 bg-gray-50 border-gray-200' };
 
-                      const severityBadge = {
+                      const severityBadgeMap: Record<string, string> = {
                         low: 'bg-green-100 text-green-700 border-green-300',
                         medium: 'bg-yellow-100 text-yellow-700 border-yellow-300',
                         high: 'bg-orange-100 text-orange-700 border-orange-300',
                         critical: 'bg-red-100 text-red-700 border-red-300',
-                      }[notification.severity] || 'bg-gray-100 text-gray-700';
+                      };
+                      const severityBadge = severityBadgeMap[notification.severity] || 'bg-gray-100 text-gray-700';
 
                       const TypeIcon = typeConfig.icon;
 

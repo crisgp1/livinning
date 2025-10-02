@@ -194,6 +194,12 @@ export const COLLECTIONS = {
   USER_NOTIFICATIONS: 'user_notifications',
   PROPERTY_MODERATIONS: 'property_moderations',
   REPORTS: 'reports',
+  SERVICE_ORDERS: 'service_orders',
+  PARTNER_CREDITS: 'partner_credits',
+  PARTNER_CREDIT_REQUESTS: 'partner_credit_requests',
+  PARTNER_MESSAGES: 'partner_messages',
+  PARTNER_CONVERSATIONS: 'partner_conversations',
+  PARTNER_VERIFICATIONS: 'partner_verifications',
 } as const;
 
 // --- Razones de Reporte ---
@@ -206,3 +212,68 @@ export const REPORT_REASONS = {
   offensive: 'Ofensivo / Abusivo',
   other: 'Otro',
 } as const;
+
+// --- Tipos de Servicio ---
+export const SERVICE_TYPES = {
+  plumbing: 'Plomería',
+  electrical: 'Electricidad',
+  cleaning: 'Limpieza',
+  painting: 'Pintura',
+  carpentry: 'Carpintería',
+  gardening: 'Jardinería',
+  moving: 'Mudanzas',
+  appliance_repair: 'Reparación de Electrodomésticos',
+  hvac: 'Aire Acondicionado / Calefacción',
+  pest_control: 'Control de Plagas',
+  other: 'Otro',
+} as const;
+
+// --- Estados de Órdenes de Servicio ---
+export const SERVICE_ORDER_STATUSES = {
+  pending: 'Pendiente',
+  assigned: 'Asignada',
+  in_progress: 'En Progreso',
+  completed: 'Completada',
+  cancelled: 'Cancelada',
+  disputed: 'En Disputa',
+} as const;
+
+// --- Estados de Pago ---
+export const PAYMENT_STATUSES = {
+  pending: 'Pago Pendiente',
+  held: 'Dinero Retenido',
+  released: 'Liberado al Partner',
+  refunded: 'Reembolsado',
+} as const;
+
+// --- Estados de Verificacion de Partner ---
+export const PARTNER_VERIFICATION_STATUSES = {
+  not_started: 'No Iniciada',
+  pending: 'Pendiente de Revision',
+  in_review: 'En Revision',
+  verified: 'Verificado',
+  rejected: 'Rechazada',
+  resubmit_required: 'Requiere Reenvio',
+} as const;
+
+// --- Tipos de Documentos de Verificacion ---
+export const VERIFICATION_DOCUMENT_TYPES = {
+  identification: 'Identificacion Oficial',
+  proof_of_address: 'Comprobante de Domicilio',
+  bank_statement: 'Estado de Cuenta Bancario',
+  tax_id: 'RFC / Tax ID',
+  professional_license: 'Licencia Profesional',
+  insurance_certificate: 'Certificado de Seguro',
+} as const;
+
+// --- Estados de Solicitud de Credito ---
+export const CREDIT_REQUEST_STATUSES = {
+  pending: 'Pendiente',
+  approved: 'Aprobada',
+  counter_offer: 'Contraoferta',
+  rejected: 'Rechazada',
+  cancelled: 'Cancelada',
+} as const;
+
+// --- Cooldown de solicitudes (en milisegundos) ---
+export const CREDIT_REQUEST_COOLDOWN = 90 * 24 * 60 * 60 * 1000; // 90 dias (3 meses)

@@ -287,7 +287,7 @@ export default function PropertyDetailPage({
               </p>
             </div>
 
-            {property.amenities && property.amenities.length > 0 && (
+            {(property as any).amenities && (property as any).amenities.length > 0 && (
               <>
                 <Separator />
                 <div>
@@ -295,7 +295,7 @@ export default function PropertyDetailPage({
                     Amenidades
                   </h2>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {property.amenities.map((amenity, index) => (
+                    {(property as any).amenities.map((amenity: string, index: number) => (
                       <div
                         key={index}
                         className="flex items-center gap-2 text-neutral-700"

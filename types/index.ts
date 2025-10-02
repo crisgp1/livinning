@@ -37,6 +37,34 @@ export type ReportReason =
   | 'other';
 export type ReportStatus = 'pending' | 'reviewing' | 'resolved' | 'dismissed';
 
+// --- Sistema de Órdenes de Servicio ---
+export type ServiceOrderStatus =
+  | 'pending'        // Cliente solicitó, esperando asignación
+  | 'assigned'       // Asignada a Partner
+  | 'in_progress'    // Partner trabajando en ella
+  | 'completed'      // Partner completó el servicio
+  | 'cancelled'      // Cancelada
+  | 'disputed';      // En disputa
+
+export type ServiceType =
+  | 'plumbing'       // Plomería
+  | 'electrical'     // Electricidad
+  | 'cleaning'       // Limpieza
+  | 'painting'       // Pintura
+  | 'carpentry'      // Carpintería
+  | 'gardening'      // Jardinería
+  | 'moving'         // Mudanzas
+  | 'appliance_repair' // Reparación de electrodomésticos
+  | 'hvac'           // Aire acondicionado/calefacción
+  | 'pest_control'   // Control de plagas
+  | 'other';         // Otro
+
+export type PaymentStatus =
+  | 'pending'        // Pago pendiente
+  | 'held'           // Dinero retenido por la plataforma
+  | 'released'       // Liberado al partner
+  | 'refunded';      // Reembolsado al cliente
+
 // --- Usuario Base ---
 export interface User {
   id: string;
@@ -208,6 +236,96 @@ export interface Commission {
 
   createdAt: Date;
   updatedAt: Date;
+}
+
+// --- Orden de Servicio ---
+export interface ServiceOrder {
+  id: string;
+  orderNumber: string; // Número de orden único (ej: ORD-2024-0001)
+
+  // Cliente
+  customerId: string; // Clerk ID del cliente
+  customerName: string;
+  customerEmail: string;
+  customerPhone?: string;
+
+  // Servicio
+  serviceType: ServiceType;
+  description: string;
+  urgency: 'low' | 'medium' | 'high' | 'urgent';
+
+  // Ubicación del servicio
+  address: string;
+  city: string;
+  state: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
+
+  // Partner asignado
+  partnerId?: string;
+  partnerName?: string;
+  assignedAt?: Date;
+  assignedBy?: string; // ID del admin/helpdesk que asignó
+
+  // Estado
+  status: ServiceOrderStatus;
+
+  // Pago
+  amount: number;
+  currency: string;
+  paymentStatus: PaymentStatus;
+  paymentId?: string; // ID de transacción de Stripe
+  paidAt?: Date;
+  releasedAt?: Date; // Cuándo se liberó el pago al partner
+
+  // Fechas de servicio
+  scheduledDate?: Date;
+  completedAt?: Date;
+  cancelledAt?: Date;
+
+  // Evidencia del servicio
+  beforePhotos?: string[];
+  afterPhotos?: string[];
+  partnerNotes?: string;
+
+  // Monitoreo de HELPDESK
+  helpdeskNotes?: string;
+  lastContactedAt?: Date;
+  contactedBy?: string;
+
+  // Calificación
+  rating?: number; // 1-5
+  customerReview?: string;
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// --- Crédito de Partner ---
+export interface PartnerCredit {
+  id: string;
+  partnerId: string;
+  partnerName: string;
+
+  // Crédito
+  amount: number;
+  reason: string;
+  notes?: string;
+
+  // Otorgado por
+  grantedBy: string; // ID del SUPERADMIN
+  grantedByName: string;
+  grantedAt: Date;
+
+  // Uso
+  used: boolean;
+  usedAt?: Date;
+  usedForOrderId?: string; // ID de la orden en la que se usó
+
+  expiresAt?: Date;
+  createdAt: Date;
 }
 
 // --- Favoritos ---

@@ -17,6 +17,7 @@ export type WidgetType =
   | 'subscription-status'
   | 'commissions'
   | 'referral-list'
+  | 'order-list'
   | 'activity'
   | 'system-logs';
 
