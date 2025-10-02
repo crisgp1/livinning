@@ -25,6 +25,18 @@ export type LocationType = 'city' | 'beach' | 'mountain' | 'countryside' | 'lake
 export type TicketStatus = 'open' | 'pending' | 'resolved' | 'closed';
 export type TicketPriority = 'low' | 'medium' | 'high' | 'urgent';
 
+// --- Tipos de Reportes ---
+export type ReportType = 'property' | 'agency';
+export type ReportReason =
+  | 'fraudulent'
+  | 'inappropriate_content'
+  | 'incorrect_information'
+  | 'duplicate'
+  | 'spam'
+  | 'offensive'
+  | 'other';
+export type ReportStatus = 'pending' | 'reviewing' | 'resolved' | 'dismissed';
+
 // --- Usuario Base ---
 export interface User {
   id: string;
@@ -100,6 +112,17 @@ export interface Property {
   // Estado
   status: PropertyStatus;
   rejectionReason?: string;
+
+  // Moderación
+  moderationStatus?: 'pending' | 'approved' | 'rejected' | 'needs_correction';
+  moderatedBy?: string;
+  moderatedAt?: Date;
+  fieldViolations?: Array<{
+    field: string;
+    message: string;
+    severity: 'low' | 'medium' | 'high';
+  }>;
+  moderationNotes?: string;
 
   // Métricas
   views: number;
@@ -235,4 +258,37 @@ export interface PartnerStats {
   totalEarnings: number;
   pendingEarnings: number;
   paidEarnings: number;
+}
+
+// --- Reporte ---
+export interface Report {
+  id: string;
+  type: ReportType;
+  reason: ReportReason;
+  description: string;
+  status: ReportStatus;
+
+  // Información del reportante
+  reporterId?: string; // null si es anónimo
+  reporterName?: string;
+  reporterEmail?: string;
+
+  // Información del reportado
+  propertyId?: string;
+  propertyTitle?: string;
+  agencyId?: string;
+  agencyName?: string;
+
+  // Revisión
+  reviewedBy?: string;
+  reviewedByName?: string;
+  reviewedAt?: Date;
+  reviewNotes?: string;
+
+  // Acción tomada
+  moderationAction?: 'none' | 'suspend_property' | 'suspend_user' | 'suspend_both';
+
+  // Timestamps
+  createdAt: Date;
+  updatedAt: Date;
 }

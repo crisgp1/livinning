@@ -43,9 +43,13 @@ export default async function PropertiesPage({ params, searchParams }: Propertie
   const propertyLimit = (user.publicMetadata?.propertyLimit as number) || 1;
   const subscriptionStatus = (user.publicMetadata?.subscriptionStatus as string) || 'inactive';
 
-  // Obtener propiedades del usuario
+  // Determinar si es rol administrativo
+  const isAdmin = userRole === 'SUPERADMIN' || userRole === 'ADMIN' || userRole === 'HELPDESK';
+
+  // Obtener propiedades
+  // Si es admin, muestra todas las propiedades. Si no, solo las del usuario.
   const { properties, total } = await listProperties({
-    ownerId: userId,
+    ...(isAdmin ? {} : { ownerId: userId }),
     page,
     limit,
     sortBy: 'createdAt',

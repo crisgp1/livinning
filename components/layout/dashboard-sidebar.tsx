@@ -4,6 +4,7 @@
 
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -13,8 +14,9 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { UpgradeButton } from '@/components/upgrade';
+import { SpotlightSearch } from '@/components/dashboard/spotlight-search';
 import * as Icons from 'lucide-react';
-import { LucideIcon } from 'lucide-react';
+import { LucideIcon, Search, Command } from 'lucide-react';
 
 interface DashboardSidebarProps {
   navigation: NavItem[];
@@ -38,13 +40,30 @@ export function DashboardSidebar({
   currentProperties = 0,
 }: DashboardSidebarProps) {
   const pathname = usePathname();
+  const [spotlightOpen, setSpotlightOpen] = useState(false);
 
   const getIcon = (iconName: string): LucideIcon => {
     const Icon = (Icons as any)[iconName];
     return Icon || Icons.Circle;
   };
 
+  // Manejar Ctrl+K o Cmd+K para abrir Spotlight
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setSpotlightOpen((open) => !open);
+      }
+    };
+
+    document.addEventListener('keydown', down);
+    return () => document.removeEventListener('keydown', down);
+  }, []);
+
   const showUpgradeButton = userRole?.toUpperCase() === 'USER' && userId && userEmail && userName;
+  const isAdmin = userRole?.toUpperCase() === 'SUPERADMIN' ||
+                  userRole?.toUpperCase() === 'ADMIN' ||
+                  userRole?.toUpperCase() === 'HELPDESK';
 
   return (
     <div className="flex h-full w-64 flex-col border-r border-border bg-background">
@@ -55,6 +74,23 @@ export function DashboardSidebar({
           <p className="text-sm text-muted-foreground mt-1">{description}</p>
         )}
       </div>
+
+      {/* Search Button - Solo para roles administrativos */}
+      {isAdmin && (
+        <div className="px-3 pb-3">
+          <Button
+            variant="outline"
+            className="w-full justify-start text-sm text-muted-foreground"
+            onClick={() => setSpotlightOpen(true)}
+          >
+            <Search className="mr-2 h-4 w-4" />
+            <span className="flex-1 text-left">Buscar usuarios...</span>
+            <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+              <span className="text-xs">⌘</span>K
+            </kbd>
+          </Button>
+        </div>
+      )}
 
       <Separator />
 
@@ -101,6 +137,9 @@ export function DashboardSidebar({
           </>
         )}
       </ScrollArea>
+
+      {/* Spotlight Search */}
+      <SpotlightSearch open={spotlightOpen} onOpenChange={setSpotlightOpen} />
     </div>
   );
 }

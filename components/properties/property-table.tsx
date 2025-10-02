@@ -162,7 +162,7 @@ export function PropertyTable({
                 {/* Precio */}
                 <TableCell>
                   <div className="font-semibold">
-                    {property.currency} {property.price.toLocaleString()}
+                    {property.currency || '$'} {(property.price || 0).toLocaleString()}
                   </div>
                   <div className="text-xs text-neutral-500">
                     {property.transactionType === 'rent' ? '/mes' : ''}
@@ -172,7 +172,7 @@ export function PropertyTable({
                 {/* Ubicación */}
                 <TableCell>
                   <div className="text-sm">
-                    {property.city}, {property.state}
+                    {property.city || 'Sin ciudad'}, {property.state || 'Sin estado'}
                   </div>
                 </TableCell>
 
@@ -187,7 +187,7 @@ export function PropertyTable({
                 <TableCell className="text-center">
                   <div className="flex items-center justify-center gap-1">
                     <Eye className="h-4 w-4 text-neutral-500" />
-                    <span className="text-sm">{property.views.toLocaleString()}</span>
+                    <span className="text-sm">{(property.views || 0).toLocaleString()}</span>
                   </div>
                 </TableCell>
 

@@ -191,4 +191,18 @@ export const COLLECTIONS = {
   TICKET_MESSAGES: 'ticket_messages',
   COMMISSIONS: 'commissions',
   FAVORITES: 'favorites',
+  USER_NOTIFICATIONS: 'user_notifications',
+  PROPERTY_MODERATIONS: 'property_moderations',
+  REPORTS: 'reports',
+} as const;
+
+// --- Razones de Reporte ---
+export const REPORT_REASONS = {
+  fraudulent: 'Fraudulento / Estafa',
+  inappropriate_content: 'Contenido Inapropiado',
+  incorrect_information: 'Información Incorrecta',
+  duplicate: 'Publicación Duplicada',
+  spam: 'Spam',
+  offensive: 'Ofensivo / Abusivo',
+  other: 'Otro',
 } as const;

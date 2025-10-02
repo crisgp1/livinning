@@ -6,11 +6,15 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { SignInButton, SignUpButton, UserButton, SignedIn, SignedOut } from '@clerk/nextjs';
-import { Home, Building, Info, Phone } from 'lucide-react';
+import { SignInButton, SignUpButton, UserButton, SignedIn, SignedOut, useUser } from '@clerk/nextjs';
+import { Home, Building, Info, Phone, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { NotificationBell } from '@/components/layout/notification-bell';
 
 export function Navbar() {
+  const { user } = useUser();
+  const userRole = ((user?.publicMetadata?.role as string) || 'user').toLowerCase();
+
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
@@ -83,6 +87,13 @@ export function Navbar() {
             </SignUpButton>
           </SignedOut>
           <SignedIn>
+            <Link href={`/dashboard/${userRole}`}>
+              <Button variant="outline" size="sm" className="gap-2">
+                <LayoutDashboard className="h-4 w-4" />
+                <span className="hidden sm:inline">Panel</span>
+              </Button>
+            </Link>
+            <NotificationBell />
             <UserButton
               afterSignOutUrl="/"
               appearance={{

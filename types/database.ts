@@ -12,7 +12,10 @@ import {
   TransactionType,
   LocationType,
   TicketStatus,
-  TicketPriority
+  TicketPriority,
+  ReportType,
+  ReportReason,
+  ReportStatus
 } from './index';
 
 // --- Documentos de MongoDB ---
@@ -31,6 +34,10 @@ export interface UserDocument {
   updatedAt: Date;
   lastLogin?: Date;
   isActive: boolean;
+  isSuspended?: boolean;
+  suspendedAt?: Date;
+  suspendedBy?: string; // Clerk ID del admin que suspendió
+  suspensionReason?: string;
 
   // Para USER
   propertyCount?: number;
@@ -92,6 +99,13 @@ export interface PropertyDocument {
   status: PropertyStatus;
   rejectionReason?: string;
 
+  // Moderación
+  moderationStatus?: 'pending' | 'approved' | 'rejected' | 'needs_correction';
+  moderatedBy?: string; // Clerk ID del admin
+  moderatedAt?: Date;
+  fieldViolations?: PropertyFieldViolation[];
+  moderationNotes?: string;
+
   // Métricas
   views: number;
   likes: number;
@@ -101,6 +115,36 @@ export interface PropertyDocument {
   createdAt: Date;
   updatedAt: Date;
   publishedAt?: Date;
+}
+
+export interface PropertyFieldViolation {
+  field: string; // Nombre del campo con violación
+  message: string; // Comentario del admin sobre la violación
+  severity: 'low' | 'medium' | 'high';
+}
+
+export interface PropertyModerationDocument {
+  _id: ObjectId;
+  propertyId: ObjectId;
+  propertyTitle: string;
+  ownerId: string; // Clerk ID del dueño
+  ownerName: string;
+
+  // Resultado de moderación
+  action: 'approve' | 'reject' | 'request_corrections';
+  fieldViolations?: PropertyFieldViolation[];
+  generalNotes?: string;
+
+  // Admin que moderó
+  moderatedBy: string; // Clerk ID
+  moderatedByName: string;
+  moderatedAt: Date;
+
+  // Notificación enviada
+  notificationSent: boolean;
+  notificationId?: ObjectId;
+
+  createdAt: Date;
 }
 
 export interface SubscriptionDocument {
@@ -179,6 +223,20 @@ export interface FavoriteDocument {
   createdAt: Date;
 }
 
+export interface UserNotificationDocument {
+  _id: ObjectId;
+  userId: string; // Clerk user ID
+  type: 'warning' | 'violation' | 'suspension' | 'info';
+  title: string;
+  message: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  isRead: boolean;
+  createdBy: string; // Clerk ID del admin
+  createdByName: string;
+  createdAt: Date;
+  readAt?: Date;
+}
+
 // --- Índices sugeridos ---
 export const MONGODB_INDEXES = {
   users: [
@@ -217,5 +275,49 @@ export const MONGODB_INDEXES = {
   ],
   favorites: [
     { userId: 1, propertyId: 1 }
+  ],
+  userNotifications: [
+    { userId: 1, isRead: 1 },
+    { 'createdAt': -1 }
+  ],
+  reports: [
+    { status: 1 },
+    { type: 1 },
+    { propertyId: 1 },
+    { agencyId: 1 },
+    { 'createdAt': -1 }
   ]
 };
+
+// --- Reporte Document ---
+export interface ReportDocument {
+  _id: ObjectId;
+  type: ReportType;
+  reason: ReportReason;
+  description: string;
+  status: ReportStatus;
+
+  // Información del reportante
+  reporterId?: string; // Clerk ID, null si es anónimo
+  reporterName?: string;
+  reporterEmail?: string;
+
+  // Información del reportado
+  propertyId?: string; // Property ID string
+  propertyTitle?: string;
+  agencyId?: string; // Clerk ID de la agencia
+  agencyName?: string;
+
+  // Revisión
+  reviewedBy?: string; // Clerk ID del admin
+  reviewedByName?: string;
+  reviewedAt?: Date;
+  reviewNotes?: string;
+
+  // Acción tomada
+  moderationAction?: 'none' | 'suspend_property' | 'suspend_user' | 'suspend_both';
+
+  // Timestamps
+  createdAt: Date;
+  updatedAt: Date;
+}

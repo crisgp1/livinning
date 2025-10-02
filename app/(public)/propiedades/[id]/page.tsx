@@ -2,8 +2,10 @@
 // LIVINNING - Página de Detalle de Propiedad
 // ============================================
 
-import { notFound } from 'next/navigation';
-import { findPropertyById } from '@/lib/db/models/property';
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,9 +22,13 @@ import {
   Mail,
   Phone,
   Share2,
-  Heart,
+  Flag,
+  Loader2,
+  Home,
 } from 'lucide-react';
 import { FavoriteButton } from '@/components/properties/favorite-button';
+import { ReportDialog } from '@/components/reports/report-dialog';
+import { Property } from '@/types';
 
 interface PropertyDetailPageProps {
   params: Promise<{
@@ -30,15 +36,104 @@ interface PropertyDetailPageProps {
   }>;
 }
 
-export default async function PropertyDetailPage({
+export default function PropertyDetailPage({
   params,
 }: PropertyDetailPageProps) {
-  const { id } = await params;
+  const router = useRouter();
+  const [property, setProperty] = useState<Property | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [propertyId, setPropertyId] = useState<string>('');
 
-  const property = await findPropertyById(id);
+  useEffect(() => {
+    params.then(({ id }) => {
+      setPropertyId(id);
+      fetchProperty(id);
+    });
+  }, [params]);
+
+  const fetchProperty = async (id: string) => {
+    try {
+      const response = await fetch(`/api/properties/${id}`);
+
+      if (!response.ok) {
+        setProperty(null);
+        setIsLoading(false);
+        return;
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        setProperty(data.data.property);
+      } else {
+        setProperty(null);
+      }
+    } catch (error) {
+      console.error('Error fetching property:', error);
+      setProperty(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   if (!property) {
-    notFound();
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 flex items-center justify-center p-4">
+        <Card className="max-w-lg w-full card-airbnb border-0 shadow-xl">
+          <CardContent className="pt-12 pb-10 px-8">
+            <div className="flex flex-col items-center text-center space-y-6">
+              {/* Fluent Emoji 3D - Sad Face */}
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-violet/20 to-purple-vibrant/20 rounded-full blur-2xl animate-pulse" />
+                <img
+                  src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Disappointed%20face/3D/disappointed_face_3d.png"
+                  alt="No encontrado"
+                  className="w-32 h-32 object-contain relative z-10"
+                  loading="eager"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <h1 className="text-3xl md:text-4xl font-bold text-neutral-900">
+                  Propiedad no encontrada
+                </h1>
+                <p className="text-lg text-neutral-600 max-w-sm mx-auto leading-relaxed">
+                  La propiedad que buscas no existe o ya no está disponible
+                </p>
+              </div>
+
+              <div className="w-full pt-4 space-y-3">
+                <Button
+                  onClick={() => router.push('/propiedades')}
+                  className="w-full h-12 text-base font-semibold"
+                  size="lg"
+                >
+                  <Home className="h-5 w-5 mr-2" />
+                  Explorar propiedades
+                </Button>
+                <Button
+                  onClick={() => router.push('/')}
+                  variant="outline"
+                  className="w-full h-12 text-base"
+                  size="lg"
+                >
+                  Volver al inicio
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   const propertyTypeLabels: Record<string, string> = {
@@ -272,6 +367,18 @@ export default async function PropertyDetailPage({
                       <FavoriteButton propertyId={property.id} />
                     </div>
                   </div>
+
+                  <Separator />
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full text-muted-foreground hover:text-destructive"
+                    onClick={() => setReportDialogOpen(true)}
+                  >
+                    <Flag className="h-4 w-4 mr-2" />
+                    Reportar propiedad
+                  </Button>
                 </CardContent>
               </Card>
 
@@ -308,6 +415,15 @@ export default async function PropertyDetailPage({
           </div>
         </div>
       </section>
+
+      {/* Report Dialog */}
+      <ReportDialog
+        open={reportDialogOpen}
+        onOpenChange={setReportDialogOpen}
+        type="property"
+        propertyId={propertyId}
+        title={property.title}
+      />
     </div>
   );
 }

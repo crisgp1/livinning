@@ -148,6 +148,7 @@ export const DASHBOARD_CONFIGS: Record<UserRole, DashboardConfig> = {
     layout: { columns: 2, rows: 2, gap: 'md' },
     navigation: [
       { label: 'Inicio', href: '/dashboard/helpdesk', icon: 'LayoutDashboard' },
+      { label: 'Moderación', href: '/dashboard/helpdesk/moderacion', icon: 'ShieldAlert' },
       { label: 'Tickets', href: '/dashboard/helpdesk/tickets', icon: 'MessageSquare' },
       {
         label: 'Usuarios',
@@ -194,7 +195,7 @@ export const DASHBOARD_CONFIGS: Record<UserRole, DashboardConfig> = {
     navigation: [
       { label: 'Inicio', href: '/dashboard/admin', icon: 'LayoutDashboard' },
       { label: 'Usuarios', href: '/dashboard/admin/usuarios', icon: 'Users' },
-      { label: 'Propiedades', href: '/dashboard/admin/propiedades', icon: 'Building' },
+      { label: 'Moderación', href: '/dashboard/admin/moderacion', icon: 'ShieldAlert' },
       {
         label: 'Suscripciones',
         href: '/dashboard/admin/suscripciones',
@@ -254,7 +255,7 @@ export const DASHBOARD_CONFIGS: Record<UserRole, DashboardConfig> = {
     navigation: [
       { label: 'Inicio', href: '/dashboard/superadmin', icon: 'LayoutDashboard' },
       { label: 'Usuarios', href: '/dashboard/superadmin/usuarios', icon: 'Users' },
-      { label: 'Propiedades', href: '/dashboard/superadmin/propiedades', icon: 'Building' },
+      { label: 'Moderación', href: '/dashboard/superadmin/moderacion', icon: 'ShieldAlert' },
       {
         label: 'Suscripciones',
         href: '/dashboard/superadmin/suscripciones',

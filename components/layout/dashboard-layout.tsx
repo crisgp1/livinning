@@ -8,6 +8,7 @@ import { ReactNode } from 'react';
 import { useUser, useClerk } from '@clerk/nextjs';
 import { useDashboard } from '@/hooks/use-dashboard';
 import { DashboardSidebar } from './dashboard-sidebar';
+import { NotificationBell } from './notification-bell';
 import { Button } from '@/components/ui/button';
 import { Building, LogOut, User } from 'lucide-react';
 import {
@@ -94,6 +95,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 ))}
               </div>
             )}
+
+            {/* Notification Bell */}
+            <NotificationBell />
 
             {/* User Menu */}
             <DropdownMenu>
