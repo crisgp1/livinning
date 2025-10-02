@@ -35,7 +35,7 @@ export function propertyDocumentToProperty(doc: PropertyDocument): Property {
     images: doc.images,
     videos: doc.videos,
     virtualTour: doc.virtualTour,
-    ownerId: doc.ownerId.toString(),
+    ownerId: doc.ownerId, // Already a string (Clerk user ID)
     ownerType: doc.ownerType,
     ownerName: doc.ownerName,
     status: doc.status,
@@ -209,7 +209,7 @@ export async function listProperties(filters: {
   }
 
   if (filters.ownerId) {
-    query.ownerId = new ObjectId(filters.ownerId);
+    query.ownerId = filters.ownerId; // Clerk user ID (string)
   }
 
   const page = filters.page || 1;
@@ -346,7 +346,7 @@ export async function updatePropertyStatus(
  */
 export async function countUserProperties(userId: string): Promise<number> {
   const collection = await getCollection<PropertyDocument>(COLLECTIONS.PROPERTIES);
-  return await collection.countDocuments({ ownerId: new ObjectId(userId) });
+  return await collection.countDocuments({ ownerId: userId }); // Clerk user ID (string)
 }
 
 /**

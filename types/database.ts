@@ -82,7 +82,7 @@ export interface PropertyDocument {
   virtualTour?: string;
 
   // Dueño
-  ownerId: ObjectId;
+  ownerId: string; // Clerk user ID
   ownerType: 'USER' | 'AGENCY';
   ownerName: string;
 
