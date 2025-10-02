@@ -28,6 +28,7 @@ export function propertyDocumentToProperty(doc: PropertyDocument): Property {
     coordinates: doc.coordinates,
     propertyType: doc.propertyType,
     transactionType: doc.transactionType,
+    locationType: doc.locationType,
     bedrooms: doc.bedrooms,
     bathrooms: doc.bathrooms,
     area: doc.area,
@@ -143,6 +144,7 @@ export async function listProperties(filters: {
   state?: string;
   propertyType?: string;
   transactionType?: string;
+  locationType?: string;
   minPrice?: number;
   maxPrice?: number;
   minArea?: number;
@@ -174,6 +176,10 @@ export async function listProperties(filters: {
 
   if (filters.transactionType) {
     query.transactionType = filters.transactionType as any;
+  }
+
+  if (filters.locationType) {
+    query.locationType = filters.locationType as any;
   }
 
   if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {

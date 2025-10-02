@@ -10,6 +10,7 @@ import {
   PropertyStatus,
   PropertyType,
   TransactionType,
+  LocationType,
   TicketStatus,
   TicketPriority
 } from './index';
@@ -71,6 +72,7 @@ export interface PropertyDocument {
   // Características
   propertyType: PropertyType;
   transactionType: TransactionType;
+  locationType?: LocationType;
   bedrooms?: number;
   bathrooms?: number;
   area: number;

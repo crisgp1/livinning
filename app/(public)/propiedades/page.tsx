@@ -3,6 +3,7 @@
 // ============================================
 
 import { PropertyFilters } from '@/components/properties/property-filters';
+import { LocationCategories } from '@/components/properties/location-categories';
 import { PropertiesMapView } from '@/components/properties/properties-map-view';
 import { listProperties } from '@/lib/db/models/property';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -14,6 +15,7 @@ interface PropertiesPageProps {
     city?: string;
     propertyType?: string;
     transactionType?: string;
+    locationType?: string;
     page?: string;
     sortBy?: string;
   }>;
@@ -29,6 +31,7 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
     city: params.city,
     propertyType: params.propertyType,
     transactionType: params.transactionType as 'sale' | 'rent' | undefined,
+    locationType: params.locationType,
     page: 1,
     limit: 1000, // Límite alto para mostrar todas en el mapa
     sortBy: params.sortBy || 'createdAt',
@@ -43,6 +46,9 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
         initialPropertyType={params.propertyType}
         initialTransactionType={params.transactionType}
       />
+
+      {/* Categorías de Ubicación */}
+      <LocationCategories />
 
       {/* Resultados - Layout estilo Zillow */}
       <div className="mx-auto px-4 pt-4 max-w-[1800px]">

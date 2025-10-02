@@ -37,6 +37,7 @@ export default function NewPropertyPage() {
     description: '',
     propertyType: '',
     transactionType: '',
+    locationType: '',
     price: '',
     state: '',
     city: '',
@@ -82,6 +83,7 @@ export default function NewPropertyPage() {
         body: JSON.stringify({
           ...formData,
           images,
+          locationType: formData.locationType || undefined,
           price: parseFloat(formData.price),
           bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : undefined,
           bathrooms: formData.bathrooms ? parseInt(formData.bathrooms) : undefined,
@@ -209,6 +211,30 @@ export default function NewPropertyPage() {
                     <SelectItem value="sale">Venta</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="space-y-2 md:col-span-2">
+                <Label>Tipo de ubicación</Label>
+                <Select
+                  value={formData.locationType}
+                  onValueChange={(value) => setFormData({ ...formData, locationType: value })}
+                  disabled={isLoading}
+                >
+                  <SelectTrigger className="border-neutral-200">
+                    <SelectValue placeholder="Selecciona el tipo de ubicación" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="city">Ciudad - Propiedades en zonas urbanas</SelectItem>
+                    <SelectItem value="beach">Playa - Propiedades frente al mar</SelectItem>
+                    <SelectItem value="mountain">Montaña - Propiedades en zonas montañosas</SelectItem>
+                    <SelectItem value="countryside">Campo - Propiedades rurales</SelectItem>
+                    <SelectItem value="lake">Lago - Propiedades junto a lagos</SelectItem>
+                    <SelectItem value="suburb">Suburbio - Propiedades en zonas residenciales</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-neutral-500">
+                  Esto ayudará a los usuarios a encontrar tu propiedad según el tipo de ubicación que buscan
+                </p>
               </div>
             </div>
           </CardContent>

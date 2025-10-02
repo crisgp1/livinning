@@ -19,6 +19,7 @@ export type SubscriptionPlan = 'basic' | 'premium' | 'enterprise';
 export type PropertyStatus = 'active' | 'pending' | 'rejected' | 'inactive';
 export type PropertyType = 'house' | 'apartment' | 'land' | 'commercial' | 'office';
 export type TransactionType = 'sale' | 'rent';
+export type LocationType = 'city' | 'beach' | 'mountain' | 'countryside' | 'lake' | 'suburb';
 
 // --- Estados de Tickets ---
 export type TicketStatus = 'open' | 'pending' | 'resolved' | 'closed';
@@ -80,6 +81,7 @@ export interface Property {
   // Características
   propertyType: PropertyType;
   transactionType: TransactionType;
+  locationType?: LocationType;
   bedrooms?: number;
   bathrooms?: number;
   area: number; // m2
